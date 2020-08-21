@@ -1,0 +1,13 @@
+body {
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+.hotline{
+  text-decoration: none;
+  color: #2992bb!important;
+}
+
+.hotline:hover{
+  text-decoration: none;
+  color: #00B7FF!important;
+}
