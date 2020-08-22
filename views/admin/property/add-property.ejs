@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <% include ../../partials/head %>
+</head>
+
+<body class="body-wrapper">
+  <% include ../../partials/menu %>
+<section class="ad-post bg-gray py-5">
+    <div class="container">
+            <!-- Post Your ad start -->
+            <fieldset class="border border-gary p-4 mb-5">
+                    <div class="row">
+                        <div id="alert" class="alert alert-primary d-none" role="alert">
+                            A simple primary alert—check it out!
+                        </div>
+                        <div class="col-lg-12">
+                            <h3>Thêm Property</h3>
+                        </div>
+                        <div class="col-lg-12">
+                            <h6 class="font-weight-bold pt-4 pb-1">Tên:</h6>
+                            <input id="name" type="text" name="name" class="border w-100 p-2 bg-white text-capitalize" placeholder="Toàn Mỹ">
+                            
+                            <h6 class="font-weight-bold pt-4 pb-1">Vật Phẩm:</h6>
+                            <select id="idItem" name="item" id="inputGroupSelect" class="w-100">
+                                <% items.forEach((item) =>{ %>
+                                <option value="<%= item._id %>"><%= item.name %></option>
+                                <% }) %>
+                            </select>
+                           
+
+                            <button id="submit" type="submit" class="btn btn-info d-block mt-2"><i class="fas fa-plus"></i>  Thêm</button>
+                            </div>
+
+                           
+                        </div>
+                    </div>
+            </fieldset>
+    </div>
+</section>
+<!--============================
+=            Footer            =
+=============================-->
+
+<% include ../../partials/footer %>
+<script src="/js/admin/property/add-property.js"></script>
+</body>
+
+</html>

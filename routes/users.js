@@ -1,12 +1,13 @@
 var express = require('express');
 var router = express.Router();
-const userController = require('../controllers/user');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/'})
 
-/* GET users listing. */
-router.get('/add-account', userController.renderAddAccount);
+const userC = require('../controllers/user/add-account');
 
-router.post('/add-account', upload.array('images'), userController.addNewAccount)
+/* GET users listing. */
+router.get('/add-account', userC.renderAddAccount);
+
+router.post('/add-account', upload.array('images'), userC.addNewAccount)
 
 module.exports = router;

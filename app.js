@@ -11,6 +11,7 @@ const userModel = require('./models/user');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
+const adminRouter = require('./routes/admin');
 
 const app = express();
 
@@ -33,6 +34,7 @@ mongoose.connect(config.mongodb.uri, {useNewUrlParser: true, useUnifiedTopology:
 // setup route
 app.use('/', indexRouter);
 app.use('/user', usersRouter);
+app.use('/admin', adminRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

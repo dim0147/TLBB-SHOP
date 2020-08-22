@@ -16,6 +16,6 @@ const accountSchema = mongoose.Schema({
     longvan: {type: String, required: true, enum: config.account.longvan},
     type: {type: String, required: true, enum: config.account.type},
     userId: {type: mongoose.Schema.Types.ObjectId, ref:'users'}
-});
+},{ timestamps: { createdAt: 'createdAt' } } );
 
 module.exports = mongoose.model('accounts', accountSchema);

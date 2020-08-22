@@ -6,6 +6,6 @@ const userSchema = mongoose.Schema({
     idFacebook: String,
     name: String,
     urlImage: String
-});
+}, { timestamps: { createdAt: 'created_at' } });
 
 module.exports = mongoose.model('users', userSchema);
