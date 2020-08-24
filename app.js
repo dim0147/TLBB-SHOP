@@ -4,6 +4,11 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const logger = require('morgan');
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
+const passport = require('passport');
+const flash = require('connect-flash');
+const axios = require('axios').default
 
 const config = require('./config/config');
 
@@ -28,8 +33,39 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // connect mongodb
 console.log('Connect to mongodb...');
-mongoose.connect(config.mongodb.uri, {useNewUrlParser: true, useUnifiedTopology: true})
+mongoose.connect(config.mongodb.uri, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false})
 .then(() => console.log('Connect success'));
+
+// Setup session
+  // Store to store session in db
+const store = new MongoDBStore({
+  uri: config.mongodb.uri,
+  collection: 'mySessions'
+});
+store.on('error', function(error) {
+  console.log(error);
+});
+
+app.use(session({
+  secret: config.session.secretKey,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {maxAge: config.session.cookieRememberMe}, // 86400000
+  store: store
+}));
+
+// Config passport
+app.use(flash());
+require('./config/passport-config.js');
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+app.use(function(req, res, next) {
+      res.locals.userSS = req.user;
+      next()
+});
+
 
 // setup route
 app.use('/', indexRouter);
@@ -40,6 +76,8 @@ app.use('/admin', adminRouter);
 app.use(function(req, res, next) {
   next(createError(404));
 });
+
+
 
 // error handler
 app.use(function(err, req, res, next) {

@@ -6,7 +6,10 @@
 
 var app = require('../app');
 var debug = require('debug')('tlbb-shop:server');
-var http = require('http');
+var http = require('https');
+const fs = require('fs');
+const path = require('path');
+
 
 /**
  * Get port from environment and store in Express.
@@ -15,11 +18,17 @@ var http = require('http');
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
+const httpsOptions = {
+  key: fs.readFileSync(path.join(__dirname, '../https-key/key.pem')),
+  cert: fs.readFileSync(path.join(__dirname,'../https-key/cert.pem'))
+};
+
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+// var server = http.createServer(app);
+var server = http.createServer(httpsOptions, app);
 
 /**
  * Listen on provided port, on all network interfaces.

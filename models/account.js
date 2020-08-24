@@ -4,17 +4,18 @@ const config = require('../config/config');
 const accountSchema = mongoose.Schema({
     title: {type: String, required: true},
     c_name: {type: String, required: true},
-    phai: {type: String, required: true, enum: config.account.phai},
+    phai: {type: mongoose.Schema.Types.ObjectId, ref: 'phais',required: true},
     level: {type: Number, required: true},
-    vohon: {type: String, required: true, enum: config.account.vohon},
-    amkhi: {type: String, required: true, enum: config.account.amkhi},
-    thankhi: {type: String, required: true, enum: config.account.thankhi},
-    tuluyen: {type: String, required: true, enum: config.account.tuluyen},
-    ngoc: {type: String, required: true, enum: config.account.ngoc},
-    doche: {type: String, required: true, enum: config.account.doche},
-    dieuvan: {type: String, required: true, enum: config.account.dieuvan},
-    longvan: {type: String, required: true, enum: config.account.longvan},
-    type: {type: String, required: true, enum: config.account.type},
+    vohon: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
+    amkhi: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
+    thankhi: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
+    tuluyen: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
+    ngoc: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
+    doche: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
+    dieuvan: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
+    longvan: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
+    transaction_type: {type: String, required: true, enum: config.account.type},
+    status: {type: String, required: true, enum: config.account.status},
     userId: {type: mongoose.Schema.Types.ObjectId, ref:'users'}
 },{ timestamps: { createdAt: 'createdAt' } } );
 

@@ -87,7 +87,8 @@ $(document).ready(function(){
             showAlert("Hãy chọn ít nhất 10 ảnh để có thể tiếp tục", 0);
             return;
         }
-            
+        $('#submit').prop("disabled",true);
+        setAllowPointer($("#submit"), false);    
         $.ajax( {
             url: '/user/add-account',
             type: 'POST',
@@ -96,13 +97,13 @@ $(document).ready(function(){
             contentType: false,
             success: res => {
                             showAlert(res, 1);
-                            $(this).prop("disabled",false);
-                            setAllowPointer(this, true);
+                            $('#submit').prop("disabled",false);
+                            setAllowPointer($("#submit"), true);
                         },
                         error: err => {
                             showAlert("Có lỗi xảy ra: " + err.responseText, 0);
-                            $(this).prop("disabled",false);
-                            setAllowPointer(this, true);
+                            $('#submit').prop("disabled",false);
+                            setAllowPointer($("#submit"), true);
                         }
           } );
 

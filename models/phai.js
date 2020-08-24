@@ -4,4 +4,4 @@ const phaiSchema = mongoose.Schema({
     name: {type: String, required: true}
 }, {timestamps: { createdAt: true, updatedAt: true }});
 
-module.exports = mongoose.model('phai', phaiSchema);
+module.exports = mongoose.model('phais', phaiSchema);
