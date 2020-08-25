@@ -13,13 +13,11 @@ const userModel = require('../models/user');
 
 
 passport.serializeUser( (user, done) => {
-    done(null, user.id);
+    done(null, {_id: user._id, name: user.name, urlImage: user.urlImage, type: user.type});
 });
 
-passport.deserializeUser(function(id, done){
-    userModel.findById(id, function(err, user){
-        done(err, user);
-    });
+passport.deserializeUser(function(user, done){
+    done(null, user);
 });
 
 passport.use('local.register', new LocalStrategy({passReqToCallback: true}, (req, username, password, done) => {
@@ -101,6 +99,13 @@ passport.use(new FacebookStrategy({
                 cb(null, false)
             });
         },
+        (user, cb) => {
+            if(user === false) return cb(null, false)
+            userModel.findOneAndUpdate({_id: user._id}, {name: profile.displayName}, err => {
+                if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
+                cb(null, user)
+            })
+        },
         // If exist continue with user variable, otherwise create new one
         (user, cb) => {
             if(user !== false) return cb(null, user); 
@@ -117,8 +122,8 @@ passport.use(new FacebookStrategy({
         }
     ], function(err, user){
         if(err) return done(null, false, err);
-        console.log('Tao thanh cong');
-        console.log(user);
+        user.urlImage = 'http://graph.facebook.com/' + profile.id +'/picture?type=square';
+        user.name = profile.displayName;
         done(null, user);
     });
   }
@@ -151,10 +156,10 @@ passport.use(new GoogleStrategy({
                 cb(null, false)
             });
         },
-        // If exist, update url avartar image
+        // If exist, update url avatar image and name
         (user, cb) => {
             if(user === false) return cb(null, false)
-            userModel.findOneAndUpdate({_id: user._id}, {urlImage: profile.photo}, err => {
+            userModel.findOneAndUpdate({_id: user._id}, {urlImage: profile.photo, name: profile.displayName}, err => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
                 cb(null, user)
             })
@@ -175,6 +180,8 @@ passport.use(new GoogleStrategy({
         }
     ],function(err, user){
         if(err) return done(err);
+        user.urlImage = profile.photo;
+        user.name = profile.displayName;
         done(null, user);
     })
   }

@@ -55,26 +55,32 @@
 									<a class="dropdown-item" href="ad-listing-list.html">Trợ Giúp</a>
 								</div>
 							</li>
+
+							
 						</ul>
 						<ul class="navbar-nav ml-auto mt-10">
-							<li class="nav-item">
-								<div >
-								<% if(userSS){ %>
-									<%
-									if(userSS.type === 'web')
-										userSS.urlImage = '/images/member.png'
-									if (userSS.type === 'facebook')
-										userSS.urlImage = `http://graph.facebook.com/${userSS.idFacebook}/picture?type=square`
-									%>
+							<% if(userSS){ %>
+							<li class="nav-item dropdown dropdown-slide">
+								<a class="nav-link dropdown-toggle" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 									<img style="padding-bottom: 2px" src="<%= userSS.urlImage %>" width=50 height=40 class="rounded-circle" style="padding: 0; margin: 0">
-									<span style="padding-right: 2em; padding-left: 0.1em; margin-top: 30px" > <%= userSS.name %> </span>
-								<% }else{ %>
-								<a class="nav-link login-button" href="/user/login">Đăng nhập</a>
-								<% } %>
+									<%= userSS.name %>
+								</a>
+								<!-- Dropdown list -->
+								<div class="dropdown-menu">
+									<a class="dropdown-item" href="category.html">Thông Tin Cá Nhân</a>
+									<a class="dropdown-item" href="/user/logout">Đăng Xuất</a>
 								</div>
 							</li>
+							<% }else{ %>
+								<li class="nav-item">
+									<div>
+										<a style="margin-top: 10px;" class="nav-link login-button" href="/user/login">Đăng nhập</a>
+									</div>
+								</li>
+							<% } %>
+							
 							<li class="nav-item">
-								<a class="nav-link text-white add-button" href="/user/add-account"><i class="fa fa-plus-circle"></i> Tạo Bài Đăng</a>
+								<a style="margin-top: 10px;" class="nav-link text-white add-button" href="/account/add-account"><i class="fa fa-plus-circle"></i> Tạo Bài Đăng</a>
 							</li>
 						</ul>
 					</div>

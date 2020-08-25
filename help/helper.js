@@ -27,3 +27,13 @@ exports.verifyPassword = function(password, hashPassword) {
   this.salt, 1000, 64, `sha512`).toString(`hex`); 
   return hashPassword == hash; 
 }; 
+
+exports.generateRandomString = function(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+     result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}

@@ -8,15 +8,16 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const passport = require('passport');
 const flash = require('connect-flash');
-const axios = require('axios').default
+
 
 const config = require('./config/config');
 
-const userModel = require('./models/user');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const adminRouter = require('./routes/admin');
+const accountRouter = require('./routes/account');
+const user = require('./models/user');
 
 const app = express();
 
@@ -60,10 +61,14 @@ require('./config/passport-config.js');
 app.use(passport.initialize());
 app.use(passport.session());
 
-
+// Pass user session to ejs
 app.use(function(req, res, next) {
-      res.locals.userSS = req.user;
-      next()
+  if(req.isAuthenticated()){
+    if(req.user.type === 'web')
+      req.user.urlImage = config.urlWebsite + '/images/member.png';
+  }
+  res.locals.userSS = req.user;
+  next()
 });
 
 
@@ -71,6 +76,7 @@ app.use(function(req, res, next) {
 app.use('/', indexRouter);
 app.use('/user', usersRouter);
 app.use('/admin', adminRouter);
+app.use('/account', accountRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
