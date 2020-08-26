@@ -8,6 +8,7 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const passport = require('passport');
 const flash = require('connect-flash');
+const dateFormat = require('dateformat')
 
 
 const config = require('./config/config');
@@ -66,6 +67,7 @@ app.use(function(req, res, next) {
   if(req.isAuthenticated()){
     if(req.user.type === 'web')
       req.user.urlImage = config.urlWebsite + '/images/member.png';
+    req.user.created_at = dateFormat(new Date(req.user.created_at), "mmmm d, yyyy")
   }
   res.locals.userSS = req.user;
   next()

@@ -13,7 +13,7 @@ const userModel = require('../models/user');
 
 
 passport.serializeUser( (user, done) => {
-    done(null, {_id: user._id, name: user.name, urlImage: user.urlImage, type: user.type});
+    done(null, {_id: user._id, name: user.name, urlImage: user.urlImage, type: user.type, created_at: user.created_at});
 });
 
 passport.deserializeUser(function(user, done){

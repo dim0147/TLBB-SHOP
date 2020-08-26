@@ -1,9 +1,9 @@
-const rateModel = require('../../../models/rate');
-const accountModel = require('../../../models/account')
+const rateModel = require('../../models/rate');
+const accountModel = require('../../models/account')
 const waterfall = require('async-waterfall');
 const { body, validationResult } = require('express-validator')
 
-exports.validationBody = [
+exports.validateBody = [
     body('rate', 'Thiếu trường').isInt({min:1, max: 5}),
     body('accountId', 'Thiếu trường').notEmpty(),
     (req, res, next) => {

@@ -1,13 +1,15 @@
 const waterfall = require('async-waterfall');
+const dateFormat = require('dateformat');
+
 const config = require('../../config/config');
 
 const accountModel = require('../../models/account');
 const imageModel = require('../../models/image');
 const acLinkAddFieldModel = require('../../models/account-link-addfield');
 const rateModel = require('../../models/rate')
+const commentModel = require('../../models/comment');
 
 exports.renderPage = (req, res) => {
-    console.log(req.params.id);
     const popAcFields = [
         {
             path: 'phai',
@@ -66,6 +68,8 @@ exports.renderPage = (req, res) => {
             accountModel.findById(req.params.id).populate(popAcFields).exec((err, account) => {
                 if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau');
                 if(account === null) return cb('Không tìm thấy tài khoản này!')
+                account = account.toObject();
+                account.userId.created_at = dateFormat(new Date(account.userId.created_at), 'mmmm d, yyyy')
                 cb(null, account);
             });
         },
@@ -98,10 +102,55 @@ exports.renderPage = (req, res) => {
                 };
                 cb(null, result);
             })
-        }
+        },
+        // Query for five comment
+        // (result, cb) => {
+        //     commentModel.find({account: result.account._id, parent: null}).sort([['createdAt', -1]]).limit(5).lean().exec((err, comments) =>{
+        //         if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau')
+        //         cb(null, result, comments);
+        //     });
+        // },
+        // // Query for reply comments
+        // (result, comments, cb) => {
+        //     if(comments.length === 0){
+        //         result.comments = comments;
+        //         return cb(null, result, null)
+        //     } 
+        //     const listIdComment = comments.map(comment => comment._id);
+        //     commentModel.aggregate([
+        //         {
+        //             $match: {
+        //                 parent: {$in: listIdComment}
+        //             }
+        //         },
+        //         {
+        //             $sort: {createdAt: -1}
+        //         },
+        //         {
+        //             $group: {
+        //                 _id: "$parent",
+        //                 comments: { $push: "$$ROOT" }
+        //             }
+        //         }
+                // {
+                //      $addFields:{
+                //         "comments.test": "unleaded"
+                //      }
+                // }
+        //     ]).exec((err, result) => {
+        //         if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau' + err);
+        //         cb(null, result);
+        //     });
+        // }
     ], function(err, result){
         if(err) return res.render('404', {title: 'Xin lỗi, không tìm thấy trang'})
         res.render('account/view-account', {title: result.account.title, account: result.account, addFields: result.addFields, images: result.images, rate: result.rate});
     });
-
 }
+
+
+
+exports.loadComment = function (req, res){
+    
+}
+

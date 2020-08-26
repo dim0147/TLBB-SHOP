@@ -4,8 +4,9 @@ var router = express.Router();
 const multer = require('multer');
 const path = require('path');
 
-const viewAC = require('../controllers/account/view-account')
-const createRateC = require('../controllers/account/rate/create-rating')
+const viewAC = require('../controllers/account/view-account');
+const rateC = require('../controllers/account/rate');
+const commentC = require('../controllers/account/comment');
 
 
 const upload = multer({fileFilter: function (req, file, callback) {
@@ -28,6 +29,12 @@ router.post('/add-account', upload.array('images'), addAC.addNewAccount)
 router.get('/view-account/:id', viewAC.renderPage);
 
 /* CREATE user rating. */
-router.post('/rate/create-rating', createRateC.validationBody, createRateC.createRating);
+router.post('/create-rating', rateC.validateBody, rateC.createRating);
+
+/* CREATE user comment. */
+router.post('/create-comment', commentC.validateBody, commentC.createComment);
+
+/* GET user comment. */
+router.get('/get-comments', commentC.validateBodyGetComments, commentC.getComments);
 
 module.exports = router;

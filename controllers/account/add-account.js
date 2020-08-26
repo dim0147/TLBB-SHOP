@@ -192,7 +192,6 @@ function removeAccount(account){
             return
         }
         console.log('Remove account thành công:');
-        console.log(account);
     })
     
 }

@@ -6,6 +6,9 @@
 
 <body class="body-wrapper">
 	<input id="idAccount" type="hidden" value="<%= account._id %>">
+	<% if(typeof userSS !== "undefined"){ %>
+		<input id="urlImage" type="hidden" value= "<%= userSS.urlImage %>">
+	<% } %>
     <% include ../partials/menu %>
     
 <!--===================================
@@ -30,7 +33,7 @@
 					<!-- product slider -->
 					<div class="product-slider">
 						<% images.forEach(img => { %>
-							<div class="product-slider-item my-4" data-image="<%= img.url %>">
+							<div class="product-slider-item my-4 col-xs-3" data-image="<%= img.url %>">
 								<img class="img-responsive img-fluid" src="<%= img.url %>" alt="product-img">
 							</div>
 						<% }) %>
@@ -142,12 +145,13 @@
 							<div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
 								<h3 class="tab-title">Bình Luận</h3>
 								<div class="product-review">
-									
+								<div id="comment-section">
+
 									<!-- comment -->
 									<div class="media">
 										<!-- Avater -->
-										<img src="images/user/user-thumb.jpg" alt="avater">
-										<div class="media-body">
+										<img src="/images/user/user-thumb.jpg" alt="avater">
+										<div class="media-body" comment-id="5f45d1051d9e7404cdef162c" name="Dương Quỳnh Anh">
 											<!-- Ratings -->
 											<div class="ratings">
 												<ul class="list-inline">
@@ -180,8 +184,68 @@
 													riamipsa eaque.
 												</p>
 											</div>
+											<button style="margin: 0px; padding: 0px" class="btn btn-like"><span><i class="far fa-heart"></i> Thích</span></button>
+											<button style="margin-left: 20px; padding: 0px" class="btn btn-createReply"><span><i class="fas fa-comment-dots"></i> Trả Lời</span></button>
 										</div>
 									</div>
+
+									<div style="margin-left: 50px" class="media">
+										<!-- Avater -->
+										<img src="/images/user/user-thumb.jpg" alt="avater">
+										<div class="media-body" comment-id="123" name="Dương Quỳnh Anh">
+											<!-- Ratings -->
+											<div class="ratings">
+												<ul class="list-inline">
+													<li class="list-inline-item">
+														<i class="fa fa-star"></i>
+													</li>
+													<li class="list-inline-item">
+														<i class="fa fa-star"></i>
+													</li>
+													<li class="list-inline-item">
+														<i class="fa fa-star"></i>
+													</li>
+													<li class="list-inline-item">
+														<i class="fa fa-star"></i>
+													</li>
+													<li class="list-inline-item">
+														<i class="fa fa-star"></i>
+													</li>
+												</ul>
+											</div>
+											<div class="name">
+												<h5>Jessica Brown</h5>
+											</div>
+											<div class="date">
+												<p>Mar 20, 2018</p>
+											</div>
+											<div class="review-comment">
+												<p>
+													Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremqe laudant tota rem ape
+													riamipsa eaque.
+												</p>
+											</div>
+											<button style="margin: 0px; padding: 0px" class="btn btn-like"><span><i class="far fa-heart"></i> Thích</span></button>
+											<button style="margin-left: 20px; padding: 0px" class="btn btn-createReply"><span><i class="fas fa-comment-dots"></i> Trả Lời</span></button>
+										
+										</div>
+									</div>
+
+
+									<div style="margin-left: 50px" class="media replyTextarea">
+										<!-- Avater -->
+										<img src="/images/user/user-thumb.jpg" alt="avater">
+										<div class="media-body">
+											<div class="review-comment">
+												<p>Trả lời </p>
+												<textarea name="" id="" rows="5" class="form-control"></textarea>
+												<button style="margin-top: 10px" class="btn btn-primary pull-right">Đăng</button>
+											</div>
+										</div>
+									</div>
+
+
+								</div>	
 
 									<% if(typeof userSS === 'undefined'){ %>
 									<div class="text-center">
@@ -200,9 +264,12 @@
 										</div>
 										<div class="review-submit">
 												<div class="col-12">
-													<textarea name="review" id="review" rows="5" class="form-control" placeholder="Bình luận"></textarea>
+													<textarea name="comment" id="comment" rows="5" class="form-control" placeholder="Bình luận"></textarea>
 												</div>
 												<div class="col-12">
+													<div id="alert" class="alert alert-secondary d-none" role="alert">
+														This is a secondary alert—check it out!
+													</div>
 													<button id="submitBtn" type="button" class="btn btn-main">Đăng</button>
 												</div>
 										</div>
@@ -235,12 +302,12 @@
 							%>
 						<img class="rounded-circle img-fluid mb-5 px-5" src="<%= account.userId.urlImage %>" alt="">
 						<h4><a href=""><%= account.userId.name %></a></h4>
-						<p class="member-time">Thành viên kể từ <%= new Date(account.userId.created_at).getDate() + '-' + (new Date(account.userId.created_at).getMonth()+1) + '-'+ new Date(account.userId.created_at).getFullYear() %></p>
+						<p class="member-time">Thành viên kể từ <%= account.userId.created_at %></p>
 						<a href="" style="color: green">Xem tất cả các tài khoản được đăng bởi <%= account.userId.name %></a>
 						<ul class="list-inline mt-20">
 							<li class="list-inline-item"><a href="<%= account.contactFB %>" target="_blank" class="btn btn-contact d-inline-block  btn-success px-lg-5 my-1 px-md-3"><i class="fas fa-sms"></i>  Liên Hệ</a></li>
-							<li class="list-inline-item"><a href="" class="btn btn-offer d-inline-block btn-warning ml-n1 my-1 px-lg-4 px-md-3">Đề nghị
-									giá</a></li>
+							<li class="list-inline-item"><a href="" class="btn btn-offer d-inline-block btn-warning ml-n1 my-1 px-lg-4 px-md-3"><i class="fab fa-accusoft"></i>    Đưa Ra 
+								Đề Nghị</a></li>
 						</ul>
 					</div>
 					<!-- Map Widget -->

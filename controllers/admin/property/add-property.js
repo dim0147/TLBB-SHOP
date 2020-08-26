@@ -10,13 +10,11 @@ exports.renderPage = (req, res) => {
             res.status(500).send("Có lỗi xảy ra, xin vui lòng thử lại sau");
             return
         }
-        console.log(items);
         res.render('admin/property/add-property', {title: 'Thêm Property', items: items});
     })
 }
 
 exports.addNewProperty = (req, res) => {
-    console.log(req.body);
     if(typeof req.body.name === 'undefined' || typeof req.body.idItem === 'undefined'){
         res.status(400).send("Thiếu dữ liệu!");
         return
