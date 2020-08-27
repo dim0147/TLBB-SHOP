@@ -7,6 +7,7 @@ const path = require('path');
 const viewAC = require('../controllers/account/view-account');
 const rateC = require('../controllers/account/rate');
 const commentC = require('../controllers/account/comment');
+const likedC = require('../controllers/account/liked');
 
 
 const upload = multer({fileFilter: function (req, file, callback) {
@@ -36,5 +37,8 @@ router.post('/create-comment', commentC.validateBody, commentC.createComment);
 
 /* GET user comment. */
 router.get('/get-comments', commentC.validateBodyGetComments, commentC.getComments);
+
+/* HANDLE user likes. */
+router.post('/liked', likedC.validationBody, likedC.likeHandler);
 
 module.exports = router;

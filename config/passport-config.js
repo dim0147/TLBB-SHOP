@@ -101,7 +101,7 @@ passport.use(new FacebookStrategy({
         },
         (user, cb) => {
             if(user === false) return cb(null, false)
-            userModel.findOneAndUpdate({_id: user._id}, {name: profile.displayName}, err => {
+            userModel.findOneAndUpdate({_id: user._id}, {name: profile.displayName, urlImage: 'http://graph.facebook.com/' + profile.id +'/picture?type=square'}, err => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
                 cb(null, user)
             })

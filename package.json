@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www"
+    "start": "nodemon ./bin/www",
+    "build": "browserify browserify.js -o bundle.js"
   },
   "dependencies": {
     "async-waterfall": "^0.1.5",
