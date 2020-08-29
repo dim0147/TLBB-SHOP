@@ -8,17 +8,15 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const passport = require('passport');
 const flash = require('connect-flash');
-const dateFormat = require('dateformat')
 
 
 const config = require('./config/config');
-
+const middlewareHandle = require('./controllers/middleware');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const adminRouter = require('./routes/admin');
 const accountRouter = require('./routes/account');
-const user = require('./models/user');
 
 const app = express();
 
@@ -63,15 +61,10 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Pass user session to ejs
-app.use(function(req, res, next) {
-  if(req.isAuthenticated()){
-    if(req.user.type === 'web')
-      req.user.urlImage = config.urlWebsite + '/images/member.png';
-    req.user.created_at = dateFormat(new Date(req.user.created_at), "mmmm d, yyyy")
-  }
-  res.locals.userSS = req.user;
-  next()
-});
+app.use(middlewareHandle.setUserSession);
+
+// Pass menu data to ejs
+app.use(middlewareHandle.loadMenuView);
 
 
 // setup route

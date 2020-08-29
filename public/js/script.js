@@ -223,8 +223,49 @@
      // bootstrap slider range
   $('.range-track').slider({});
   $('.range-track').on('slide', function (slideEvt) {
-    $('.value').text('$' + slideEvt.value[0] + ' - ' + '$' + slideEvt.value[1]);
+    slideEvt.value[0] = slideEvt.value[0].toLocaleString('en-US', {style : 'currency', currency : 'VND'});
+    slideEvt.value[1] = slideEvt.value[1].toLocaleString('en-US', {style : 'currency', currency : 'VND'});
+    $('.value').text(slideEvt.value[0] + ' - ' + slideEvt.value[1]);
   });
 
 
 })(jQuery);
+
+$(document).ready(function () {
+
+  $('.navbar .dropdown-item').on('click', function (e) {
+      var $el = $(this).children('.dropdown-toggle');
+      var $parent = $el.offsetParent(".dropdown-menu");
+      if(typeof $el[0] === 'undefined') {
+        location.replace($(this).attr('href'))
+        return false;
+      }
+      console.log('WTF Dude???');
+      $(this).parent("li").toggleClass('open');
+  
+      if (!$parent.parent().hasClass('navbar-nav')) {
+          if ($parent.hasClass('show')) {
+              $parent.removeClass('show');
+              $el.next().removeClass('show');
+              $el.next().css({"top": -999, "left": -999});
+          } else {
+              $parent.parent().find('.show').removeClass('show');
+              $parent.addClass('show');
+              $el.next().addClass('show');
+              
+              console.log('Inner still run');
+              $el.next().css({"top": $el[0].offsetTop, "left": $parent.outerWidth() - 4});
+          }
+          console.log('running');
+          e.preventDefault();
+          e.stopPropagation();
+      }
+  });
+  
+  $('.navbar .dropdown').on('hidden.bs.dropdown', function () {
+      $(this).find('li.dropdown').removeClass('show open');
+      $(this).find('ul.dropdown-menu').removeClass('show open');
+  });
+  
+  });
+

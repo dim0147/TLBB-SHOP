@@ -1,5 +1,8 @@
+const waterfall = require('async-waterfall');
 
-const crypto = require('crypto'); 
+const phaiModel = require('../models/phai');
+const itemModel = require('../models/item');
+const bosungField = require('../models/add_field')
 
 exports.checkEmptyRequest = function(req, arrayProperty, arrayNoCheckNull = []){
     for (var i = 0; i < arrayProperty.length; i++){
@@ -14,26 +17,56 @@ exports.checkEmptyRequest = function(req, arrayProperty, arrayNoCheckNull = []){
     return false;
 }
 
-exports.hashPassword = function(password) { 
-  this.salt = crypto.randomBytes(16).toString('hex'); 
-  this.hash = crypto.pbkdf2Sync(password, this.salt,  
-  1000, 64, `sha512`).toString(`hex`); 
-  return this.hash;
-}; 
 
-exports.verifyPassword = function(password, hashPassword) { 
-  this.salt = crypto.randomBytes(16).toString('hex'); 
-  var hash = crypto.pbkdf2Sync(password,  
-  this.salt, 1000, 64, `sha512`).toString(`hex`); 
-  return hashPassword == hash; 
-}; 
+exports.getMenuData = function(){
+  return new Promise((resolve, reject) => {
+      waterfall([
+          cb => {
+              phaiModel.find({}).lean().exec((err, phais) => {
+                  if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau');
+                  cb(null, phais)
+              });
+          },
+          (phais, cb) => {
+              itemModel.aggregate([
+                  {
+                      $lookup: {
+                          from: 'item-properties',
+                          let: {idItem: '$_id'},
+                          pipeline: [
+                              {
+                                  $match: {
+                                      $expr:{
+                                          $eq: ['$itemId', '$$idItem']
+                                      }
+                                  }
+                              }
+                          ],
+                          as: 'properties'
+                      }
+                  }
+              ], function(err, items) {
+                  if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau');
+                  menuView = {
+                      phais: phais,
+                      items: items
+                  }
+                  cb(null, menuView)
+  4                   
+              });
+          }
+      ], function(err, result){
+          if(err) return reject(err);
+          resolve(result);
+      });
+  })
+}
 
-exports.generateRandomString = function(length) {
-  var result           = '';
-  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  var charactersLength = characters.length;
-  for ( var i = 0; i < length; i++ ) {
-     result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
+exports.getBosungFields = function(){
+    return new Promise((resolve, reject) =>{
+        bosungField.find({}).exec(function(err, result){
+            if(err) return reject(err);
+            resolve(result);
+        });
+    })
 }

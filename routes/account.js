@@ -8,6 +8,7 @@ const viewAC = require('../controllers/account/view-account');
 const rateC = require('../controllers/account/rate');
 const commentC = require('../controllers/account/comment');
 const likedC = require('../controllers/account/liked');
+const searchC = require('../controllers/account/search');
 
 
 const upload = multer({fileFilter: function (req, file, callback) {
@@ -29,6 +30,10 @@ router.post('/add-account', upload.array('images'), addAC.addNewAccount)
 /* GET detail account. */
 router.get('/view-account/:id', viewAC.renderPage);
 
+/* Search account. */
+router.get('/search', searchC.renderPage);
+
+
 /* CREATE user rating. */
 router.post('/create-rating', rateC.validateBody, rateC.createRating);
 
@@ -40,5 +45,6 @@ router.get('/get-comments', commentC.validateBodyGetComments, commentC.getCommen
 
 /* HANDLE user likes. */
 router.post('/liked', likedC.validationBody, likedC.likeHandler);
+
 
 module.exports = router;

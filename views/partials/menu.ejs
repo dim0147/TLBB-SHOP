@@ -1,91 +1,101 @@
-<section>
-	<div class="container">
-		<div class="row">
-			<div class="col-md-12">
-				<nav class="navbar navbar-expand-lg navbar-light navigation">
-					<a class="navbar-brand" href="/">
-						<img src="/images/logo.gif" alt="">
-					</a>
-					<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-					 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-						<span class="navbar-toggler-icon"></span>
-					</button>
-					<div class="collapse navbar-collapse" id="navbarSupportedContent">
-						<ul class="navbar-nav ml-auto main-nav ">
-							<li class="nav-item active">
-								<a class="nav-link" href="/">Trang chủ</a>
-							</li>
-							<li class="nav-item dropdown dropdown-slide">
-								<a class="nav-link dropdown-toggle" data-toggle="dropdown" href="">Phái<span><i class="fa fa-angle-down"></i></span>
-								</a>
+<style>
 
-								<!-- Dropdown list -->
-								<div class="dropdown-menu">
-									<a class="dropdown-item" href="dashboard.html">Nga my</a>
-									<a class="dropdown-item" href="dashboard-my-ads.html">Thiếu Lâm</a>
-									<a class="dropdown-item" href="dashboard-favourite-ads.html">Tỉnh Túc</a>
-									<a class="dropdown-item" href="dashboard-archived-ads.html">Tiêu Dao</a>
-									<a class="dropdown-item" href="dashboard-pending-ads.html">Thiên Sơn</a>
-								</div>
-							</li>
-							<li class="nav-item dropdown dropdown-slide">
-								<a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-									Thể loại <span><i class="fa fa-angle-down"></i></span>
-								</a>
-								<!-- Dropdown list -->
-								<div class="dropdown-menu">
-									<a class="dropdown-item" href="about-us.html">Full 5</a>
-									<a class="dropdown-item" href="contact-us.html">Full 5 + 6</a>
-									<a class="dropdown-item" href="user-profile.html">Full 6</a>
-									<a class="dropdown-item" href="404.html">Full 6 + 7</a>
-									<a class="dropdown-item" href="store.html">1 Thuộc Tính</a>
-                                    <a class="dropdown-item" href="single-blog.html">2 Thuộc Tính</a>
-                                    <a class="dropdown-item" href="blog.html">3 Thuộc Tính</a>
-                                    <a class="dropdown-item" href="package.html">PK</a>
-									<a class="dropdown-item" href="single.html">Phó bản</a>
-								</div>
-							</li>
-							<li class="nav-item dropdown dropdown-slide">
-								<a class="nav-link dropdown-toggle" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-									Hỗ trợ <span><i class="fa fa-angle-down"></i></span>
-								</a>
-								<!-- Dropdown list -->
-								<div class="dropdown-menu">
-									<a class="dropdown-item" href="category.html">Điều Khoản</a>
-									<a class="dropdown-item" href="ad-listing-list.html">Trợ Giúp</a>
-								</div>
-							</li>
+</style>
 
-							
+<section style="margin-bottom:0px">
+	<div style="margin-bottom:0px !important" class="navbar navbar-expand-md navbar-dark bg-dark mb-4" role="navigation">
+		<a class="navbar-brand" href="/">
+			<img src="/images/logo.gif" alt="">
+		</a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarCollapse">
+			<ul class="navbar-nav mr-auto">
+				<li class="nav-item">
+					<a class="nav-link" href="/">Trang chủ <span class="sr-only"></span></a>
+				</li>
+
+				<!-- Phái -->
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" id="phai" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Phái</a>
+					<ul class="dropdown-menu" aria-labelledby="phai">
+				<% if(menuView.phais.length > 0){ %>
+					<% menuView.phais.forEach(function(phai){ %>
+						<li class="dropdown-item" href="/account/search?phai=<%=phai._id%>"><a><%= phai.name %></a></li>						
+					<% }) %>
 						</ul>
-						<ul class="navbar-nav ml-auto mt-10">
-							<% if(userSS){ %>
-							<li class="nav-item dropdown dropdown-slide">
-								<a class="nav-link dropdown-toggle" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-									<img style="padding-bottom: 2px" src="<%= userSS.urlImage %>" width=50 height=40 class="rounded-circle" style="padding: 0; margin: 0">
-									<%= userSS.name %>
-								</a>
-								<!-- Dropdown list -->
-								<div class="dropdown-menu">
-									<a class="dropdown-item" href="category.html">Thông Tin Cá Nhân</a>
-									<a class="dropdown-item" href="/user/logout">Đăng Xuất</a>
-								</div>
-							</li>
-							<% }else{ %>
-								<li class="nav-item">
-									<div>
-										<a style="margin-top: 10px;" class="nav-link login-button" href="/user/login">Đăng nhập</a>
-									</div>
+				<% } %>
+				</li>
+
+				<!-- Item Propety -->
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" id="dropdown1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Thể loại</a>
+					<ul class="dropdown-menu" aria-labelledby="dropdown1">
+
+						<% if(menuView.items.length > 0){ %>
+							<% menuView.items.forEach(function(item){ %>
+								<li class="dropdown-item dropdown">
+									<a class="dropdown-toggle" id="<%= item._id %>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><%= item.name %></a>
+									<ul class="dropdown-menu" aria-labelledby="<%= item._id %>">
+										<% item.properties.forEach(function(property){ %>
+											<li class="dropdown-item" href="/account/search?<%= item.slug %>=<%= property._id %>"><a href="/account/search?<%= item.slug %>=<%= property._id %>"><%= property.name %></a></li>
+										<% }) %>
+									</ul>
 								</li>
-							<% } %>
-							
-							<li class="nav-item">
-								<a style="margin-top: 10px;" class="nav-link text-white add-button" href="/account/add-account"><i class="fa fa-plus-circle"></i> Tạo Bài Đăng</a>
-							</li>
+							<% }) %>
+						<% } %>
+					</ul>
+				</li>
+
+				<!-- Contact -->
+				<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle" id="dropdown2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Hỗ trợ</a>
+						<ul class="dropdown-menu" aria-labelledby="dropdown2">
+							<li class="dropdown-item" href="#"><a>Liên Hệ</a></li>
+							<li class="dropdown-item" href="#"><a>Gửi Phiếu Hỗ Trợ</a></li>
+							<li class="dropdown-item" href="#"><a>Action 2 C</a></li>
 						</ul>
-					</div>
-				</nav>
-			</div>
+				</li>
+
+				<!-- Term & Condition -->
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" id="dropdown3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Điều Khoản</a>
+					<ul class="dropdown-menu" aria-labelledby="dropdown3">
+						<li class="dropdown-item" href="#"><a>Điều Khoản</a></li>
+						<li class="dropdown-item" href="#"><a>Điều kiện và Quy tắc Đăng</a></li>
+					</ul>
+			</li>
+			</ul>
+
+			
+			<form class="form-inline mt-2 mt-md-0">
+				<ul class="navbar-nav ml-auto mt-10">
+					<% if(userSS){ %>
+					<li class="nav-item dropdown dropdown-slide">
+						<a class="nav-link dropdown-toggle" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<img style="padding-bottom: 2px; margin-right: 10px;" src="<%= userSS.urlImage %>" width=50 height=40 class="rounded-circle" style="padding: 0; margin: 0">
+							<%= userSS.name %>
+						</a>
+						<!-- Dropdown list -->
+						<div class="dropdown-menu">
+							<a class="dropdown-item" href="category.html">Thông Tin Cá Nhân</a>
+							<a class="dropdown-item" href="/user/logout">Đăng Xuất</a>
+						</div>
+					</li>
+					<% }else{ %>
+						<li class="nav-item">
+							<div>
+								<a style="margin-top: 10px;" class="nav-link login-button" href="/user/login">Đăng nhập</a>
+							</div>
+						</li>
+					<% } %>
+					
+					<li class="nav-item">
+						<a style="margin-top: 10px;" class="nav-link text-white add-button" href="/account/add-account"><i class="fa fa-plus-circle"></i> Tạo Bài Đăng</a>
+					</li>
+				</ul>
+			</form>
 		</div>
 	</div>
 </section>

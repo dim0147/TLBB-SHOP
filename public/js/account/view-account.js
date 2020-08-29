@@ -79,8 +79,11 @@ $("document").ready(function() {
                 time
             }
         */
-        if(comments.length === 0)   return;
-        comments.map(function(comment){
+
+        if(comments.data.length === 0)   return;
+
+        const lastIndex = comments.data.length - 1;
+        comments.data.map(function(comment, index) {
             commentObject = {
                 _id: comment._id,
                 name: comment.userDetail[0].name,
@@ -93,8 +96,10 @@ $("document").ready(function() {
                 time: dateFormat(comment.createdAt, 'dddd mmmm d, yyyy')
             }
             let div = createComment(commentObject);
-            if(comment.replies.length > 0 )
-                comment.replies.map( reply => {
+            if(comment.replies.data.length > 0 ){
+                comment.replies.data.reverse();
+                const firstIndex = 0;
+                comment.replies.data.map( (reply, i) => {
                     replyd = {
                         _id: reply._id,
                         name: reply.userReply[0].name,
@@ -106,11 +111,58 @@ $("document").ready(function() {
                         likeFromUser: reply.likeFromUser.length > 0 ? true : false,
                         time: dateFormat(reply.createdAt, 'dddd mmmm d, yyyy')
                     }
-                    createComment(replyd, div);
+                    let resultDiv = createComment(replyd, div);
+                    if(i === firstIndex && comment.replies.totalLeft != 0){ // end of comment
+                        if(Number(comment.totalLeft) > 10)
+                            comment.replies.totalLeft = 'Hiển thị thêm trả lời'
+                        else
+                            comment.replies.totalLeft = 'Hiển thị thêm ' +  comment.replies.totalLeft +' trả lời'
+                        $(resultDiv).after('<h6 class="more-replies" parentId="'+ reply.parent +'" continueId="'+reply._id+'" style="color: rgb(18, 177, 18); "><span class="badge badge-success"><i class="fas fa-arrow-down"></i></span>     '+comment.replies.totalLeft + '</h6>')
+                    }
                 });
+            }
+
+            
+            if(index === lastIndex && comments.totalLeft != 0){ // end of comment
+                if(Number(comments.totalLeft) > 10)
+                    comments.totalLeft = 'Hiển thị thêm bình luận'
+                else
+                    comments.totalLeft = 'Hiển thị thêm ' +  comments.totalLeft +' bình luận'
+                $('#comment-section').append('<button id="btn-load-comment" continueId="' + comment._id  + '" style="margin-bottom: 10px" class="btn-load-comment btn btn-large btn-block btn-primary" type="button">' +  comments.totalLeft +'</button>')
+                return
+            }
         });
 
     }
+
+    function displayReplyComment(comments, elementToAddBehind){
+        if(comments.data.length === 0)   return;
+
+        const firstIndex = 0;
+        comments.data.reverse();
+        comments.data.map( (reply, i) => {
+            replyd = {
+                _id: reply._id,
+                name: reply.userDetail[0].name,
+                avatar: reply.userDetail[0].urlImage,
+                comment: reply.comment,
+                parent: reply.parent,
+                rate: reply.userDetail[0].rate.length > 0 ? reply.userDetail[0].rate[0].rate : null,
+                totalLike: reply.likes.length,
+                likeFromUser: reply.likeFromUser.length > 0 ? true : false,
+                time: dateFormat(reply.createdAt, 'dddd mmmm d, yyyy')
+            }
+            let resultDiv = createComment(replyd, elementToAddBehind);
+            if(i === firstIndex && comments.totalLeft != 0){ // end of comments
+                if(Number(comments.totalLeft) > 10)
+                    comments.totalLeft = 'Hiển thị thêm trả lời'
+                else
+                    comments.totalLeft = 'Hiển thị thêm ' +  comments.totalLeft +' trả lời'
+                $(resultDiv).after('<h6 class="more-replies" parentId="'+ reply.parent +'" continueId="'+reply._id+'" style="color: rgb(18, 177, 18); "><span class="badge badge-success"><i class="fas fa-arrow-down"></i></span>     '+comments.totalLeft + '</h6>')
+            }
+        });
+    }
+
 
     fetchComment();
 
@@ -188,7 +240,6 @@ $("document").ready(function() {
                 parent: null
             },
             success: res => {
-                console.log(res);
                 createComment({_id: res.comment._id, name: res.comment.name, avatar: res.comment.avatar, comment: res.comment.comment, parent: null, rate: res.rate, time: res.comment.createdAt})
                 showAlert('Đăng bình luận thành công!', 1);
                 $('#comment').val('');
@@ -290,6 +341,76 @@ $("document").ready(function() {
                 showAlert('Có lỗi xảy ra: ' + err.responseText, 0, $('#alert-reply'));
             }
         })
+    });
+
+    $('#comment-section').on('click', 'button.btn-load-comment', function(){
+        if(!$('#urlImage').length)
+        return;
+
+        setAllowPointer(this, false);
+        $(this).prop('disabled', true)
+        $(this).html('<i class="fas fa-spinner fa-spin"></i>   Đang tải...</i>');
+        const button = this;
+        $.ajax({
+            method: 'GET',
+            url: '/account/get-comments',
+            data: {
+                accountId: $("#idAccount").val(),
+                first_load: false,
+                continueId: $(this).attr('continueId'),
+                parentId: false
+            },
+            success: function(res){
+                console.log(res);
+                $(button).remove();
+                displayComment(res);
+                
+            },
+            error: function(err){
+                alert('Có lỗi xảy ra, vui lòng thử lại sau')
+                setAllowPointer(button, true);
+                $(button).prop('disabled', false);
+                $(button).text("Hiển thị thêm bình luận")
+                console.log(err);
+            }
+        })
+
+    });
+
+    $('#comment-section').on('click', 'h6.more-replies', function(){
+        if(!$('#urlImage').length)
+        return;
+
+
+        setAllowPointer(this, false);
+        $(this).prop('disabled', true)
+        $(this).html('<i class="fas fa-spinner fa-spin"></i>   Đang tải...</i>');
+        const element = this;
+        $.ajax({
+            method: 'GET',
+            url: '/account/get-comments',
+            data: {
+                accountId: $("#idAccount").val(),
+                first_load: false,
+                continueId: $(this).attr('continueId'),
+                parentId: $(this).attr('parentId')
+            },
+            success: function(res){
+                console.log(res);
+                displayReplyComment(res, element);
+                $(element).remove();
+                // displayComment(res);
+                
+            },
+            error: function(err){
+                alert('Có lỗi xảy ra, vui lòng thử lại sau')
+                setAllowPointer(button, true);
+                $(button).prop('disabled', false);
+                $(button).text("Hiển thị thêm bình luận")
+                console.log(err);
+            }
+        })
+
     });
     
     function createComment(comment, btnReplyElement = null){

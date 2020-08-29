@@ -109,7 +109,7 @@ exports.createComment = function (req, res){
 ]
 */
 exports.getComments = async function (req, res){
-    // console.log(req.query);
+    console.log(req.query);
     if(!req.isAuthenticated())
         return res.status(400).send("Xin hãy đăng nhập!")
     
@@ -123,186 +123,230 @@ exports.getComments = async function (req, res){
     }).catch(err => res.status(400).send(err))
     if(!accountIsExist) return
 
+    let payload = {}
     // Get comments(First time loading)
     if(req.query.first_load === 'true'){
-        waterfall([
-            cb => {
-                commentModel.aggregate([
-                    {
-                        //  Get first 5 comment
-                        $match:{
-                            account: mongoose.Types.ObjectId(req.query.accountId),
-                            parent: null
-                        },  
-                    },
-                    {$sort: {createdAt: -1}},
-                    {$limit: 5},
+        console.log('first load');
+        payload.condition = {
+            account: mongoose.Types.ObjectId(req.query.accountId),
+            parent: null
+        }
+        payload.sort = {
+            createdAt: -1
+        }
+        payload.limit = 6
+    }   // Get more comments
+    else if(req.query.continueId !== 'false' && req.query.parentId === 'false'){
+        console.log('continueId without parent');
+        payload.condition = {
+            account: mongoose.Types.ObjectId(req.query.accountId),
+            parent: null,
+            _id: {$lt: mongoose.Types.ObjectId(req.query.continueId)}
+        };
+        payload.sort = {
+            createdAt: -1
+        };
+        payload.limit = 6
+    }
+    else if(req.query.continueId !== 'false' && req.query.parentId !== 'false'){
+        console.log('continueId without parent');
+        payload.condition = {
+            account: mongoose.Types.ObjectId(req.query.accountId),
+            parent: mongoose.Types.ObjectId(req.query.parentId),
+            _id: {$gt: mongoose.Types.ObjectId(req.query.continueId)}
+        }
+        payload.sort = {
+            createdAt: 1
+        };
+        payload.limit = 3
+    }
+    else
+        return res.status(400).send("Lỗi xác thực")
 
-                        //  Get user detail of 5 comment
+    waterfall([
+        cb => {
+            commentModel.aggregate([
+                {
+                    //  Get first 5 comment
+                    $match: payload.condition,  
+                },
+                {$sort: payload.sort},
+                {$limit: payload.limit},
+
+                    //  Get user detail of 5 comment
+                {
+                    $lookup:
                     {
-                        $lookup:
-                        {
-                            'from': 'users',
-                            'let': {userId: '$user' , accountId: '$account'},
-                            pipeline: [
+                        'from': 'users',
+                        'let': {userId: '$user' , accountId: '$account'},
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $eq: ['$_id', '$$userId']
+                                    }
+                                }
+                            },
+                            {   // Get Rate of 5 user if they have rated
+                                $lookup:
                                 {
-                                    $match: {
-                                        $expr: {
-                                            $eq: ['$_id', '$$userId']
-                                        }
+                                    'from': 'rates',
+                                    'let': {userId: "$_id"},
+                                    'pipeline': [
+                                        { 
+                                            $match: {
+                                                $expr: {$and:
+                                                    [
+                                                        {$eq: ['$user', '$$userId']},
+                                                        {$eq: ['$account', '$$accountId']}
+                                                    ]}
+                                            }
+                                        },
+                                        {$limit: 1}
+                                    ],
+                                    'as': 'rate'
+                                }
+                            },
+                        ],
+                        'as': 'userDetail'
+                    }
+                },
+                {   // Get  comment's likes
+                    $lookup:{
+                        from: 'likes',
+                        let: {commentId: '$_id'},
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                            $eq: ['$comment', '$$commentId']
                                     }
-                                },
-                                {   // Get Rate of 5 user if they have rated
-                                    $lookup:
-                                    {
-                                        'from': 'rates',
-                                        'let': {userId: "$_id"},
-                                        'pipeline': [
-                                            { 
-                                                $match: {
-                                                    $expr: {$and:
-                                                        [
-                                                            {$eq: ['$user', '$$userId']},
-                                                            {$eq: ['$account', '$$accountId']}
-                                                        ]}
-                                                }
-                                            },
-                                            {$limit: 1}
-                                        ],
-                                        'as': 'rate'
-                                    }
-                                },
-                            ],
-                            'as': 'userDetail'
-                        }
-                    },
-                    {   // Get  comment's likes
-                        $lookup:{
+                                }
+                            }
+                        ],
+                        as: 'likes'
+                    }
+                },
+                {   // Get req user like
+                        $lookup: {
                             from: 'likes',
                             let: {commentId: '$_id'},
-                            pipeline: [
+                            pipeline:[
                                 {
-                                    $match: {
+                                    $match:{
                                         $expr: {
-                                                $eq: ['$comment', '$$commentId']
-                                        }
+                                            $and: [
+                                                {$eq: ['$user', mongoose.Types.ObjectId(req.user._id)]},
+                                                {$eq: ['$comment', '$$commentId']}
+                                            ]}
                                     }
                                 }
                             ],
-                            as: 'likes'
+                            as: 'likeFromUser'
                         }
-                    },
-                    {   // Get req user like
-                            $lookup: {
-                                from: 'likes',
-                                let: {commentId: '$_id'},
-                                pipeline:[
-                                    {
-                                        $match:{
-                                            $expr: {
-                                                $and: [
-                                                    {$eq: ['$user', mongoose.Types.ObjectId(req.user._id)]},
-                                                    {$eq: ['$comment', '$$commentId']}
-                                                ]}
-                                        }
-                                    }
-                                ],
-                                as: 'likeFromUser'
-                            }
-                    },
-                    // Get comment replies of 5 comments, each comment query 3 replies and sort latest, sort by date
+                },
+                // Get comment replies of 5 comments, each comment query 3 replies and sort latest, sort by date
+                {
+                    $lookup:
                     {
-                        $lookup:
-                        {
-                            'from': 'comments',
-                            'let': {commentParent: "$_id", accountId: "$account"},
-                            'pipeline': [
-                                {
-                                    $match: {
-                                        $expr: { $eq: ['$parent', '$$commentParent']}
-                                    }
-                                },
-                                {$limit: 3},
-                                {$sort: {createdAt: -1}},
-                                {   // Get user detail and rate of comment replies
-                                    $lookup: {
-                                        from: 'users',
-                                        let: {userReplyId: '$user'},
-                                        pipeline: [
-                                            {
-                                                $match:{
-                                                    $expr: {$eq: ['$_id', '$$userReplyId']}
-                                                }
-                                            },
-                                            {   // Get rate of user if have
-                                                $lookup: {
-                                                    from: 'rates',
-                                                    let: {userRateId: '$_id'},
-                                                    pipeline: [
-                                                        {
-                                                          $match:{
-                                                              $expr: {$and:
-                                                                [
-                                                                  {$eq: ['$user', '$$userRateId']},
-                                                                  {$eq: ['$account', '$$accountId']}
-
-                                                                ]
-                                                              }
-                                                          }  
-                                                        },
-                                                        {  $limit: 1 }
-                                                    ],
-                                                    as: 'rate'
-                                                }
-                                            },
-                                        ],
-                                        as: 'userReply'
-                                    }
-                                },
-                                {   // Get total likes comment
-                                    $lookup: {
-                                        from: 'likes',
-                                        let: {commentId: '$_id'},
-                                        pipeline: [
-                                            {
-                                                $match: {
-                                                    $expr: {
-                                                        $eq: ['$comment', '$$commentId']
-                                                    }
-                                                }
-                                            }
-                                        ],
-                                        as: 'likes'
-                                    }
-                                },
-                                {   // Get comment like from user
-                                    $lookup: {
-                                        from: 'likes',
-                                        let: {commentId: '$_id'},
-                                        pipeline: [
-                                            {
-                                                $match: {
-                                                    $expr: {
-                                                        $and:[
-                                                            {$eq: ['$comment', '$$commentId']},
-                                                            {$eq: ['$user', mongoose.Types.ObjectId(req.user._id)]}
-                                                        ]
-                                                    }
-                                                }
-                                            }
-                                        ],
-                                        as: 'likeFromUser'
-                                    }
+                        'from': 'comments',
+                        'let': {commentParent: "$_id", accountId: "$account"},
+                        'pipeline': [
+                            {
+                                $match: {
+                                    $expr: { $eq: ['$parent', '$$commentParent']}
                                 }
-                            ],
-                            'as': 'replies'
-                        },
-                        
-                    },
+                            },
+                            {$sort: {createdAt: 1}},
+                            {$limit: 3},
+                            {   // Get user detail and rate of comment replies
+                                $lookup: {
+                                    from: 'users',
+                                    let: {userReplyId: '$user'},
+                                    pipeline: [
+                                        {
+                                            $match:{
+                                                $expr: {$eq: ['$_id', '$$userReplyId']}
+                                            }
+                                        },
+                                        {   // Get rate of user if have
+                                            $lookup: {
+                                                from: 'rates',
+                                                let: {userRateId: '$_id'},
+                                                pipeline: [
+                                                    {
+                                                      $match:{
+                                                          $expr: {$and:
+                                                            [
+                                                              {$eq: ['$user', '$$userRateId']},
+                                                              {$eq: ['$account', '$$accountId']}
 
-                    {
-                        $project:
-                        {   
+                                                            ]
+                                                          }
+                                                      }  
+                                                    },
+                                                    {  $limit: 1 }
+                                                ],
+                                                as: 'rate'
+                                            }
+                                        },
+                                    ],
+                                    as: 'userReply'
+                                }
+                            },
+                            {   // Get total likes comment
+                                $lookup: {
+                                    from: 'likes',
+                                    let: {commentId: '$_id'},
+                                    pipeline: [
+                                        {
+                                            $match: {
+                                                $expr: {
+                                                    $eq: ['$comment', '$$commentId']
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    as: 'likes'
+                                }
+                            },
+                            {   // Get comment like from user
+                                $lookup: {
+                                    from: 'likes',
+                                    let: {commentId: '$_id'},
+                                    pipeline: [
+                                        {
+                                            $match: {
+                                                $expr: {
+                                                    $and:[
+                                                        {$eq: ['$comment', '$$commentId']},
+                                                        {$eq: ['$user', mongoose.Types.ObjectId(req.user._id)]}
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    as: 'likeFromUser'
+                                }
+                            }
+                        ],
+                        'as': 'replies'
+                    },
+                    
+                },
+
+                {
+                    $project:
+                    {   
+                        _id: 1,
+                        account: 1,
+                        comment: 1,
+                        parent: 1,
+                        likes: 1,
+                        likeFromUser: 1,
+                        createdAt: 1,
+                        updatedAt: 1,
+                        replies: {
                             _id: 1,
                             account: 1,
                             comment: 1,
@@ -310,28 +354,8 @@ exports.getComments = async function (req, res){
                             likeFromUser: 1,
                             createdAt: 1,
                             updatedAt: 1,
-                            replies: {
-                                _id: 1,
-                                account: 1,
-                                comment: 1,
-                                likes: 1,
-                                likeFromUser: 1,
-                                createdAt: 1,
-                                updatedAt: 1,
-                                parent: 1,
-                                userReply: {
-                                    _id: 1,
-                                    name: 1,
-                                    urlImage: 1,
-                                    role: 1,
-                                    createdAt: 1,
-                                    rate: {
-                                        rate: 1,
-                                        createdAt: 1
-                                    }
-                                }
-                            },
-                            userDetail: {
+                            parent: 1,
+                            userReply: {
                                 _id: 1,
                                 name: 1,
                                 urlImage: 1,
@@ -342,71 +366,122 @@ exports.getComments = async function (req, res){
                                     createdAt: 1
                                 }
                             }
+                        },
+                        userDetail: {
+                            _id: 1,
+                            name: 1,
+                            urlImage: 1,
+                            role: 1,
+                            createdAt: 1,
+                            rate: {
+                                rate: 1,
+                                createdAt: 1
+                            }
                         }
                     }
-                ]).exec(function (err, comments){
-                    if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau" + err);
-                    // console.log(comments);
-                    cb(null, comments);
-                });
-            },
-                 //  Get replies of first 5 comment and merge
-            (comments, cb) => {
-                if(comments.length === 0) return cb(null, comments, null);
-                let listPromise = comments.map(comment => {
-                    return new Promise((resolve, reject) => {
-                        commentModel.aggregate([
-                            {
-                                $match:{
-                                    parent: comment._id
-                                }
-                            },
-                            {
-                                $limit: 3
-                            }
-                        ]).exec(function(err, replyComments){
-                            resolve(replyComments);
-                        });
-                    });
-                });
-                Promise.all(listPromise).then((result => cb(null, comments, result))).catch((err) => cb(err));
-            },
-            (comments, replyComments, cb) => {
-                if(comments.length === 0) return cb(null, comments, null);
-            
-                // cb(null, mergeComments(comments, replyComments))
+                }
+            ]).exec(function (err, comments){
+                if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau" + err);
+                // console.log(comments);
                 cb(null, comments);
+            });
+        },
+             //  Get replies of first 5 comment and merge
+        (comments, cb) => {
+            if(comments.length === 0) return cb(null, comments, null);
+            
+            // Query comment include reply
+            let condition = {
+                _id: {$lt: mongoose.Types.ObjectId(comments[(Number(comments.length) - 1)]._id)}, 
+                account: req.query.accountId,
+                parent: null
             }
-        ], function(err, result){
-            if(err) return console.log(err);
-            // console.log(result);
-            return res.send(result)
-        });
+            // Query reply comment only
+            if(req.query.parentId !== 'false'){
+                condition = {
+                    _id: {$gt: mongoose.Types.ObjectId(comments[(Number(comments.length) - 1)]._id)}, 
+                    account: req.query.accountId,
+                    parent: mongoose.Types.ObjectId(req.query.parentId)
+                }
+            }
+            let countMainComments = new Promise((resolve, reject) =>{
+                commentModel.countDocuments(
+                    condition, (err, count) => {
+                    if(err) return reject(err);
+                    resolve({_id: comments[(Number(comments.length) - 1)]._id, countLeft: count});
+                });
+            })
 
-    }
+            let countRepliesComment = comments.map(comment => {
+                return new Promise((resolve, reject) => {
+                    if(comment.replies.length === 0) return resolve(0);
+                    let lastIndex = Number(comment.replies.length) - 1;
+                    commentModel.countDocuments({
+                        _id: {$gt: mongoose.Types.ObjectId(comment.replies[lastIndex]._id)},
+                        account: req.query.accountId,
+                        parent: mongoose.Types.ObjectId(comment.replies[lastIndex].parent)
+                    }, (err, count) => {
+                        if(err) return reject(err);
+                        resolve({_id: comment.replies[lastIndex]._id, countLeft: count})
+                    });
+                    
+                });
+            });
+
+            countRepliesComment.unshift(countMainComments);
+            Promise.all(countRepliesComment).then((result => cb(null, comments, result))).catch((err) => cb(err));
+        },
+        (comments, counts, cb) => {
+            if(comments.length === 0)
+                return cb(null, {totalLeft: 0, data: []}, null);
+            
+            comments = mergeCountCommentLeft(comments, counts);
+            cb(null, comments);
+        }
+    ], function(err, result){
+        if(err) return console.log(err);
+        // console.log(result);
+        return res.send(result)
+    });
 }
 /* replyComments[0] = [{ parent: 11, _id:1, comment: 1},{parent: 11, _id:2, comment: 2}] // Same Parent ID
  replyComments[1] = [{parent: 12, _id:3, comment: 3 },{parent: 12, _id:4, comment: 4}]
 
  comments = [ {_id: 11, comment: cc, parent: null}, {_id: 12, comment: da, parent: null} ]
 */
-function mergeComments(comments = [], replyComments = []){
-    // console.log('comment');
-    // // console.log(comments);
-    // console.log('reply');
-    // console.log(replyComments);
-    comments.forEach((comment) => {
-        comment.listReplies = [];
-        for (let i = 0; i < replyComments.length; i++){
-            let arrComments = replyComments[i];
-            if(arrComments.length === 0 || (arrComments[0].parent.toString() != comment._id.toString())){
-                continue;
-            } else{
-                arrComments.forEach(replyComment => {
-                    comment.listReplies.push(replyComment)
-                })
-            }
+function mergeCountCommentLeft(comments, countArr) {
+
+    comments = {
+        totalLeft: countArr[0].countLeft, // First index is total mainComment
+        data: comments
+    };
+
+    for (let i = 0; i < comments.data.length; i++){
+        let comment = comments.data[i];
+        if(comment.replies.length === 0){
+            comments.data[i].replies = {
+                totalLeft: 0, // First index is total mainComment
+                data: []
+            };
+            continue;
         }
-    })
+
+        comment.replies.some(reply => {
+
+            let isDone = countArr.some(count => {
+                if(count._id == reply._id){
+                    console.log('equal!!!!!');
+                    comments.data[i].replies = {
+                        totalLeft: count.countLeft,
+                        data: comments.data[i].replies
+                    }
+                    return true;
+                }
+                    
+            })
+            if (isDone) return true;
+        });
+    }
+
     return comments;
 }

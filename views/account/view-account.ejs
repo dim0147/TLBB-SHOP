@@ -1,7 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <% include ../partials/head %>
+	<% include ../partials/head %>
+	<style> 
+	.more-replies { 
+			text-align: right;
+		} 
+		.more-replies:hover { 
+			color:rgb(120, 199, 120); 
+			cursor: pointer;
+			text-align: right;
+		} 
+	</style> 
 </head>
 
 <body class="body-wrapper">
@@ -147,8 +157,8 @@
 								<div class="product-review">
 								<div id="comment-section">
 
-
-
+									
+									
 								</div>	
 
 									<% if(typeof userSS === 'undefined'){ %>

@@ -1,5 +1,34 @@
 /*=== MEDIA QUERY ===*/
 @import url("https://fonts.googleapis.com/css?family=Muli:300,400,600,700,800,900");
+.navbar .dropdown-toggle, .navbar .dropdown-menu a {
+  cursor: pointer;
+}
+
+.navbar .dropdown-item.active, .navbar .dropdown-item:active {
+  color: inherit;
+  text-decoration: none;
+  background-color: inherit;
+}
+
+.navbar .dropdown-item:focus, .navbar .dropdown-item:hover {
+  color: #16181b;
+  text-decoration: none;
+  background-color: #f8f9fa;
+}
+
+@media (min-width: 767px) {
+  .navbar .dropdown-toggle:not(.nav-link)::after {
+      display: inline-block;
+      width: 0;
+      height: 0;
+      margin-left: .5em;
+      vertical-align: 0;
+      border-bottom: .3em solid transparent;
+      border-top: .3em solid transparent;
+      border-left: .3em solid;
+  }
+}
+
 body {
   line-height: 1.5;
   font-family: "Muli", sans-serif;
@@ -2701,3 +2730,4 @@ form textarea {
 }
 
 /*# sourceMappingURL=maps/style.css.map */
+
