@@ -70,3 +70,20 @@ exports.getBosungFields = function(){
         });
     })
 }
+
+exports.isEmpty = function(map) {
+    for(var key in map) {
+      if (map.hasOwnProperty(key)) {
+         return false;
+      }
+    }
+    return true;
+}
+
+exports.checkProperty = function(object, arrayProperty){
+    for(let i = 0; i < arrayProperty.length; i++){
+        if(!object.hasOwnProperty(arrayProperty[i]))
+            return false
+    }
+    return true
+}

@@ -93,7 +93,7 @@ $("document").ready(function() {
                 rate: comment.userDetail[0].rate.length > 0 ? comment.userDetail[0].rate[0].rate : null,
                 totalLike: comment.likes.length,
                 likeFromUser: comment.likeFromUser.length > 0 ? true : false,
-                time: dateFormat(comment.createdAt, 'dddd mmmm d, yyyy')
+                time: dateFormat(comment.createdAt, 'd mmmm, yyyy')
             }
             let div = createComment(commentObject);
             if(comment.replies.data.length > 0 ){
@@ -109,7 +109,7 @@ $("document").ready(function() {
                         rate: reply.userReply[0].rate.length > 0 ? reply.userReply[0].rate[0].rate : null,
                         totalLike: reply.likes.length,
                         likeFromUser: reply.likeFromUser.length > 0 ? true : false,
-                        time: dateFormat(reply.createdAt, 'dddd mmmm d, yyyy')
+                        time: dateFormat(reply.createdAt, 'd mmmm, yyyy')
                     }
                     let resultDiv = createComment(replyd, div);
                     if(i === firstIndex && comment.replies.totalLeft != 0){ // end of comment
@@ -150,7 +150,7 @@ $("document").ready(function() {
                 rate: reply.userDetail[0].rate.length > 0 ? reply.userDetail[0].rate[0].rate : null,
                 totalLike: reply.likes.length,
                 likeFromUser: reply.likeFromUser.length > 0 ? true : false,
-                time: dateFormat(reply.createdAt, 'dddd mmmm d, yyyy')
+                time: dateFormat(reply.createdAt, 'd mmmm, yyyy')
             }
             let resultDiv = createComment(replyd, elementToAddBehind);
             if(i === firstIndex && comments.totalLeft != 0){ // end of comments

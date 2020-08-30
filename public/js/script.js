@@ -225,7 +225,6 @@
   $('.range-track').on('slide', function (slideEvt) {
     slideEvt.value[0] = slideEvt.value[0].toLocaleString('en-US', {style : 'currency', currency : 'VND'});
     slideEvt.value[1] = slideEvt.value[1].toLocaleString('en-US', {style : 'currency', currency : 'VND'});
-    $('.value').text(slideEvt.value[0] + ' - ' + slideEvt.value[1]);
   });
 
 

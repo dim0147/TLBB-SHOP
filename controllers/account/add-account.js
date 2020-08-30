@@ -211,14 +211,14 @@ exports.addNewAccount = async (req, res) => {
         return res.status(400).send("Level không hợp lệ!!!");
 
     // Check Sell Or Trade
-    if(req.body.postType != 'giaoluu' && req.body.postType != 'ban')
+    if(req.body.postType != 'trade' && req.body.postType != 'sell')
         return res.status(400).send("Hình thức giao dịch không hợp lệ!!!");
         // Check price is valid
         let price = Number(req.body.price);
-        if(req.body.postType == 'ban' && (price == '' || Number.isNaN(price)))
+        if(req.body.postType == 'sell' && (price == '' || Number.isNaN(price)))
             return res.status(400).send("Giá không hợp lệ!!!");
         // Check phai is valid
-        if(req.body.postType == 'giaoluu'){
+        if(req.body.postType == 'trade'){
             if(req.body.phaigiaoluu.length === 0) return res.status(400).send("Hãy chọn phái cần giao lưu!!!");
             let cPhaiGL = await checkPhai(req.body.phaigiaoluu);
             if(cPhaiGL.status !== 'OK') return res.status(400).send("Phái giao lưu không hợp lệ!!!");

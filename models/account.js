@@ -15,7 +15,7 @@ const accountSchema = mongoose.Schema({
     doche: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
     dieuvan: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
     longvan: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
-    transaction_type: {type: String, required: true, enum: config.account.type},
+    transaction_type: {type: String, required: true, enum: config.account.transaction_type},
     price: {type: Number},
     phaigiaoluu: {type: mongoose.Schema.Types.ObjectId, ref: 'phais',required: true},
     status: {type: String, required: true, enum: config.account.status, default: 'pending'},
