@@ -43,8 +43,8 @@
 					<!-- product slider -->
 					<div class="product-slider">
 						<% images.forEach(img => { %>
-							<div class="product-slider-item my-4 col-xs-3" data-image="<%= img.url %>">
-								<img class="img-responsive img-fluid" src="<%= img.url %>" alt="product-img">
+							<div class="product-slider-item my-4 col-xs-3" data-image="/images/data/<%= img.url %>">
+								<img class="img-responsive img-fluid" src="/images/data/<%= img.url %>" alt="product-img">
 							</div>
 						<% }) %>
 					</div>
@@ -82,7 +82,7 @@
 								<table class="table table-bordered product-table">
 									<tbody>
 										<tr>
-											<% if(account.transaction_type == 'ban'){ %>
+											<% if(account.transaction_type == 'sell'){ %>
 												<td>Bán</td>
 												<td><%= account.price.toLocaleString('it-IT', {style : 'currency', currency : 'VND'}) %></td>
 											<% }else{ %>
@@ -198,7 +198,7 @@
 			<div class="col-md-4">
 				<div class="sidebar">
 					<div class="widget price text-center">
-						<% if(account.transaction_type == 'ban'){ %>
+						<% if(account.transaction_type == 'sell'){ %>
 							<h4>Bán</h4>
 							<p><%=  account.price.toLocaleString('it-IT', {style : 'currency', currency : 'VND'}); %></p>
 						<% }else{ %>

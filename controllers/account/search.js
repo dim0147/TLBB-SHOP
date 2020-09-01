@@ -28,7 +28,9 @@ function filterSpecialSort(req){
         let condition = {};
         let option =
         {
-            sort: {createdAt: 1}
+            sort: {createdAt: 1}, 
+            itemPerPage: 9,
+            skip: 0
         };
         let listBosung = [];
 
@@ -81,11 +83,23 @@ function filterSpecialSort(req){
                 }
             }
 
+            // Elevate string
+            if(field === 'c_name'){
+                condition.c_name = {$regex: originQuery.c_name, $options: 'i'}
+            }
+
             // Elevate sort
             if(field === 'createdAt'){
                 option.sort = {createdAt: Number(req.query.createdAt)}
             }
         }
+
+        // Calculate page
+        if(typeof req.query.page != 'undefined' && !isNaN(req.query.page)){
+            option.skip = (Number(req.query.page) - 1) * option.itemPerPage;
+        }
+            
+
 
         // Successfully
         return {
@@ -106,6 +120,9 @@ function rmvSpecialField(req){
     delete req.query.bosung;
     delete req.query.phai;
     delete req.query.transaction_type;
+    delete req.query.page;
+    delete req.query.c_name;
+    delete req.query.dataOnly;
     return req;
 }
 
@@ -145,9 +162,11 @@ function formatDate(accounts){
     return accounts;
 }
 
-exports.renderPage = async function(req, res, next){
-        const removedField = ['min', 'max', 'phaigiaoluu', 'bosung', 'phaigiaoluu', 'transaction_type', 'createdAt', 'phai'];
-        const originQuery = req.query;
+exports.renderPage = async function(req, res){
+        // Check if get data only or not
+        let dataOnly = false;
+        if(typeof req.query.dataOnly !== "undefined" && req.query.dataOnly == 'true')
+            dataOnly = true;
 
         // Check if empty query
         if(helper.isEmpty(req.query))
@@ -155,7 +174,12 @@ exports.renderPage = async function(req, res, next){
 
         // Filter special sort
         let filter = filterSpecialSort(req);
-        if(!filter.OK) throw new Error(filter.message)
+        if(!filter.OK){
+            if(dataOnly)
+                return res.status(400).send(filter.message)
+            else
+                return res.render('account/search', {title: 'Search', error: filter.message});
+        }
         let condition = filter.data.condition;
         let option = filter.data.option;
         let listBosung = filter.data.listBosung;
@@ -165,7 +189,12 @@ exports.renderPage = async function(req, res, next){
 
         //  Filter normal field with mongoose.Types.ObjectId
         let filterMgsObj = filterMongooseObjectId(req, condition);
-        if(!filterMgsObj.OK) throw new Error(filterMgsObj.message)
+        if(!filterMgsObj.OK){
+            if(dataOnly)
+                return res.status(400).send(filterMgsObj.message)
+            else
+                return res.render('account/search', {title: 'Search', error: filterMgsObj.message});
+        } 
         condition = filterMgsObj.data.condition;
 
         // Query part
@@ -227,6 +256,7 @@ exports.renderPage = async function(req, res, next){
             ];
         }
 
+        // Unwind to using group
         let unwindPart = [
             {
                 $unwind: {
@@ -236,6 +266,7 @@ exports.renderPage = async function(req, res, next){
             }
         ];
 
+        //  Group by id
         let groupPart = [
             
             {
@@ -276,6 +307,7 @@ exports.renderPage = async function(req, res, next){
             }
         ];
 
+        // Apply sort and limit and skip and get total documents
         let endPart = [
             {
             $facet: {
@@ -284,7 +316,10 @@ exports.renderPage = async function(req, res, next){
                         $sort: option.sort
                     },
                     {
-                        $limit: 9
+                        $skip: option.skip
+                    },
+                    {
+                        $limit: option.itemPerPage
                     }
                 ],
                 totalCount: [
@@ -298,18 +333,10 @@ exports.renderPage = async function(req, res, next){
 
         //  Merge all part to a pipeline
         const pipelineAg = queryPart.concat(bosungPart, unwindPart, groupPart, endPart);
-
-        console.log(option.sort);
         waterfall([
             cb => {
                 accountModel.aggregate(pipelineAg, function(err, accounts){
                   if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
-                  console.log('account');
-                  console.log(accounts);
-                  console.log('result');
-                  console.log(accounts[0].data);
-                  console.log('total count');
-                  console.log(accounts[0].totalCount);
                 //   cb(null, accounts[0].data);
                   cb(null, accounts);
                 });
@@ -381,13 +408,31 @@ exports.renderPage = async function(req, res, next){
                 });
             }
         ], async function(err, result){
-            if (err) return res.status(400).send(err);
-            console.log('rs');
-            console.log(result);
-            const bosungFields = await helper.getBosungFields();
-            res.render('account/search', {title: 'Search', bosungFields: bosungFields, accounts: result.account, totalCount: result.count});
+            // If error
+            if (err){
+                if(dataOnly)
+                    return res.status(400).send(filterMgsObj.message)
+                else
+                    return res.render('account/search', {title: 'Search', error: err});
+            } 
+
+            // Check if no result
+            if(result.length === 0){
+                result.account = [];
+                result.count = [];
+            }
+
+            // Get bosung field, search in cache
+            let bosungFields = cache.getKey('bosung');
+            if(typeof bosungFields === 'undefined'){
+                bosungFields = await helper.getBosungFields();
+                cache.setKey('bosung', bosungFields);
+            }
+
+            if(dataOnly)
+                return res.send({accounts: result.account, totalCount: result.count})
+            else
+                res.render('account/search', {title: 'Search', bosungFields: bosungFields, accounts: result.account, totalCount: result.count, itemPerPage: option.itemPerPage});
 
         });
-        
-        // accountModel.find({vohon: 213}, null, {sort: -1, limit: 3, populate}, function(err, result))
 }

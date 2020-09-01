@@ -223,8 +223,9 @@
      // bootstrap slider range
   $('.range-track').slider({});
   $('.range-track').on('slide', function (slideEvt) {
-    slideEvt.value[0] = slideEvt.value[0].toLocaleString('en-US', {style : 'currency', currency : 'VND'});
-    slideEvt.value[1] = slideEvt.value[1].toLocaleString('en-US', {style : 'currency', currency : 'VND'});
+    let minMoney = slideEvt.value[0].toLocaleString('en-US', {style : 'currency', currency : 'VND'});
+    let maxMoney = slideEvt.value[1].toLocaleString('en-US', {style : 'currency', currency : 'VND'});
+    $('.value').text( minMoney + ' - ' + maxMoney);
   });
 
 

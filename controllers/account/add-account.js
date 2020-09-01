@@ -210,6 +210,10 @@ exports.addNewAccount = async (req, res) => {
     if(Number.isNaN(level) || Number(level) <= 0 || Number(level) >=120)
         return res.status(400).send("Level không hợp lệ!!!");
 
+    //  Check title
+    if(req.body.title.length > 25)
+        return res.status(400).send("Tựa bài viết không được quá 20 kí tự!!!");
+
     // Check Sell Or Trade
     if(req.body.postType != 'trade' && req.body.postType != 'sell')
         return res.status(400).send("Hình thức giao dịch không hợp lệ!!!");
@@ -302,29 +306,29 @@ exports.addNewAccount = async (req, res) => {
                 cb(null, newAccount);
             });
         },
-        // Upload Image to imgur server
-        (newAccount, cb) => {
-            let arrImages = req.files.map(image => {
-                return image.buffer.toString('base64')
-            });
-            imgur.uploadAlbum(arrImages, 'Base64')
-            .then(function(album) {
-                cb(null, album, newAccount);
-            })
-            .catch(function (err) {
-                console.error("Có lỗi khi upload ảnh lên imgur");
-                console.error(err.message);
-                removeAccount(newAccount);
-                cb("Có lỗi xảy ra, không thể tải ảnh lên server, vui lòng thử lại sau");
-            });
-        },
+        // // Upload Image to imgur server
+        // (newAccount, cb) => {
+        //     let arrImages = req.files.map(image => {
+        //         return image.buffer.toString('base64')
+        //     });
+        //     imgur.uploadAlbum(arrImages, 'Base64')
+        //     .then(function(album) {
+        //         cb(null, album, newAccount);
+        //     })
+        //     .catch(function (err) {
+        //         console.error("Có lỗi khi upload ảnh lên imgur");
+        //         console.error(err.message);
+        //         removeAccount(newAccount);
+        //         cb("Có lỗi xảy ra, không thể tải ảnh lên server, vui lòng thử lại sau");
+        //     });
+        // },
         // Save link imgur image to db
-        (album, newAccount, cb) => {
-            if(album.images.length === 0) return cb("Có lỗi xảy ra, không có ảnh, vui lòng thử lại sau")
-            let listImages = album.images.map(image => {
+        (newAccount, cb) => {
+            if(req.files.length === 0) return cb("Có lỗi xảy ra, không có ảnh, vui lòng thử lại sau")
+            let listImages = req.files.map(image => {
                 return {
-                    url: image.link,
-                    albumId: album.data.id,
+                    url: image.filename,
+                    albumId: 'TLBB',
                     account: newAccount._id
                 }
             });

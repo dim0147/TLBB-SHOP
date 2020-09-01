@@ -12,3 +12,7 @@ exports.setKey = function(key, value, stdTTL = 1000){
 exports.setManyKeys = function(listKeyValues = [],stdTTL = 1000){
     return myCache.mset(listKeyValues, stdTTL);
 }
+
+exports.getTtl = function(key){
+    return myCache.getTtl(key);
+}

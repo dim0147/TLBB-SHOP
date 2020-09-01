@@ -8,6 +8,7 @@ const imageModel = require('../../models/image');
 const acLinkAddFieldModel = require('../../models/account-link-addfield');
 const rateModel = require('../../models/rate')
 const commentModel = require('../../models/comment');
+const viewModel = require('../../models/view');
 
 dateFormat.i18n = {
     dayNames: [
@@ -74,7 +75,6 @@ exports.renderPage = (req, res) => {
             model: 'users'
         }
     ];
-    console.log('cc gi');
     const popBosungField = {path: 'fieldId', model: 'add-fields'};
     waterfall([
         //  Find account with id
@@ -117,47 +117,26 @@ exports.renderPage = (req, res) => {
                 cb(null, result);
             })
         },
-        // Query for five comment
-        // (result, cb) => {
-        //     commentModel.find({account: result.account._id, parent: null}).sort([['createdAt', -1]]).limit(5).lean().exec((err, comments) =>{
-        //         if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau')
-        //         cb(null, result, comments);
-        //     });
-        // },
-        // // Query for reply comments
-        // (result, comments, cb) => {
-        //     if(comments.length === 0){
-        //         result.comments = comments;
-        //         return cb(null, result, null)
-        //     } 
-        //     const listIdComment = comments.map(comment => comment._id);
-        //     commentModel.aggregate([
-        //         {
-        //             $match: {
-        //                 parent: {$in: listIdComment}
-        //             }
-        //         },
-        //         {
-        //             $sort: {createdAt: -1}
-        //         },
-        //         {
-        //             $group: {
-        //                 _id: "$parent",
-        //                 comments: { $push: "$$ROOT" }
-        //             }
-        //         }
-                // {
-                //      $addFields:{
-                //         "comments.test": "unleaded"
-                //      }
-                // }
-        //     ]).exec((err, result) => {
-        //         if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau' + err);
-        //         cb(null, result);
-        //     });
-        // }
+        (result, cb) => {// Adding view
+            if(typeof req.ip === 'undefined') return cb(null, result);
+            viewModel.findOne({ip:req.ip, account: result.account._id}).exec((err, ip) => {
+                if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau');
+                if(ip !== null) return cb(null, result);
+                const newView = {
+                    account: result.account._id,
+                    ip: req.ip
+                };
+                if(req.isAuthenticated())
+                    newView.user = req.user._id;
+                viewModel.create(newView, (err) =>{
+                    if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau');
+                    return cb(null, result);
+                })
+            });
+        }
     ], function(err, result){
-        if(err) return res.render('404', {title: 'Xin lỗi, không tìm thấy trang'})
+        if(err) throw new Error(err);
+       
         res.render('account/view-account', {title: result.account.title, account: result.account, addFields: result.addFields, images: result.images, rate: result.rate});
     });
 }

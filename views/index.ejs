@@ -2,6 +2,13 @@
 <html lang="en">
 <head>
   <% include partials/head %>
+<style>
+
+	.giaoluu{
+		background: red !important;
+	}
+</style>
+
 </head>
 
 <body class="body-wrapper">
@@ -10,7 +17,6 @@
 =            Menu        =
 ================================-->
   <% include partials/menu %>
-
 
 <!--===============================
 =            Hero Area            =
@@ -23,24 +29,26 @@
 			<div class="col-md-12">
 				<!-- Header Contetnt -->
 				<div class="content-block">
-					<h1>Trang buôn bán tài khoản </h1>
-					<p>Tham gia và mua bán hoặc tìm những nick ưng ý <br> hiện đang có ở tất cả server</p>
+					<h2 style="color:rgb(255, 0, 200); font-weight: bold;">Xin lưu ý: Đây là website hoàn toàn miễn phí giúp bạn có thể tìm mua tài khoản ưng ý nhanh chóng, không phải nạp tiền, chỉ cần chụp ảnh trang bị tài khoản của bạn lên để người khác có thể xem đồ đạc, không phải đưa thông tin lên!</h2>
+					<h1>Thiên Long Shop </h1>
+					<p>Tham gia và tìm những nick ưng ý <br> hiện đang có ở tất cả server hoặc tạo bài đăng để bán tài khoản</p><br>
+					
 					<div class="short-popular-category-list text-center">
 						<h2>Những tìm kiếm phổ biến</h2>
 						<ul class="list-inline">
 							<li class="list-inline-item">
-								<a href="category.html"><i class="fa fa-bed"></i> Full 6</a></li>
+								<a href="/account/search?ngoc=5f40d1dff5bc420c761b4b2b"><i class="fa fa-bed"></i> Full 6</a></li>
 							<li class="list-inline-item">
-								<a href="category.html"><i class="fa fa-grav"></i> 3 Thuộc Tính</a>
+								<a href="/account/search?thankhi=5f40d28ff5bc420c761b4b3d"><i class="fa fa-grav"></i> 3 Thuộc Tính</a>
 							</li>
 							<li class="list-inline-item">
-								<a href="category.html"><i class="fa fa-car"></i> Võ Hồn Toàn Mỹ</a>
+								<a href="/account/search?createdAt=-1"><i class="fas fa-star-and-crescent"></i> Vừa tải lên</a>
 							</li>
 							<li class="list-inline-item">
-								<a href="category.html"><i class="fa fa-cutlery"></i> Cái Bang</a>
+								<a href="/account/search?vohon=5f40d1abf5bc420c761b4b24"><i class="fa fa-car"></i> Võ Hồn Toàn Mỹ</a>
 							</li>
 							<li class="list-inline-item">
-								<a href="category.html"><i class="fa fa-coffee"></i> Ám Khí</a>
+								<a href="/account/search?phai=5f40a245027ded0715fcd4ba"><i class="fab fa-accessible-icon"></i> Cái Bang</a>
 							</li>
 						</ul>
 					</div>
@@ -51,26 +59,30 @@
 						<div class="container">
 							<div class="row justify-content-center">
 								<div class="col-lg-12 col-md-12 align-content-center">
-										<form>
+										<form action="/account/search" method="GET">
 											<div class="form-row">
 												<div class="form-group col-md-4">
-													<input type="text" class="form-control my-2 my-lg-1" id="inputtext4" placeholder="Nhập tên nhân vật bạn muốn tìm kiếm">
+													<input name="c_name" type="text" class="form-control my-2 my-lg-1" id="inputtext4" placeholder="Nhập tên nhân vật bạn muốn tìm kiếm">
 												</div>
 												<div class="form-group col-md-3">
-													<select class="w-100 form-control mt-lg-1 mt-md-2">
-														<option>Tất cả</option>
-														<option value="1">Thiên Long</option>
-														<option value="2">Cái Bang</option>
-														<option value="4">Minh Giáo</option>
-													</select>
+													<% if(typeof phais !== 'undefined' && phais.length > 0){ %>
+														<select name="phai" class="w-100 form-control mt-lg-1 mt-md-2">
+															<option value="all">Tất cả</option>
+															<% phais.forEach(function(phai){ %>
+																<option value="<%= phai._id %>"><%= phai.name %></option>
+															<% }) %>	
+														</select>
+													<% } %>
+													
 												</div>
 												<div class="form-group col-md-3">
-                          <select class="w-100 form-control mt-lg-1 mt-md-2">
-														<option>Tất cả</option>
-														<option value="1" selected="selected">Tình Kiếm</option>
-														<option value="2">Tình Kiếm 2</option>
-														<option value="4">Minh Giáo</option>
-													</select>
+													<% if(typeof servers !== 'undefined' && servers.length > 0){ %>
+														<select name="server" class="w-100 form-control mt-lg-1 mt-md-2">
+															<% servers[0].properties.forEach(function(server){ %>
+																<option value="<%= server._id %>"><%= server.name %></option>
+															<% }) %>														
+														</select>
+													<% } %>
 												</div>
 												<div class="form-group col-md-2 align-self-center">
 													<button type="submit" class="btn btn-primary">Tìm Kiếm</button>
@@ -103,7 +115,7 @@
 			<div class="col-md-12">
 				<div class="section-title">
 					<h2>Xem nhiều</h2>
-					<p>Những tài khoản vật phẩm được xem nhiều.</p>
+					<p>Những tài khoản được xem nhiều.</p>
 				</div>
 			</div>
 		</div>
@@ -111,154 +123,62 @@
 			<!-- offer 01 -->
 			<div class="col-lg-12">
 				<div class="trending-ads-slide">
-					<div class="col-sm-12 col-lg-4">
-						<!-- product card -->
-<div class="product-item bg-light">
-	<div class="card">
-		<div class="thumb-content">
-			<!-- <div class="price">$200</div> -->
-			<a href="single.html">
-				<img class="card-img-top img-fluid" src="images/products/products-1.jpg" alt="Card image cap">
-			</a>
-		</div>
-		<div class="card-body">
-		    <h4 class="card-title"><a href="single.html">11inch Macbook Air</a></h4>
-		    <ul class="list-inline product-meta">
-		    	<li class="list-inline-item">
-		    		<a href="single.html"><i class="fa fa-folder-open-o"></i>Electronics</a>
-		    	</li>
-		    	<li class="list-inline-item">
-		    		<a href="#"><i class="fa fa-calendar"></i>26th December</a>
-		    	</li>
-		    </ul>
-		    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Explicabo, aliquam!</p>
-		    <div class="product-ratings">
-		    	<ul class="list-inline">
-		    		<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
-		    		<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
-		    		<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
-		    		<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
-		    		<li class="list-inline-item"><i class="fa fa-star"></i></li>
-		    	</ul>
-		    </div>
-		</div>
-	</div>
-</div>
 
+					<% if(typeof mostViewAccount !== 'undefined' && mostViewAccount.length > 0){ %>
+						<% mostViewAccount.forEach(function(account){ %>
+							
+							<div class="col-sm-12 col-lg-4">
+								 <div class="product-item bg-light">
+								   <div class="card">
+									  <div class="thumb-content"> 
+										  <% if(account.transaction_type == 'sell'){ %>
+										  	<div class="price"><%= account.price.toLocaleString('en-US', {style : 'currency', currency : 'VND'}); %></div> 
+										  <% }else{ %>
+											<div class="price giaoluu">Giao lưu <%= account.phaigiaoluu.name %></div> 
+										  <% } %>
+										 <a href="/account/view-account/<%= account._id %>">
+										 <img width="315px" height="216px" class="card-img-top img-fluid" src="images/data/<%= account.image.url %>" alt="Card image cap">
+										 </a>
+									  </div>
+									  <div class="card-body">
+										 <h4 class="card-title"><a href="/account/view-account/<%= account._id %>"><%= account.title %></a></h4>
+										 <ul class="list-inline product-meta">
+											<li class="list-inline-item">
+											   <a style="color: red" href="/account/search?phai=<%= account.phai._id %>"><i class="fa fa-folder-open-o"></i><%= account.phai.name %></a>
+											</li>
+											<li class="list-inline-item">
+											   <a href="#"><i class="fa fa-calendar"></i><%= account.createdAt %></a>
+											</li>
 
-
-					</div>
-					<div class="col-sm-12 col-lg-4">
-						<!-- product card -->
-<div class="product-item bg-light">
-	<div class="card">
-		<div class="thumb-content">
-			<!-- <div class="price">$200</div> -->
-			<a href="single.html">
-				<img class="card-img-top img-fluid" src="images/products/products-2.jpg" alt="Card image cap">
-			</a>
-		</div>
-		<div class="card-body">
-		    <h4 class="card-title"><a href="single.html">Full Study Table Combo</a></h4>
-		    <ul class="list-inline product-meta">
-		    	<li class="list-inline-item">
-		    		<a href="single.html"><i class="fa fa-folder-open-o"></i>Furnitures</a>
-		    	</li>
-		    	<li class="list-inline-item">
-		    		<a href="#"><i class="fa fa-calendar"></i>26th December</a>
-		    	</li>
-		    </ul>
-		    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Explicabo, aliquam!</p>
-		    <div class="product-ratings">
-		    	<ul class="list-inline">
-		    		<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
-		    		<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
-		    		<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
-		    		<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
-		    		<li class="list-inline-item"><i class="fa fa-star"></i></li>
-		    	</ul>
-		    </div>
-		</div>
-	</div>
-</div>
-
-
-
-					</div>
-					<div class="col-sm-12 col-lg-4">
-						<!-- product card -->
-<div class="product-item bg-light">
-	<div class="card">
-		<div class="thumb-content">
-			<!-- <div class="price">$200</div> -->
-			<a href="single.html">
-				<img class="card-img-top img-fluid" src="images/products/products-3.jpg" alt="Card image cap">
-			</a>
-		</div>
-		<div class="card-body">
-		    <h4 class="card-title"><a href="single.html">11inch Macbook Air</a></h4>
-		    <ul class="list-inline product-meta">
-		    	<li class="list-inline-item">
-		    		<a href="single.html"><i class="fa fa-folder-open-o"></i>Electronics</a>
-		    	</li>
-		    	<li class="list-inline-item">
-		    		<a href="#"><i class="fa fa-calendar"></i>26th December</a>
-		    	</li>
-		    </ul>
-		    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Explicabo, aliquam!</p>
-		    <div class="product-ratings">
-		    	<ul class="list-inline">
-		    		<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
-		    		<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
-		    		<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
-		    		<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
-		    		<li class="list-inline-item"><i class="fa fa-star"></i></li>
-		    	</ul>
-		    </div>
-		</div>
-	</div>
-</div>
-
-
-
-					</div>
-					<div class="col-sm-12 col-lg-4">
-						<!-- product card -->
-<div class="product-item bg-light">
-	<div class="card">
-		<div class="thumb-content">
-			<!-- <div class="price">$200</div> -->
-			<a href="single.html">
-				<img class="card-img-top img-fluid" src="images/products/products-2.jpg" alt="Card image cap">
-			</a>
-		</div>
-		<div class="card-body">
-		    <h4 class="card-title"><a href="single.html">Full Study Table Combo</a></h4>
-		    <ul class="list-inline product-meta">
-		    	<li class="list-inline-item">
-		    		<a href="single.html"><i class="fa fa-folder-open-o"></i>Furnitures</a>
-		    	</li>
-		    	<li class="list-inline-item">
-		    		<a href="#"><i class="fa fa-calendar"></i>26th December</a>
-		    	</li>
-		    </ul>
-		    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Explicabo, aliquam!</p>
-		    <div class="product-ratings">
-		    	<ul class="list-inline">
-		    		<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
-		    		<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
-		    		<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
-		    		<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
-		    		<li class="list-inline-item"><i class="fa fa-star"></i></li>
-		    	</ul>
-		    </div>
-		</div>
-	</div>
-</div>
-
-
-
-					</div>
+											<li class="list-inline-item">
+												<a href="#"><i class="fas fa-eye"></i><%= account.totalView %></a>
+											 </li>
+										 </ul>
+										 <p class="card-text">
+											 Server: <%= account.server.name %><br>
+											 Tên nhân vật: <%= account.c_name %><br>
+											 Ngọc: <%= account.ngoc.name %><br>
+											 Điêu Văn: <%= account.dieuvan.name %><br>
+											 Võ Hồn: <%= account.vohon.name %>
+										 </p>
+										 <div class="product-ratings">
+											<ul class="list-inline">
+												<% if(account.rate == null || account.rate == 0) account.rate = 5%>
+												<% for(let i = 0; i < Math.floor(Number(account.rate)); i++){ %>
+													<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
+												<% } %>
+											   <% for(let i = Math.floor(Number(account.rate)); i < 5; i++){ %>
+													<li class="list-inline-item"><i class="fa fa-star"></i></li>
+											   <% } %>
+											</ul>
+										 </div>
+									  </div>
+								   </div>
+								</div>
+							 </div> 
+						<% }) %>
+						
+					<% } %>
 				</div>
 			</div>
 			
@@ -281,131 +201,47 @@
 				<!-- Section title -->
 				<div class="section-title">
 					<h2>Tất cả danh mục</h2>
-					<p>Những tài khoản và vật phẩm được phân chia giúp bạn có thể dễ dàng tìm kiếm!</p>
+					<p>Những tài khoản được phân chia giúp bạn có thể dễ dàng tìm kiếm!</p>
 				</div>
 				<div class="row">
-					<!-- Category list -->
-					<div class="col-lg-3 offset-lg-0 col-md-5 offset-md-1 col-sm-6 col-6">
-						<div class="category-block">
-							<div class="header">
-								<i class="fa fa-laptop icon-bg-1"></i> 
-								<h4>Electronics</h4>
-							</div>
-							<ul class="category-list" >
-								<li><a href="category.html">Laptops <span>93</span></a></li>
-								<li><a href="category.html">Iphone <span>233</span></a></li>
-								<li><a href="category.html">Microsoft  <span>183</span></a></li>
-								<li><a href="category.html">Monitors <span>343</span></a></li>
-							</ul>
-						</div>
-					</div> <!-- /Category List -->
-					<!-- Category list -->
-					<div class="col-lg-3 offset-lg-0 col-md-5 offset-md-1 col-sm-6 col-6">
-						<div class="category-block">
-							<div class="header">
-								<i class="fa fa-apple icon-bg-2"></i> 
-								<h4>Restaurants</h4>
-							</div>
-							<ul class="category-list" >
-								<li><a href="category.html">Cafe <span>393</span></a></li>
-								<li><a href="category.html">Fast food <span>23</span></a></li>
-								<li><a href="category.html">Restaurants  <span>13</span></a></li>
-								<li><a href="category.html">Food Track<span>43</span></a></li>
-							</ul>
-						</div>
-					</div> <!-- /Category List -->
-					<!-- Category list -->
-					<div class="col-lg-3 offset-lg-0 col-md-5 offset-md-1 col-sm-6 col-6">
-						<div class="category-block">
-							<div class="header">
-								<i class="fa fa-home icon-bg-3"></i> 
-								<h4>Real Estate</h4>
-							</div>
-							<ul class="category-list" >
-								<li><a href="category.html">Farms <span>93</span></a></li>
-								<li><a href="category.html">Gym <span>23</span></a></li>
-								<li><a href="category.html">Hospitals  <span>83</span></a></li>
-								<li><a href="category.html">Parolurs <span>33</span></a></li>
-							</ul>
-						</div>
-					</div> <!-- /Category List -->
-					<!-- Category list -->
-					<div class="col-lg-3 offset-lg-0 col-md-5 offset-md-1 col-sm-6 col-6">
-						<div class="category-block">
-							<div class="header">
-								<i class="fa fa-shopping-basket icon-bg-4"></i> 
-								<h4>Shoppings</h4>
-							</div>
-							<ul class="category-list" >
-								<li><a href="category.html">Mens Wears <span>53</span></a></li>
-								<li><a href="category.html">Accessories <span>212</span></a></li>
-								<li><a href="category.html">Kids Wears <span>133</span></a></li>
-								<li><a href="category.html">It & Software <span>143</span></a></li>
-							</ul>
-						</div>
-					</div> <!-- /Category List -->
-					<!-- Category list -->
-					<div class="col-lg-3 offset-lg-0 col-md-5 offset-md-1 col-sm-6 col-6">
-						<div class="category-block">
-							<div class="header">
-								<i class="fa fa-briefcase icon-bg-5"></i> 
-								<h4>Jobs</h4>
-							</div>
-							<ul class="category-list" >
-								<li><a href="category.html">It Jobs <span>93</span></a></li>
-								<li><a href="category.html">Cleaning & Washing <span>233</span></a></li>
-								<li><a href="category.html">Management  <span>183</span></a></li>
-								<li><a href="category.html">Voluntary Works <span>343</span></a></li>
-							</ul>
-						</div>
-					</div> <!-- /Category List -->
-					<!-- Category list -->
-					<div class="col-lg-3 offset-lg-0 col-md-5 offset-md-1 col-sm-6 col-6">
-						<div class="category-block">
-							<div class="header">
-								<i class="fa fa-car icon-bg-6"></i> 
-								<h4>Vehicles</h4>
-							</div>
-							<ul class="category-list" >
-								<li><a href="category.html">Bus <span>193</span></a></li>
-								<li><a href="category.html">Cars <span>23</span></a></li>
-								<li><a href="category.html">Motobike  <span>33</span></a></li>
-								<li><a href="category.html">Rent a car <span>73</span></a></li>
-							</ul>
-						</div>
-					</div> <!-- /Category List -->
-					<!-- Category list -->
-					<div class="col-lg-3 offset-lg-0 col-md-5 offset-md-1 col-sm-6 col-6">
-						<div class="category-block">
-							<div class="header">
-								<i class="fa fa-paw icon-bg-7"></i> 
-								<h4>Pets</h4>
-							</div>
-							<ul class="category-list" >
-								<li><a href="category.html">Cats <span>65</span></a></li>
-								<li><a href="category.html">Dogs <span>23</span></a></li>
-								<li><a href="category.html">Birds  <span>113</span></a></li>
-								<li><a href="category.html">Others <span>43</span></a></li>
-							</ul>
-						</div>
-					</div> <!-- /Category List -->
-					<!-- Category list -->
-					<div class="col-lg-3 offset-lg-0 col-md-5 offset-md-1 col-sm-6 col-6">
-						<div class="category-block">
-							
-							<div class="header">
-								<i class="fa fa-laptop icon-bg-8"></i> 
-								<h4>Services</h4>
-							</div>
-							<ul class="category-list" >
-								<li><a href="category.html">Cleaning <span>93</span></a></li>
-								<li><a href="category.html">Car Washing <span>233</span></a></li>
-								<li><a href="category.html">Clothing  <span>183</span></a></li>
-								<li><a href="category.html">Business <span>343</span></a></li>
-							</ul>
-						</div>
-					</div> <!-- /Category List -->
+					<% const icon = ['fa-laptop icon-bg-1', 'fa-apple icon-bg-2', 'fa-home icon-bg-3', 'fa-shopping-basket icon-bg-4', 'fa-briefcase icon-bg-5', 'fa-car icon-bg-6', 'fa-paw icon-bg-7', 'fa-laptop icon-bg-8'] %>
 					
+					<% if(typeof items !== 'undefined' && items.length > 0){ %>
+						<% for(let i = 0; i < items.length; i++){ %>
+							<% let item = items[i]; 
+							let iconTemp = null;
+							%>
+							<% if(i > (icon.length - 1)){
+									if(i - icon.length > (icon.length - 1)){
+										iconTemp = icon[0];
+									}
+										
+									else{
+										iconTemp = icon[Number(i - icon.length)];
+									}
+										
+								}else{
+									iconTemp = icon[i];
+								}
+							%>
+										<!-- Category list -->
+								<div class="col-lg-3 offset-lg-0 col-md-5 offset-md-1 col-sm-6 col-6">
+									<div class="category-block">
+										<div class="header">
+											<i class="fa <%= iconTemp %>"></i> 
+											<h4><%= item.name %></h4>
+										</div>
+										<ul class="category-list" >
+											<% item.properties.forEach(property =>{ %>
+												<li><a href="/account/search?<%= item.slug %>=<%= property._id %>"><%= property.name %> <span><%= property.totalAccount %></span></a></li>
+											<% }) %>
+											
+										</ul>
+									</div>
+								</div> <!-- /Category List -->
+						<% } %>
+					<% } %>
+				
 					
 				</div>
 			</div>
@@ -425,11 +261,10 @@
 		<div class="row justify-content-md-center text-center">
 			<div class="col-md-8">
 				<div class="content-holder">
-					<h2>Start today to get more exposure and
-					grow your business</h2>
+					<h2>Bắt đầu ngay hôm nay để tiếp xúc nhiều hơn</h2>
 					<ul class="list-inline mt-30">
-						<li class="list-inline-item"><a class="btn btn-main" href="ad-listing.html"><i class="fa fa-plus-circle"></i> Add Listing</a></li>
-						<li class="list-inline-item"><a class="btn btn-secondary" href="category.html">Browser Listing</a></li>
+						<li class="list-inline-item"><a class="btn btn-main" href="/account/add-account"><i class="fa fa-plus-circle"></i> Tạo bài đăng</a></li>
+						<li class="list-inline-item"><a class="btn btn-secondary" href="/account/search?createdAt=-1">Duyệt các tài khoản hiện đang có</a></li>
 					</ul>
 				</div>
 			</div>
@@ -440,7 +275,7 @@
 
 
 <% include partials/footer %>
-
+<script src="/js/index.js"></script>
 </body>
 
 </html>

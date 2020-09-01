@@ -6,12 +6,52 @@
       .trade{
           background: red!important;
       }
+
+      .itemInSearch{
+          margin: 10px;
+          border-bottom: 4px solid rgb(70, 75, 70);
+      }
+
+      .itemInSearch:hover{
+          background:#353233
+      }
+      .scrollbar::-webkit-scrollbar-track
+      {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+            border-radius: 10px;
+            background-color: #F5F5F5;
+      }
+
+        .scrollbar::-webkit-scrollbar
+        {
+            width: 12px;
+            background-color: #F5F5F5;
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb
+        {
+            border-radius: 10px;
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+            background-color: #555;
+        }
+
+        .scrollbar
+        {
+            margin-left: 30px;
+            float: left;
+            height: 300px;
+            width: 65px;
+            background: #F5F5F5;
+            overflow-y: scroll;
+            margin-bottom: 25px;
+        }
   </style>
 </head>
 
 <body class="body-wrapper">
     <% include ../partials/menu %>
-
+    <% if(typeof itemPerPage === 'undefined') itemPerPage = 0 %>
+    <input class="itemPerPage" type="hidden" value="<%= itemPerPage %>">
 
     <section class="page-search">
         <div class="container">
@@ -19,21 +59,21 @@
                 <div class="col-md-12">
                     <!-- Advance Search -->
                     <div class="advance-search">
-                        <form>
+                        <form action="" method="GET">
                             <div class="form-row">
-                                <div class="form-group col-md-4">
-                                    <input type="text" class="form-control my-2 my-lg-0" id="inputtext4" placeholder="What are you looking for">
+                                <div class="form-group col-md-10">
+                                    <input name="c_name" type="text" class="form-control my-2 my-lg-0" id="ipSearchName" placeholder="Nhập tên nhân vật ít nhất 3 ký tự">
                                 </div>
-                                <div class="form-group col-md-3">
-                                    <input type="text" class="form-control my-2 my-lg-0" id="inputCategory4" placeholder="Category">
-                                </div>
-                                <div class="form-group col-md-3">
-                                    <input type="text" class="form-control my-2 my-lg-0" id="inputLocation4" placeholder="Location">
-                                </div>
+                                
                                 <div class="form-group col-md-2">
-                                    
-                                    <button type="submit" class="btn btn-primary">Search Now</button>
+                                    <button type="submit" class="btn btn-warning"><i class="fas fa-search"></i> Tìm Kiếm</button>
                                 </div>
+
+                                <div class="form-group col-md-10 divResult d-none scrollbar" style="overflow: auto;max-height: 50vh;background:#1a040d; padding: 10px;">
+
+                                </div>
+
+
                             </div>
                         </form>
                     </div>
@@ -46,9 +86,13 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="search-result bg-gray">
-                        <% if(accounts.length > 0){ %>
-                        <h2>Kết quả tìm kiếm</h2>
-                        <p><%= totalCount[0].count %> tài khoản</p>
+                        <% if(typeof accounts !== 'undefined' && accounts.length > 0){ %>
+                            <% if(typeof totalCount !== 'undefined' && totalCount.length > 0){ %>
+                                <h2 class="totalAccount" total="<%= totalCount[0].count %>">Kết quả tìm kiếm</h2>
+                                <p><%= totalCount[0].count %> tài khoản</p>
+                            <% } %>
+                        <% }else{ %>
+                            <h2 class="totalAccount" total="0">Không tìm thấy kết quả nào</h2>
                         <% } %>
                     </div>
                 </div>
@@ -59,7 +103,13 @@
     <form action="" id="formSubmit" method="GET">
         <input type="hidden" name="min" id="minPrice">
         <input type="hidden" name="max" id="maxPrice">
-    <% if(menuView.phais.length > 0){ %>
+
+        <div class="widget filter">
+            <h4 class="widget-header">Tên Nhân Vật</h4>
+            <input type="text" name="c_name" class="form-control my-2 my-lg-0" placeholder="Nhập tên nhân vật">
+        </div>
+
+    <% if(typeof menuView.phais !== 'undefined' && menuView.phais.length > 0){ %>
         <div class="widget filter">
             <h4 class="widget-header">Phái</h4>
             <select name="phai" id="phai">
@@ -71,14 +121,14 @@
         </div>
     <% } %>
                 
-    <% if(menuView.items.length > 0){ %>
+    <% if(typeof menuView.items !== 'undefined' && menuView.items.length > 0){ %>
         <% menuView.items.forEach(function(item){ %>
             <div class="widget category-list">
                 <h4 class="widget-header"><%= item.name %></h4>
                 <ul class="category-list">
                     <% item.properties.forEach(function(property){ %>
                         <li><div class="form-check">
-                            <input name="<%= item.slug %>" value="<%= property._id %>" type="checkbox" class="form-check-input">
+                            <input name="<%= item.slug %>" value="<%= property._id %>" type="checkbox" class="form-check-input itemProperty" item="<%= item.slug %>" idProperty="<%= property._id %>">
                             <label class="form-check-label" for="<%= property._id %>"><%= property.name %></label>
                           </div></li>
                     <% }) %>
@@ -91,7 +141,7 @@
     
     <div class="widget filter">
         <h4 class="widget-header">Sắp xếp theo</h4>
-        <select name="createdAt">
+        <select name="createdAt" id="selectSort">
             <option value="-1">Mới Nhất</option>
             <option value="1">Cũ Nhất</option>
         </select>
@@ -109,25 +159,27 @@
     <div class="widget filter giaoluuArea">
         <h4 class="widget-header">Phái Giao Lưu</h4>
         <select name="phaigiaoluu">
-            <% menuView.phais.forEach(function(phai){ %>
-                <option value="<%= phai._id %>"><%= phai.name %></option>
-            <% }) %>
+            <% if(typeof menuView.phais !== 'undefined' && menuView.phais.length > 0){ %>
+                <% menuView.phais.forEach(function(phai){ %>
+                    <option value="<%= phai._id %>"><%= phai.name %></option>
+                <% }) %>
                 <option value="all">Tất cả</option>
+            <% } %>
         </select>
     </div>
     
     <div class="widget price-range w-100 priceArea">
         <h4 class="widget-header">Giá</h4>
         <div class="block">
-                            <input class="range-track w-100" type="text" data-slider-min="0" data-slider-max="50000000" data-slider-step="1000"
+                            <input class="range-track w-100" type="text" data-slider-min="0" data-slider-max="50000000" data-slider-step="100"
                             data-slider-value="[0,50000000]">
                     <div class="d-flex justify-content-between mt-2">
-                            <span class="value">₫0 - ₫50,000,000</span>
+                            <span class="value">₫0 - ₫20,000,000</span>
                     </div>
         </div>
     </div>
     
-    <% if(bosungFields.length > 0) {%>
+    <% if(typeof bosungFields !== 'undefined' && bosungFields.length > 0) {%>
         <div class="widget product-shorting">
             <h4 class="widget-header">Bổ sung</h4>
             <% bosungFields.forEach(function(bosung){ %>
@@ -149,11 +201,11 @@
                     <div class="category-search-filter">
                         <div class="row">
                             <div class="col-md-6">
-                                <strong>Sắp xết</strong>
-                                <select>
-                                    <option>Gần đây</option>
-                                    <option value="1">Phổ biến nhất</option>
-                                    <option value="2">Giá thấp nhất</option>
+                                <strong>Sắp xếp</strong>
+                                <select id="sortAccount">
+                                    <option value="1">Gần đây</option>
+                                    <option value="2">Phổ biến nhất</option>
+                                    <option value="3">Giá thấp nhất</option>
                                     <option value="4">Giá cao nhất</option>
                                 </select>
                             </div>
@@ -161,10 +213,19 @@
                         </div>
                     </div>
                     <div class="product-grid-list">
-                        <div class="row mt-30">
-                            <% if(accounts.length > 0){ %>
+                        <div class="row mt-30 accountAreaRow">
+                            <% if(typeof error !== 'undefined'){ %>
+                                <h1><%= error %></h1>
+                            <% } %>
+
+                            <% if(typeof accounts !== 'undefined' && accounts.length > 0){ %>
                                 <% accounts.forEach(account => { %>
-                                    <div class="col-sm-12 col-lg-4 col-md-6">
+                                    <% if(account.totalRate == null) 
+                                        account.totalRate = 5
+                                       if(account.transaction_type == 'trade')
+                                        account.price = 0
+                                    %>
+                                    <div class="col-sm-12 col-lg-4 col-md-6 accountDiv" data-date="<%= account.createdAt %>" data-rate="<%= account.totalRate %>" data-price="<%= account.price %>">
                                         <!-- product card -->
                         <div class="product-item bg-light">
                             <div class="card">
@@ -175,26 +236,15 @@
                                         <div class="price trade">Giao lưu <%= account.phaigiaoluu.name %></div>
                                     <% } %>
                                     <a href="/account/view-account/<%= account._id %>">
-                                        <img class="card-img-top" src="<%= account.image[0].url %>" alt="Card image cap" height="180px">
+                                        <% if(typeof account.image !== 'object' || account.image.length === 0){
+                                                account.image = [{url: 'no-image.png'}];
+                                            }
+                                        %>
+                                        <img class="card-img-top" src="/images/data/<%= account.image[0].url %>" alt="Card image cap" height="180px">
                                     </a>
                                 </div>
                                 <div class="card-body" style="height: 232px;">
-                                    <h4 style="height: 43px;" class="card-title"><a href="/account/view-account/<%= account._id %>"><%= account.title %></a></h4>
-                                    <ul style="margin-bottom: 3px;" class="list-inline product-meta">
-                                        <li class="list-inline-item">
-                                            <a href="/account/search?phai=<%= account.phai._id %>"><i class="fa fa-folder-open-o"></i><%= account.phai.name %></a>
-                                        </li>
-                                        <li class="list-inline-item">
-                                            <a href=""><i class="fa fa-calendar"></i><%= account.createdAt %></a>
-                                        </li>
-                                    </ul>
-                                    <p style="height: 62px; font-size: 10px" class="card-text">
-                                    - Tên nhân vật: <%= account.c_name %> <br>
-                                    - Ngọc: <%= account.ngoc.name %> <br>
-                                    - Điêu Văn: <%= account.dieuvan.name %> <br>
-                                    - Võ Hồn: <%= account.vohon.name %> <br>
-                                    - Ám Khí: <%= account.amkhi.name %>
-                                    </p>
+                                    <h4 style="height: 20px;" class="card-title"><a style="color:rgb(189, 121, 38)" href="/account/view-account/<%= account._id %>"><%= account.title %></a></h4>
                                     <div class="product-ratings">
                                         <ul class="list-inline">
                                             <% if(account.totalRate == null) account.totalRate = 5%>
@@ -206,6 +256,23 @@
                                             <% } %>
                                         </ul>
                                     </div>
+                                    <ul style="margin-bottom: 3px;" class="list-inline product-meta">
+                                        <li class="list-inline-item">
+                                            <a style="color: red" href="/account/search?phai=<%= account.phai._id %>"><i class="fa fa-folder-open-o"></i><%= account.phai.name %></a>
+                                        </li><br>
+                                        <li class="list-inline-item">
+                                            <a style="color: green" href=""><i class="fa fa-calendar"></i><%= account.createdAt %></a>
+                                        </li>
+                                    </ul>
+                                    
+                                    <p style="height: 75px; font-size: 12px; color: rgb(43, 177, 177);" class="card-text">
+                                    - Server: <%= account.server.name %><br>
+                                    - Tên nhân vật: <%= account.c_name %> <br>
+                                    - Ngọc: <%= account.ngoc.name %> <br>
+                                    - Điêu Văn: <%= account.dieuvan.name %> <br>
+                                    - Võ Hồn: <%= account.vohon.name %>
+                                    </p>
+
                                 </div>
                             </div>
                         </div>
@@ -219,22 +286,7 @@
                     </div>
                     <div class="pagination justify-content-center">
                         <nav aria-label="Page navigation example">
-                            <ul class="pagination">
-                                <li class="page-item">
-                                    <a class="page-link" href="#" aria-label="Previous">
-                                        <span aria-hidden="true">&laquo;</span>
-                                        <span class="sr-only">Trước</span>
-                                    </a>
-                                </li>
-                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#" aria-label="Next">
-                                        <span aria-hidden="true">&raquo;</span>
-                                        <span class="sr-only">Tiếp</span>
-                                    </a>
-                                </li>
+                            <ul class="pagination" id="navArea">
                             </ul>
                         </nav>
                     </div>
@@ -242,9 +294,10 @@
             </div>
         </div>
     </section>
-    <!--============================
+
     
     <% include ../partials/footer %>
+
 <script src="/js/account/search.js"></script>
 </body>
 

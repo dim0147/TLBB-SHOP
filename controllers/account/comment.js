@@ -123,7 +123,6 @@ exports.createComment = function (req, res){
 ]
 */
 exports.getComments = async function (req, res){
-    console.log(req.query);
     if(!req.isAuthenticated())
         return res.status(400).send("Xin hãy đăng nhập!")
     

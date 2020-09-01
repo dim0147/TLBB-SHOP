@@ -3,22 +3,38 @@ var router = express.Router();
 
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 const viewAC = require('../controllers/account/view-account');
 const rateC = require('../controllers/account/rate');
 const commentC = require('../controllers/account/comment');
 const likedC = require('../controllers/account/liked');
 const searchC = require('../controllers/account/search');
+const helper = require('../help/helper');
 
-
-const upload = multer({fileFilter: function (req, file, callback) {
-    var ext = path.extname(file.originalname);
-    if(ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') {
-        req.errorImage = true;
-        return callback(null, true)
+var storage = multer.diskStorage({
+    fileFilter: function (req, file, callback) {
+        var ext = path.extname(file.originalname);
+        if(ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') {
+            req.errorImage = true;
+            return callback(null, true)
+        }
+        callback(null, true)
+    },
+    destination: function (req, file, cb) {
+      cb(null, 'public/images/data/')
+    },
+    filename: function (req, file, cb) {
+        let nameImage = helper.generateRandomString(9) + path.extname(file.originalname);
+        do{
+            nameImage = helper.generateRandomString(9) + path.extname(file.originalname);
+        }while(fs.existsSync('public/images/data/' + nameImage))
+      cb(null, nameImage)
     }
-    callback(null, true)
-},})
+  })
+
+
+const upload = multer({ storage: storage });
 
 const addAC = require('../controllers/account/add-account');
 

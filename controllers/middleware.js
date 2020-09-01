@@ -29,7 +29,6 @@ dateFormat.i18n = {
 exports.setUserSession = function(req, res, next) {
     if(req.isAuthenticated()){
         if(req.user.type === 'web') req.user.urlImage = config.urlWebsite + '/images/member.png';
-        console.log('date ' +  req.user.created_at);
         if(typeof req.user.created_at === 'object')
             req.user.created_at = dateFormat(new Date(req.user.created_at), "d mmmm, yyyy")
       }
@@ -42,7 +41,6 @@ exports.loadMenuView = function(req, res, next){
     // Check if cache have menu data
     const items = cache.getKey('menuView');
     if(typeof items !== 'undefined'){
-        console.log('Using cache to show menu');
         res.locals.menuView = items;
         return next();
     }
@@ -52,7 +50,6 @@ exports.loadMenuView = function(req, res, next){
     .then(function(result){
         cache.setKey('menuView', result)
         res.locals.menuView = result;
-        console.log('Store to cache');
         next();
     })
     .catch(function(err){
