@@ -97,3 +97,15 @@ exports.generateRandomString = function(length){
     }
     return result;
 }
+
+exports.deleteManyFiles = function(arrFiles){
+    try {
+        arrFiles.forEach(path => fs.existsSync(path) && fs.unlinkSync(path));
+        console.log('Delete image files success!');
+        return true;
+      } catch (err) {
+        console.error(err)
+        return false;
+      }
+}
+

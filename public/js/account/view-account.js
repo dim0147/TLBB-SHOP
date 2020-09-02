@@ -4,6 +4,11 @@ $("document").ready(function() {
         rating: $('.starrr').attr('data-rating')
     })
 
+    $('.rateProduct').starrr({
+        rating: $('.rateProduct').attr('data-rating'),
+        readOnly: true
+    });
+
     function fetchComment(){
         
         if($('#loginFB').length) return
@@ -237,7 +242,8 @@ $("document").ready(function() {
             data: {
                 comment: $('#comment').val(),
                 accountId: $("#idAccount").val(),
-                parent: null
+                parent: null,
+                _csrf: $('#_csrf').val()
             },
             success: res => {
                 createComment({_id: res.comment._id, name: res.comment.name, avatar: res.comment.avatar, comment: res.comment.comment, parent: null, rate: res.rate, time: res.comment.createdAt})
@@ -262,7 +268,8 @@ $("document").ready(function() {
             url: '/account/create-rating',
             data: {
                 accountId: $("#idAccount").val(),
-                rate: value
+                rate: value,
+                _csrf: $('#_csrf').val()
             },
             success: res => {
                 showAlert(res, 1, $('#sideAlert'));
@@ -305,7 +312,8 @@ $("document").ready(function() {
             method: 'POST',
             data: { 
                 commentId: $(this).parent().attr('comment-own-id'),
-                liked: $(this).attr('liked')
+                liked: $(this).attr('liked'),
+                _csrf: $('#_csrf').val()
             },
             success : res => {
                 console.log(res)
@@ -328,7 +336,8 @@ $("document").ready(function() {
             data: {
                 comment: $('#replyTextArea').val(),
                 accountId: $("#idAccount").val(),
-                parent: $(thisButton).parent().attr('comment-id')
+                parent: $(thisButton).parent().attr('comment-id'),
+                _csrf: $("#_csrf").val()
             },
             success: function(res){
                 console.log(res);

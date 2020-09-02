@@ -7,6 +7,10 @@
           background: red!important;
       }
 
+      .allPGL{
+          background: rgb(241, 6, 241)!important;
+      }
+
       .itemInSearch{
           margin: 10px;
           border-bottom: 4px solid rgb(70, 75, 70);
@@ -61,6 +65,7 @@
                     <div class="advance-search">
                         <form action="" method="GET">
                             <div class="form-row">
+                                <h2 style="color:rgb(227, 252, 0)">Tìm Kiếm Tên Nhân Vật</h2>
                                 <div class="form-group col-md-10">
                                     <input name="c_name" type="text" class="form-control my-2 my-lg-0" id="ipSearchName" placeholder="Nhập tên nhân vật ít nhất 3 ký tự">
                                 </div>
@@ -106,7 +111,7 @@
 
         <div class="widget filter">
             <h4 class="widget-header">Tên Nhân Vật</h4>
-            <input type="text" name="c_name" class="form-control my-2 my-lg-0" placeholder="Nhập tên nhân vật">
+            <input id="c_nameIpFilter" type="text" name="c_name" class="form-control my-2 my-lg-0" placeholder="Nhập tên nhân vật">
         </div>
 
     <% if(typeof menuView.phais !== 'undefined' && menuView.phais.length > 0){ %>
@@ -141,9 +146,11 @@
     
     <div class="widget filter">
         <h4 class="widget-header">Sắp xếp theo</h4>
-        <select name="createdAt" id="selectSort">
-            <option value="-1">Mới Nhất</option>
-            <option value="1">Cũ Nhất</option>
+        <select name="sort" id="selectSort">
+            <option value="date-new">Mới Nhất</option>
+            <option value="date-old">Cũ Nhất</option>
+            <option value="price-high">Giá cao nhất</option>
+            <option value="price-low">Giá thấp nhất</option>
         </select>
     </div>
 
@@ -158,7 +165,7 @@
 
     <div class="widget filter giaoluuArea">
         <h4 class="widget-header">Phái Giao Lưu</h4>
-        <select name="phaigiaoluu">
+        <select name="phaigiaoluu" id="selectPhaiGiaoLuu">
             <% if(typeof menuView.phais !== 'undefined' && menuView.phais.length > 0){ %>
                 <% menuView.phais.forEach(function(phai){ %>
                     <option value="<%= phai._id %>"><%= phai.name %></option>
@@ -204,6 +211,7 @@
                                 <strong>Sắp xếp</strong>
                                 <select id="sortAccount">
                                     <option value="1">Gần đây</option>
+                                    <option value="5">Cũ Nhất</option>
                                     <option value="2">Phổ biến nhất</option>
                                     <option value="3">Giá thấp nhất</option>
                                     <option value="4">Giá cao nhất</option>
@@ -225,15 +233,17 @@
                                        if(account.transaction_type == 'trade')
                                         account.price = 0
                                     %>
-                                    <div class="col-sm-12 col-lg-4 col-md-6 accountDiv" data-date="<%= account.createdAt %>" data-rate="<%= account.totalRate %>" data-price="<%= account.price %>">
+                                    <div class="col-sm-12 col-lg-4 col-md-6 accountDiv" data-date="<%= account.originCreatedAt %>" data-rate="<%= account.totalRate %>" data-price="<%= account.price %>">
                                         <!-- product card -->
                         <div class="product-item bg-light">
                             <div class="card">
                                 <div class="thumb-content">
                                     <% if(account.transaction_type === 'sell'){ %>
                                         <div class="price"><%= account.price.toLocaleString('en-US', {style : 'currency', currency : 'VND'}); %></div>
-                                    <% }else{ %>
+                                    <% }else if(account.transaction_type === 'trade'){ %>
                                         <div class="price trade">Giao lưu <%= account.phaigiaoluu.name %></div>
+                                    <% }else{ %>
+                                        <div class="price allPGL">- Giao lưu <%= account.phaigiaoluu.name %> <br> hoặc <br>- Bán: <%= account.price.toLocaleString('en-US', {style : 'currency', currency : 'VND'}); %></div>
                                     <% } %>
                                     <a href="/account/view-account/<%= account._id %>">
                                         <% if(typeof account.image !== 'object' || account.image.length === 0){

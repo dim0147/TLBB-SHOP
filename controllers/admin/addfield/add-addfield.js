@@ -3,7 +3,7 @@ const addFieldModel = require('../../../models/add_field');
 const waterfall = require('async-waterfall');
 
 exports.renderPage = (req, res) => {
-    res.render('admin/addfield/add-addfield', {title: 'Thêm Item', account: config.account});
+    res.render('admin/addfield/add-addfield', {title: 'Thêm Item', csrfToken: req.csrfToken()});
 }
 
 exports.addNewAdditionField = (req, res) => {

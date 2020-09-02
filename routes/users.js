@@ -11,15 +11,10 @@ const upload = multer()
 
 const passport = require('passport');
 
-// const addAC = require('../controllers/user/add-account');
 const registerAC = require('../controllers/user/register');
 const loginAC = require('../controllers/user/login');
 const logoutAC = require('../controllers/user/logout');
 
-// /* Create account post listing. */
-// router.get('/add-account', addAC.renderAddAccount);
-
-// router.post('/add-account', upload.array('images'), addAC.addNewAccount)
 
 /* Create user . */
 router.get('/register', registerAC.renderPage);

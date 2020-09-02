@@ -10,7 +10,7 @@ exports.renderPage = (req, res) => {
             res.status(500).send("Có lỗi xảy ra, xin vui lòng thử lại sau");
             return
         }
-        res.render('admin/property/add-property', {title: 'Thêm Property', items: items});
+        res.render('admin/property/add-property', {title: 'Thêm Property', items: items, csrfToken: req.csrfToken()});
     })
 }
 

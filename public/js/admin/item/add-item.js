@@ -42,7 +42,7 @@ $(document).ready(function(){
         $.ajax({
             method: "POST",
             url: '/admin/item/add-item',
-            data: {name: nameItem, slug: slug},
+            data: {name: nameItem, slug: slug, _csrf: $('#_csrf').val()},
             success: res => {
                 showAlert("Tạo item '" + nameItem + "' thành công!", 1);
                 $(this).prop("disabled",false);

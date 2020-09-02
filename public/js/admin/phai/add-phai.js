@@ -35,7 +35,7 @@ $(document).ready(function(){
         $.ajax({
             method: "POST",
             url: '/admin/phai/add-phai',
-            data: {name: nameItem},
+            data: {name: nameItem, _csrf: $('#_csrf').val()},
             success: res => {
                 showAlert("Tạo phái '" + nameItem + "' thành công!", 1);
                 $(this).prop("disabled",false);

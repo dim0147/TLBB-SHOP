@@ -40,7 +40,7 @@ $(document).ready(function(){
         $.ajax({
             method: "POST",
             url: '/admin/property/add-property',
-            data: {name: nameProperty, idItem: idItem},
+            data: {name: nameProperty, idItem: idItem, _csrf: $('#_csrf').val() },
             success: res => {
                 showAlert(res, 1);
                 $(this).prop("disabled",false);

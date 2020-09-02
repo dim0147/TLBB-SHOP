@@ -1,4 +1,6 @@
 const waterfall = require('async-waterfall');
+const { body, validationResult } = require('express-validator');
+
 const config = require('../../config/config');
 
 const accountModel = require('../../models/account');
@@ -92,9 +94,31 @@ exports.renderAddAccount = (req, res) => {
             res.status(400).send(err);
             return
         }
-        res.render('account/add-account', {title:"Add new account", account: config.account, items: result.items, phais: result.phais, addFields: result.addFields});
+        res.render('account/add-account', {title:"Add new account", account: config.account, items: result.items, phais: result.phais, addFields: result.addFields, csrfToken: req.csrfToken()});
     });
 }
+
+exports.checkBody = [
+    // body('title', 'Tiêu đề không được ít hơn 5 kí tự và nhiều hơn 20 kí tự').notEmpty().isLength({min: 5, max: 20}),
+    // body('c_name', 'Tên nhân vật không được ít hơn 5 kí tự và nhiều hơn 15 kí tự').notEmpty().isLength({min: 1, max: 15}),
+    body('phai', 'Phái không hợp lệ').notEmpty().isMongoId(),
+    body('vohon', 'Võ hồn không hợp lệ').notEmpty().isMongoId(),
+    body('amkhi', 'Ám khí không hợp lệ').notEmpty().isMongoId(),
+    body('dieuvan', 'Điêu văn không hợp lệ').notEmpty().isMongoId(),
+    body('ngoc', 'Ngọc không hợp lệ').notEmpty().isMongoId(),
+    body('thankhi', 'Thần khí không hợp lệ').notEmpty().isMongoId(),
+    body('tuluyen', 'Tu luyện không hợp lệ').notEmpty().isMongoId(),
+    body('doche', 'Đồ chế không hợp lệ').notEmpty().isMongoId(),
+    body('longvan', 'Long văn không hợp lệ').notEmpty().isMongoId(),
+    body('server', 'Server không hợp lệ').notEmpty().isMongoId(),
+    body('postType', 'Hình thức không hợp lệ').notEmpty(),
+    function(req, res, next) {
+        const errors = validationResult(req);
+        if(!errors.isEmpty())
+            return res.status(400).send(errors.array()[0].msg);
+        next();
+    }
+];
 
 async function checkItemProperty(req, arrSlug){
     // Init array of promise check item and item property is exist
@@ -197,7 +221,6 @@ function removeAccount(account){
 }
 
 exports.addNewAccount = async (req, res) => {
-
 // ----------------------------- VALIDATION ----------------
     // Validate request
     const fieldsToCheck = ['title', 'c_name', 'level', 'phai', 'vohon', 'amkhi', 'dieuvan', 'ngoc', 'thankhi', 'tuluyen', 'doche', 'longvan', 'server', 'postType', 'price', 'phaigiaoluu', 'loinhan', 'contactfb', 'phone'];
@@ -215,7 +238,7 @@ exports.addNewAccount = async (req, res) => {
         return res.status(400).send("Tựa bài viết không được quá 20 kí tự!!!");
 
     // Check Sell Or Trade
-    if(req.body.postType != 'trade' && req.body.postType != 'sell')
+    if(req.body.postType != 'trade' && req.body.postType != 'sell' && req.body.postType != 'all')
         return res.status(400).send("Hình thức giao dịch không hợp lệ!!!");
         // Check price is valid
         let price = Number(req.body.price);
@@ -227,13 +250,23 @@ exports.addNewAccount = async (req, res) => {
             let cPhaiGL = await checkPhai(req.body.phaigiaoluu);
             if(cPhaiGL.status !== 'OK') return res.status(400).send("Phái giao lưu không hợp lệ!!!");
         }
+        // Check if is all, checking price and phaigiaoluu
+        if(req.body.postType == 'all'){
+            // Check price is valid
+            if(price == '' || Number.isNaN(price))
+                return res.status(400).send("Giá không hợp lệ!!!");
+            // Check phai is valid
+            if(req.body.phaigiaoluu.length === 0) return res.status(400).send("Hãy chọn phái cần giao lưu!!!");
+            let cPhaiGL = await checkPhai(req.body.phaigiaoluu);
+            if(cPhaiGL.status !== 'OK') return res.status(400).send("Phái giao lưu không hợp lệ!!!");
+        }
     
     // Check image upload
     if(req.errorImage)
         return res.status(400).send("Chỉ được cho phép upload ảnh !!!");
     if(typeof req.files === 'undefined' || req.files.length < 10)
         return res.status(400).send("Xin hãy upload ảnh đúng yêu cầu !!!");
-    if(req.files.length >= 50)
+    if(req.files.length > 50)
         return res.status(400).send("Xin hãy upload dưới 50 ảnh !!!");
     
 

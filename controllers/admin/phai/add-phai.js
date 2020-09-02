@@ -3,7 +3,7 @@ const phaiModel = require('../../../models/phai');
 const waterfall = require('async-waterfall');
 
 exports.renderPage = (req, res) => {
-    res.render('admin/phai/add-phai', {title: 'Thêm Phái'});
+    res.render('admin/phai/add-phai', {title: 'Thêm Phái', csrfToken: req.csrfToken()});
 }
 
 exports.addNewPhai = (req, res) => {

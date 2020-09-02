@@ -8,7 +8,10 @@
   <% include ../partials/menu %>
 <section class="ad-post bg-gray py-5">
     <div class="container">
-        <form id="formSubmit" action="/user/add-account" method="post" enctype="multipart/form-data" >
+        <form id="formSubmit" action="/account/add-account" method="post" enctype="multipart/form-data" >
+            <% if(typeof csrfToken !== "undefined"){ %>
+                <input id="_csrf" type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <% } %>
             <!-- Post Your ad start -->
             <fieldset class="border border-gary p-4 mb-5">
                     <div class="row">
@@ -92,13 +95,18 @@
                                     <div class="col-lg-4 mr-lg-4 my-2 rounded bg-white">
                                       <input id="giaoluuRadio" type="radio" name="postType" value="trade" id="personal">
                                       <label for="personal" class="py-2">Giao lưu</label>
-                                  </div> 
+                                    </div> 
 
-                                  <select name="phaigiaoluu" id="inputGroupSelect" class="w-100">
+                                  <select name="phaigiaoluu" id="inputGroupSelect" class="w-50">
                                     <% phais.forEach((eachPhai, i) =>{ %>
                                     <option value="<%= eachPhai._id %>"><%= eachPhai.name %></option>
                                     <% }) %>
                                     </select>
+
+                                    <div class="col-lg-4 mr-lg-4 my-2 rounded bg-white">
+                                        <input id="allRadio" type="radio" name="postType" value="all" id="personal">
+                                        <label for="personal" class="py-2">Bán + Giao Lưu</label>
+                                      </div> 
 
                                 </div>
 

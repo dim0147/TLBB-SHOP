@@ -21,6 +21,36 @@ dateFormat.i18n = {
     ]
 };
 
+exports.checkFields = async function(req, res, next){
+    if(helper.isEmpty(req.query))
+        return res.render('account/search', {title: 'Có lỗI xảy ra', error: 'Thiếu query'});
+
+    const allowField = ['c_name', 'min', 'max', 'phai', 'sort', 'transaction_type', 'phaigiaoluu', 'bosung'];
+
+    // Get item in menuView Cache, if not query
+    let menuView = cache.getKey('menuView');
+    if(typeof menuView === 'undefined'){
+        menuView = await helper.getMenuData().catch(err => res.render('account/search', {title: 'Có lỗI xảy ra', error: 'Có lỗi xảy ra vui lòng thử lại sau'}))
+        if(typeof menuView === 'undefined') return;
+        cache.setKey('menuView', menuView);
+    }
+
+    // Push slug of item to allow field
+    if(typeof menuView.items !== 'undefined' && menuView.items.length > 0){
+        menuView.items.forEach(function(item){
+            allowField.push(item.slug);
+        });
+    }
+
+    // Elevate field is one of allow field
+    for(var field in req.query){
+        if(!allowField.includes(field))
+            res.render('account/search', {title: 'Có lỗI xảy ra', error: 'Trường không hợp lệ'});
+    }
+    
+    next();
+}
+
 function filterSpecialSort(req){
         const originQuery = req.query;
 
@@ -44,6 +74,7 @@ function filterSpecialSort(req){
                         $gte: Number(originQuery.min),
                         $lte: Number(originQuery.max)
                 }
+                condition.transaction_type = {$in: ['sell', 'all']};
             }
 
             // Elevate phaigiaoluu
@@ -53,12 +84,8 @@ function filterSpecialSort(req){
                     if(!mongoose.Types.ObjectId.isValid(originQuery.phaigiaoluu)) return {OK: false, message: "Lỗi object Id"}
                     condition.phaigiaoluu = mongoose.Types.ObjectId(originQuery.phaigiaoluu);
                 }
+                condition.transaction_type = {$in: ['trade', 'all']};
             }     
-            
-            // Elevate transaction type
-            if(field === 'transaction_type' && req.query[field] != 'all'){
-                    condition.transaction_type = req.query[field];
-            }
 
             // Elevate phai
             if(field === 'phai' && req.query[field] != 'all'){
@@ -89,8 +116,15 @@ function filterSpecialSort(req){
             }
 
             // Elevate sort
-            if(field === 'createdAt'){
-                option.sort = {createdAt: Number(req.query.createdAt)}
+            if(field === 'sort'){
+                if(req.query[field] == 'date-new')
+                    option.sort = {createdAt: -1}
+                else if(req.query[field] == 'date-old')
+                    option.sort = {createdAt: 1}
+                else if(req.query[field] == 'price-high')
+                    option.sort = {price: -1}
+                else if(req.query[field] == 'price-low')
+                    option.sort = {price: 1}
             }
         }
 
@@ -116,7 +150,7 @@ function rmvSpecialField(req){
     delete req.query.min;
     delete req.query.max;
     delete req.query.phaigiaoluu;
-    delete req.query.createdAt;
+    delete req.query.sort;
     delete req.query.bosung;
     delete req.query.phai;
     delete req.query.transaction_type;
@@ -155,6 +189,7 @@ function filterMongooseObjectId(req, condition){
 function formatDate(accounts){
 
     accounts.forEach(function(account){
+        account.originCreatedAt = account.createdAt;
         account.createdAt = dateFormat(new Date(account.createdAt), "d mmmm, yyyy")
         account.user.createdAt = dateFormat(new Date(account.user.createdAt), "d mmmm, yyyy")
     });

@@ -7,7 +7,9 @@
 
 <body class="body-wrapper">
   <% include ../partials/menu %>
-
+  <% if(typeof csrfToken !== "undefined"){ %>
+    <input type="hidden" id="_csrf" value="<%= csrfToken %>">
+  <% } %>
 
 <section class="login py-5 border-top-1">
         <div class="container">

@@ -75,7 +75,8 @@ $(document).ready(function(){
                 password: password,
                 cfPassword: cfPassword,
                 name: name,
-                email: email
+                email: email,
+                _csrf: $('#_csrf').val()
             },
             success: res => {
                 showAlert(res, 1);

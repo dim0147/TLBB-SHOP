@@ -78,8 +78,13 @@ $(document).ready(function(){
             showAlert("Xin hãy nhập giá", 0);
             return;
         }
-        if(!$('#giaoluuRadio').is(':checked') && !$('#banRadio').is(':checked')){
+        if(!$('#giaoluuRadio').is(':checked') && !$('#banRadio').is(':checked') && !$('#allRadio').is(':checked')){
             showAlert("Xin hãy chọn hình thức giao dịch", 0);
+            return;
+        }
+
+        if($('#allRadio').is(':checked') && $("#priceSell").val().length === 0){
+            showAlert("Xin hãy nhập giá", 0);
             return;
         }
 
@@ -91,7 +96,7 @@ $(document).ready(function(){
         setAllowPointer($("#submit"), false);    
         showAlert("Đang tạo bài đăng...", 3);
         $.ajax( {
-            url: '/account/add-account',
+            url: '/account/add-account?_csrf=' + $('#_csrf').val(),
             type: 'POST',
             data: new FormData( this ),
             processData: false,

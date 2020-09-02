@@ -8,6 +8,9 @@
   <% include ../../partials/menu %>
 <section class="ad-post bg-gray py-5">
     <div class="container">
+        <% if(typeof csrfToken !== "undefined"){ %>
+            <input type="hidden" id="_csrf" value="<%= csrfToken %>">
+        <% } %>
             <!-- Post Your ad start -->
             <fieldset class="border border-gary p-4 mb-5">
                     <div class="row">

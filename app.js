@@ -8,6 +8,8 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const passport = require('passport');
 const flash = require('connect-flash');
+const cors = require('cors');
+const csurf = require('csurf') 
 
 
 const config = require('./config/config');
@@ -30,6 +32,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(cors({
+    origin: config.urlWebsite
+}))
 
 // connect mongodb
 console.log('Connect to mongodb...');
@@ -53,6 +58,8 @@ app.use(session({
   cookie: {maxAge: config.session.cookieRememberMe}, // 86400000
   store: store
 }));
+
+app.use(csurf());
 
 // Config passport
 app.use(flash());

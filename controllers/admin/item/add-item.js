@@ -3,7 +3,7 @@ const itemModel = require('../../../models/item');
 const waterfall = require('async-waterfall');
 
 exports.renderPage = (req, res) => {
-    res.render('admin/item/add-item', {title: 'Thêm Item', account: config.account});
+    res.render('admin/item/add-item', {title: 'Thêm Item', account: config.account, csrfToken: req.csrfToken()});
 }
 
 exports.addNewItem = (req, res) => {

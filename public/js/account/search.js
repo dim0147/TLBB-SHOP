@@ -1,6 +1,7 @@
 $('document').ready(function(){
 
-    const dataAccount = [];
+    let priceChange = false;
+    let phaiGiaoLuuChange = false;
 
     function getParameterByName(name, url) {
         if (!url) url = window.location.href;
@@ -170,7 +171,17 @@ $('document').ready(function(){
             var valueSelected = this.value;
             if(valueSelected == 1){ // Gan day
                 $('.accountDiv').sort(function(a, b) {
-                    if ($(a).attr('data-date') > $(b).attr('data-date')) {
+                    if (new Date($(a).attr('data-date')) > new Date($(b).attr('data-date'))) {
+                      return -1;
+                    } else {
+                      return 1;
+                    }
+                  }).appendTo($('.accountAreaRow'));
+            
+            }
+            else if(valueSelected == 5){ // Cũ nhất
+                $('.accountDiv').sort(function(a, b) {
+                    if (new Date($(a).attr('data-date')) < new Date($(b).attr('data-date'))) {
                       return -1;
                     } else {
                       return 1;
@@ -264,6 +275,18 @@ $('document').ready(function(){
         }); 
     }
 
+    function checkChange(){
+        $('.slider ').on('slideStop', function(ev){
+            priceChange = true;
+        });
+
+        $('#selectPhaiGiaoLuu').on('change', function(){
+            phaiGiaoLuuChange = true;
+        });
+    };
+
+    checkChange();
+
     calculatePage();
 
     checkBoxProperty();
@@ -277,13 +300,29 @@ $('document').ready(function(){
     $('.giaoluuArea').hide();
 
     $('#formSubmit').submit(function(e){
-        let price = $('.range-track').data('slider').getValue(); 
-        if(typeof price[0] !== 'number')
-            price[0] = Number(price[0].replace(/[^0-9.-]+/g,""));
-        if(typeof price[1] !== 'number')
-            price[1] = Number(price[1].replace(/[^0-9.-]+/g,""));
-        $('#minPrice').val(price[0]);
-        $('#maxPrice').val(price[1]);
+        if($('#c_nameIpFilter').val() == ''){
+            $('#c_nameIpFilter').remove();
+        } 
+
+        if($('#transaction_type').val() == 'sell'){
+            let price = $('.range-track').data('slider').getValue(); 
+            if(typeof price[0] !== 'number')
+                price[0] = Number(price[0].replace(/[^0-9.-]+/g,""));
+            if(typeof price[1] !== 'number')
+                price[1] = Number(price[1].replace(/[^0-9.-]+/g,""));
+            $('#minPrice').val(price[0]);
+            $('#maxPrice').val(price[1]);
+            $('#selectPhaiGiaoLuu').remove();
+        }
+        else if ($('#transaction_type').val() == 'trade'){
+            $('#minPrice').remove();
+            $('#maxPrice').remove();
+        }
+        else{
+            $('#minPrice').remove();
+            $('#maxPrice').remove();
+            $('#selectPhaiGiaoLuu').remove();
+        }
     });
 
     $('#transaction_type').on('change', function() {
@@ -291,8 +330,12 @@ $('document').ready(function(){
             $('.priceArea').show();
             $('.giaoluuArea').hide();
         }
-        else{
+        else if(this.value == 'trade'){
             $('.giaoluuArea').show();
+            $('.priceArea').hide();
+        }
+        else{
+            $('.giaoluuArea').hide();
             $('.priceArea').hide();
         }
             

@@ -1,14 +1,14 @@
 const waterfall = require('async-waterfall');
 const dateFormat = require('dateformat');
-
-const config = require('../../config/config');
+const {param, validationResult} = require('express-validator');
+const mongoose = require('mongoose');
 
 const accountModel = require('../../models/account');
 const imageModel = require('../../models/image');
 const acLinkAddFieldModel = require('../../models/account-link-addfield');
 const rateModel = require('../../models/rate')
-const commentModel = require('../../models/comment');
 const viewModel = require('../../models/view');
+const account = require('../../models/account');
 
 dateFormat.i18n = {
     dayNames: [
@@ -23,6 +23,17 @@ dateFormat.i18n = {
         'a', 'p', 'am', 'pm', 'A', 'P', 'AM', 'PM'
     ]
 };
+
+exports.checkBody = [
+    param('id', 'Trường id không hợp lệ').notEmpty().isMongoId(),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if(!errors.isEmpty()){
+            return res.render('account/view-account', {title:'Có lỗi xảy ra!',  error: errors.array()[0].msg });
+        }
+        next();
+    }
+]
 
 exports.renderPage = (req, res) => {
     const popAcFields = [
@@ -117,7 +128,7 @@ exports.renderPage = (req, res) => {
                 cb(null, result);
             })
         },
-        (result, cb) => {// Adding view
+        (result, cb) => { // Adding new view
             if(typeof req.ip === 'undefined') return cb(null, result);
             viewModel.findOne({ip:req.ip, account: result.account._id}).exec((err, ip) => {
                 if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau');
@@ -133,17 +144,42 @@ exports.renderPage = (req, res) => {
                     return cb(null, result);
                 })
             });
+        },
+        (result, cb) => { // Get total rate of account
+            rateModel.aggregate([
+                {
+                    $match: {
+                        account: mongoose.Types.ObjectId(result.account._id)
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        totalRate: {$avg: "$rate"}
+                    }
+                }
+            ], function(err, rates){
+                if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau');
+                if(rates.length === 0){
+                    result.account.totalRate = 5;
+                    return cb(null, result)
+                }
+                else{
+                    result.account.totalRate = rates[0].totalRate;
+                    return cb(null, result)
+                }
+            });
+        },
+        (result, cb) => { // Get total view
+            viewModel.countDocuments({account: result.account._id}, (err, totalView) => {
+                if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau');
+                result.account.totalView = totalView
+                cb(null, result);
+            })
         }
     ], function(err, result){
-        if(err) throw new Error(err);
-       
-        res.render('account/view-account', {title: result.account.title, account: result.account, addFields: result.addFields, images: result.images, rate: result.rate});
+        if(err) return res.render('account/view-account', {title: 'Có lỗi xảy ra!',  error: err });
+        res.render('account/view-account', {title: result.account.title, account: result.account, addFields: result.addFields, images: result.images, rate: result.rate, csrfToken: req.csrfToken()});
     });
-}
-
-
-
-exports.loadComment = function (req, res){
-    
 }
 

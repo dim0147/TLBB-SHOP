@@ -234,6 +234,173 @@ exports.indexPage = (req, res) =>{
                 });
             });
         },
+        (result, cb) => {   // Get recent account
+            let recentAccount = cache.getKey('recentAccount');
+            if(typeof recentAccount !== 'undefined'){
+                console.log('get key recentAccount');
+                result.recentAccount = recentAccount;
+                return cb(null, result);
+            }
+
+            // If don't have go query
+            accountModel.aggregate([
+                {
+                    $lookup:{
+                        from: 'views',
+                        localField: '_id',
+                        foreignField: 'account',
+                        as: 'view'
+
+                    }
+                },
+                {
+                    $lookup:{
+                        from: 'rates',
+                        localField: '_id',
+                        foreignField: 'account',
+                        as: 'rate'
+                    }
+                },
+                {
+                    $unwind:{
+                        path: '$rate',
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $group:{
+                        _id: "$_id",
+                        title: {$first: '$title'},
+                        c_name: {$first: '$c_name'},
+                        server: {$first: '$server'},
+                        phai: {$first: '$phai'},
+                        ngoc: {$first: '$ngoc'},
+                        dieuvan: {$first: '$dieuvan'},
+                        vohon: {$first: '$vohon'},
+                        view: {$first: '$view'},
+                        rate: {$avg: '$rate.rate'},
+                        transaction_type: {$first: '$transaction_type'},
+                        price: {$first: '$price'},
+                        phaigiaoluu: {$first: '$phaigiaoluu'},
+                        createdAt: {$first: '$createdAt'},
+                    }
+                },
+                {
+                    $lookup:{
+                        from: 'images',
+                        localField: '_id',
+                        foreignField: 'account',
+                        as: 'image'
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        title: 1,
+                        c_name: 1,
+                        server: 1,
+                        phai: 1,
+                        ngoc: 1,
+                        dieuvan: 1,
+                        vohon: 1,
+                        transaction_type: 1,
+                        price: 1,
+                        phaigiaoluu: 1,
+                        rate: 1,
+                        totalView: { $size: "$view" },
+                        image: {
+                            $cond: [
+                                {$anyElementTrue: ['$image']},
+                                {$arrayElemAt: ['$image', 0]},
+                                'no-image.png'
+                            ]
+                        },
+                        createdAt: 1,
+                    }
+                },
+                {
+                    $sort: {
+                        createdAt: -1
+                    }
+                },
+                {
+                    $limit: 6
+                }
+            ], function(err, accounts){
+                if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
+                const popAcFields = [
+                    {
+                        path: 'phai',
+                        model: 'phais',
+                        select: '_id name'
+                    },
+                    {
+                        path: 'server',
+                        model: 'item-properties',
+                        select: '_id name'
+                    },
+                    {
+                        path: 'vohon',
+                        model: 'item-properties',
+                        select: '_id name'
+                    },
+                    {
+                        path: 'amkhi',
+                        model: 'item-properties',
+                        select: '_id name'
+                    },
+                    {
+                        path: 'thankhi',
+                        model: 'item-properties',
+                        select: '_id name'
+                    },
+                    {
+                        path: 'tuluyen',
+                        model: 'item-properties',
+                        select: '_id name'
+                    },
+                    {
+                        path: 'ngoc',
+                        model: 'item-properties',
+                        select: '_id name'
+                    },
+                    {
+                        path: 'doche',
+                        model: 'item-properties',
+                        select: '_id name'
+                    },
+                    {
+                        path: 'dieuvan',
+                        model: 'item-properties',
+                        select: '_id name'
+                    },
+                    {
+                        path: 'longvan',
+                        model: 'item-properties',
+                        select: '_id name'
+                    },
+                    {
+                        path: 'phaigiaoluu',
+                        model: 'phais',
+                        select: '_id name'
+                    }
+                ];
+                if(accounts.length === 0){ // If don't have
+                    result.recentAccount = accounts;
+                    return cb(null, result);
+                } 
+                accountModel.populate(accounts, popAcFields, (err, accounts) => { // Populate fields
+                    if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
+                    accounts.forEach(account =>{
+                        account.createdAt = dateFormat(new Date(account.createdAt), "d mmmm, yyyy")
+                    });
+                    result.recentAccount = accounts;
+                    console.log('Set cache recent account');
+                    cache.setKey('recentAccount', accounts, 60);
+                    return cb(null, result);
+                });
+            });
+        },
         (result, cb) => { // Get Item properties
             // Check cache if have
             let items = cache.getKey('items');
@@ -331,9 +498,10 @@ exports.indexPage = (req, res) =>{
         }
     ], function(err, result){
         if(err){
-            console.log('co loi');
             return res.render('index', { title: 'Thiên Long Bát Bộ Shop', error: err });
         }
-        res.render('index', { title: 'Thiên Long Bát Bộ Shop', phais: result.phais, servers: result.servers, mostViewAccount: result.mostViewAccount, items: result.items });
+
+        console.log(result.recentAccount);
+        res.render('index', { title: 'Thiên Long Bát Bộ Shop', phais: result.phais, servers: result.servers, mostViewAccount: result.mostViewAccount, recentAccount: result.recentAccount ,items: result.items });
     });
 }

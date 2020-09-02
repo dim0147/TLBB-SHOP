@@ -49,7 +49,8 @@ $(document).ready(function(){
             data: {
                 username: username,
                 password: password,
-                remember_me: $("#remember_me").is(":checked")
+                remember_me: $("#remember_me").is(":checked"),
+                _csrf: $('#_csrf').val()
             },
             success: res => {
                 showAlert(res, 1);

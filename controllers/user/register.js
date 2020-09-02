@@ -4,7 +4,7 @@ const { body, validationResult } = require('express-validator');
 exports.renderPage = (req, res) => {
     if(req.isAuthenticated())
       return res.send("You login already");
-    res.render('user/register', {title: 'Đăng Kí Tài Khoản'});
+    res.render('user/register', {title: 'Đăng Kí Tài Khoản', csrfToken: req.csrfToken()});
 }
 
 exports.validateUser = [

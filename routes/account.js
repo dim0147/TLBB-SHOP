@@ -41,13 +41,13 @@ const addAC = require('../controllers/account/add-account');
 /* Create account post listing. */
 router.get('/add-account', addAC.renderAddAccount);
 
-router.post('/add-account', upload.array('images'), addAC.addNewAccount)
+router.post('/add-account', upload.array('images'), addAC.checkBody, addAC.addNewAccount)
 
 /* GET detail account. */
-router.get('/view-account/:id', viewAC.renderPage);
+router.get('/view-account/:id', viewAC.checkBody ,viewAC.renderPage);
 
 /* Search account. */
-router.get('/search', searchC.renderPage);
+router.get('/search',searchC.checkFields, searchC.renderPage);
 
 
 /* CREATE user rating. */

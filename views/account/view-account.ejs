@@ -15,7 +15,12 @@
 </head>
 
 <body class="body-wrapper">
-	<input id="idAccount" type="hidden" value="<%= account._id %>">
+	<% if(typeof csrfToken !== "undefined"){ %>
+		<input type="hidden" id="_csrf" value="<%= csrfToken %>">
+	<% } %>
+	<% if(typeof account != "undefined"){ %>
+		<input id="idAccount" type="hidden" value="<%= account._id %>">
+	<% } %>
 	<% if(typeof userSS !== "undefined"){ %>
 		<input id="urlImage" type="hidden" value= "<%= userSS.urlImage %>">
 	<% } %>
@@ -31,24 +36,35 @@
 			<!-- Left sidebar -->
 			<div class="col-md-8">
 				<div class="product-details">
-					<h1 class="product-title"><%= account.title %></h1>
+					<% if(typeof error !== 'undefined'){ %>
+						<h1><%= error %></h1>
+					<% } %>
+					<% if(typeof account !== 'undefined'){ %>
+					<h1 style="color: rgb(0, 38, 255)" class="product-title"><%= account.title %></h1>
+					<div class="rateProduct" data-rating="<%= account.totalRate %> "></div>
+					<% } %>
 					<div class="product-meta">
 						<ul class="list-inline">
+							<% if(typeof account !== 'undefined'){ %>
 							<li class="list-inline-item"><i class="fa fa-user-o"></i> Đăng bởi <a href=""><%= account.userId.name %></a></li>
-							<li class="list-inline-item"><i class="fa fa-folder-open-o"></i> Phái<a href=""><%= account.phai.name %></a></li>
-							<li class="list-inline-item"><i class="fa fa-location-arrow"></i> Ngọc<a href=""><%= account.ngoc.name %></a></li>
+							<li class="list-inline-item"><i class="fa fa-folder-open-o"></i> Phái<a href="/account/search?phai=<%= account.phai._id %> "><%= account.phai.name %></a></li>
+							<li class="list-inline-item"><i class="fa fa-location-arrow"></i> Ngọc<a href="/account/search?ngoc=<%= account.ngoc._id %>"><%= account.ngoc.name %></a></li>
+							<li class="list-inline-item"><i class="fas fa-eye"></i> <%= account.totalView %></li>
+							<% } %>
 						</ul>
 					</div>
 
+					<% if(typeof images !== 'undefined' && images.length > 0) { %>
 					<!-- product slider -->
 					<div class="product-slider">
 						<% images.forEach(img => { %>
 							<div class="product-slider-item my-4 col-xs-3" data-image="/images/data/<%= img.url %>">
-								<img class="img-responsive img-fluid" src="/images/data/<%= img.url %>" alt="product-img">
+								<img width="730px" height="547px" class="img-responsive" src="/images/data/<%= img.url %>" alt="product-img">
 							</div>
 						<% }) %>
 					</div>
 					<!-- product slider -->
+					<% } %>
 
 					<div class="content mt-5 pt-5">
 						<ul class="nav nav-pills  justify-content-center" id="pills-tab" role="tablist">
@@ -69,79 +85,84 @@
 						</ul>
 						<div class="tab-content" id="pills-tabContent">
 
-							<div class="tab-pane fade " id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
-								<h3 class="tab-title">Lời nhắn từ chủ tài khoản</h3>
-								<% if(account.loinhan == ''){ %>
-									<p>Không có lời nhắn</p>
-								<% }else %>
-									<p><%= account.loinhan %></p>
-
-							</div>
+							<% if(typeof account !== 'undefined'){ %>
+								<div class="tab-pane fade " id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+									<h3 class="tab-title">Lời nhắn từ chủ tài khoản</h3>
+									<% if(account.loinhan == ''){ %>
+										<p>Không có lời nhắn</p>
+									<% }else{ %>
+										<p><%= account.loinhan %></p>
+									<% } %>
+								</div>
+							<% } %>
+							
 							<div class="tab-pane fade show active" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
 								<h3 class="tab-title">Chi tiết tài khoản</h3>
-								<table class="table table-bordered product-table">
-									<tbody>
-										<tr>
-											<% if(account.transaction_type == 'sell'){ %>
-												<td>Bán</td>
-												<td><%= account.price.toLocaleString('it-IT', {style : 'currency', currency : 'VND'}) %></td>
-											<% }else{ %>
-												<td>Giao Lưu</td>
-												<td><%= account.phaigiaoluu.name %></td>
-											<% } %>
-										</tr>
-										<tr>
-											<td>Tên nhân vật</td>
-											<td><%= account.c_name %></td>
-										</tr>
-										<tr>
-											<td>Phái</td>
-											<td><%= account.phai.name %></td>
-										</tr>
-										<tr>
-											<td>Cấp</td>
-											<td><%= account.level %></td>
-										</tr>
-										<tr>
-											<td>Server</td>
-											<td><%= account.server.name %></td>
-										</tr>
-										<tr>
-											<td>Ngọc</td>
-											<td><%= account.ngoc.name %></td>
-										</tr>
-										<tr>
-											<td>Võ Hồn</td>
-											<td><%= account.vohon.name %></td>
-										</tr>
-										<tr>
-											<td>Ám Khí</td>
-											<td><%= account.amkhi.name %></td>
-										</tr>
-										<tr>
-											<td>Thần Khí</td>
-											<td><%= account.thankhi.name %></td>
-										</tr>
-										<tr>
-											<td>Tu Luyện</td>
-											<td><%= account.tuluyen.name %></td>
-										</tr>
-										<tr>
-											<td>Đồ</td>
-											<td><%= account.doche.name %></td>
-										</tr>
-										<tr>
-											<td>Điêu Văn</td>
-											<td><%= account.dieuvan.name %></td>
-										</tr>
-										<tr>
-											<td>Long Văn</td>
-											<td><%= account.longvan.name %></td>
-										</tr>
-										
-									</tbody>
-								</table>
-								<% if(addFields.length > 0) {%>
+								<% if(typeof account !== 'undefined'){ %>
+									<table class="table table-bordered product-table">
+										<tbody>
+											<tr>
+												<% if(account.transaction_type == 'sell'){ %>
+													<td>Bán</td>
+													<td><%= account.price.toLocaleString('it-IT', {style : 'currency', currency : 'VND'}) %></td>
+												<% }else{ %>
+													<td>Giao Lưu</td>
+													<td><%= account.phaigiaoluu.name %></td>
+												<% } %>
+											</tr>
+											<tr>
+												<td>Tên nhân vật</td>
+												<td><%= account.c_name %></td>
+											</tr>
+											<tr>
+												<td>Phái</td>
+												<td><%= account.phai.name %></td>
+											</tr>
+											<tr>
+												<td>Cấp</td>
+												<td><%= account.level %></td>
+											</tr>
+											<tr>
+												<td>Server</td>
+												<td><%= account.server.name %></td>
+											</tr>
+											<tr>
+												<td>Ngọc</td>
+												<td><%= account.ngoc.name %></td>
+											</tr>
+											<tr>
+												<td>Võ Hồn</td>
+												<td><%= account.vohon.name %></td>
+											</tr>
+											<tr>
+												<td>Ám Khí</td>
+												<td><%= account.amkhi.name %></td>
+											</tr>
+											<tr>
+												<td>Thần Khí</td>
+												<td><%= account.thankhi.name %></td>
+											</tr>
+											<tr>
+												<td>Tu Luyện</td>
+												<td><%= account.tuluyen.name %></td>
+											</tr>
+											<tr>
+												<td>Đồ</td>
+												<td><%= account.doche.name %></td>
+											</tr>
+											<tr>
+												<td>Điêu Văn</td>
+												<td><%= account.dieuvan.name %></td>
+											</tr>
+											<tr>
+												<td>Long Văn</td>
+												<td><%= account.longvan.name %></td>
+											</tr>
+											
+										</tbody>
+									</table>
+								<% } %>
+								<% if(typeof addFields !== 'undefined' && addFields.length > 0) {%>
 									<br>
 									<h3 class="tab-title">Bổ sung</h3>
 									<% addFields.forEach(function(bosung){ %>
@@ -182,7 +203,7 @@
 												</div>
 												<div class="col-12">
 													<div id="alert" class="alert alert-secondary d-none" role="alert">
-														This is a secondary alert—check it out!
+														
 													</div>
 													<button id="submitBtn" type="button" class="btn btn-main">Đăng</button>
 												</div>
@@ -198,16 +219,27 @@
 			<div class="col-md-4">
 				<div class="sidebar">
 					<div class="widget price text-center">
-						<% if(account.transaction_type == 'sell'){ %>
-							<h4>Bán</h4>
-							<p><%=  account.price.toLocaleString('it-IT', {style : 'currency', currency : 'VND'}); %></p>
-						<% }else{ %>
-							<h4>Giao Lưu</h4>
-							<p><%= account.phaigiaoluu.name %></p>
+						<% if(typeof account !== 'undefined'){ %>
+							<% if(account.transaction_type == 'sell'){ %>
+								<h4>Bán</h4>
+								<p><%=  account.price.toLocaleString('it-IT', {style : 'currency', currency : 'VND'}); %></p>
+							<% }else if(account.transaction_type == 'trade'){ %>
+								<h4>Giao Lưu</h4>
+								<p><%= account.phaigiaoluu.name %></p>
+							<% }else{ %>
+								<h4>Bán</h4>
+								<p><%=  account.price.toLocaleString('it-IT', {style : 'currency', currency : 'VND'}); %></p>
+								<br>
+								<p>hoặc</p>
+								<br>
+								<h4>Giao Lưu</h4>
+								<p><%= account.phaigiaoluu.name %></p>
+							<% } %>
 						<% } %>
 					</div>
 					<!-- User Profile widget -->
 					<div class="widget user text-center">
+						<% if(typeof account !== 'undefined') { %>
 							<%
 							if(account.userId.type === 'web')
 								account.userId.urlImage = '/images/member.png'
@@ -223,6 +255,7 @@
 							<li class="list-inline-item"><a href="" class="btn btn-offer d-inline-block btn-warning ml-n1 my-1 px-lg-4 px-md-3"><i class="fab fa-accusoft"></i>    Đưa Ra 
 								Đề Nghị</a></li>
 						</ul>
+						<% } %>
 					</div>
 					<!-- Map Widget -->
 					<div class="widget map">
@@ -232,17 +265,19 @@
 					</div>
 					<!-- Rate Widget -->
 					<div class="widget rate text-center">
-						<!-- Heading -->
-						<% if(rate === null ){
-							rate == 0
-						%>
-							<h5 class="widget-header text-center">Bạn đánh giá thế nào 
-							<br>
-							về tài khoản này</h5>
-						<% }else{ %>
-							<h5 class="widget-header text-center">Bạn đã đánh giá
-							<br>
-							về tài khoản này</h5>
+						<% if(typeof rate !== 'undefined'){ %>
+							<!-- Heading -->
+							<% if(rate === null ){
+								rate == 0
+							%>
+								<h5 class="widget-header text-center">Bạn đánh giá thế nào 
+								<br>
+								về tài khoản này</h5>
+							<% }else{ %>
+								<h5 class="widget-header text-center">Bạn đã đánh giá
+								<br>
+								về tài khoản này</h5>
+							<% } %>
 						<% } %>
 						<% if(typeof userSS === 'undefined'){ %>
 							<p>Bạn cần đăng nhập để đánh giá</p>
@@ -254,11 +289,12 @@
 						<div id="sideAlert" class="alert alert-secondary d-none" role="alert">
 							This is a secondary alert—check it out!
 							</div>
-						<!-- Rate -->
-						<div class="starrr" data-rating="<%= rate %>"></div>
+							<% if(typeof rate !== 'undefined'){ %>
+								<div class="starrr" data-rating="<%= rate %>"></div>
+							<% } %>
 						<% } %>
 					</div>
-					<!-- Safety tips widget -->
+
 					<div class="widget disclaimer">
 						<h5 class="widget-header">Những lời khuyên về an toàn</h5>
 						<ul>
@@ -268,13 +304,10 @@
 							<li>- Khi có giả mạo trên website hãy báo cáo</li>
 						</ul>
 					</div>
-					<!-- Coupon Widget -->
 					<div class="widget coupon text-center">
-						<!-- Coupon description -->
 						<p>Bạn có tài khoản cần bán? Hãy
 							tạo bài đăng ngay.
 						</p>
-						<!-- Submii button -->
 						<a href="" class="btn btn-transparent-white"><i class="fa fa-plus-circle" aria-hidden="true"></i>  Tạo bài đăng</a>
 					</div>
 

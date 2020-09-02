@@ -8,7 +8,7 @@ const config = {
 
     // account for db
     account: {
-        transaction_type: ["sell", "trade"],
+        transaction_type: ["sell", "trade", "all"],
         status: ['pending', 'approve', 'done']
     },
 

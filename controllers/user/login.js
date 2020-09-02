@@ -8,7 +8,7 @@ const { body, validationResult } = require('express-validator');
 exports.renderPage = (req, res) => {
     if(req.isAuthenticated())
         return res.send("Dang nhap roi");
-    res.render('user/login', {title: 'Đăng Nhập'});
+    res.render('user/login', {title: 'Đăng Nhập', csrfToken: req.csrfToken()});
 }
 
 exports.validateUser = [
