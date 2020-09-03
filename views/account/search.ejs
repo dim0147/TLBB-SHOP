@@ -151,26 +151,27 @@
             <option value="date-old">Cũ Nhất</option>
             <option value="price-high">Giá cao nhất</option>
             <option value="price-low">Giá thấp nhất</option>
+            <option value="most-view">Nhiều lượt xem</option>
         </select>
     </div>
 
     <div class="widget filter">
         <h4 class="widget-header">Hình thức</h4>
         <select name="transaction_type" id="transaction_type">
+                <option value="all">Tất Cả</option>
                 <option value="sell">Bán</option>
                 <option value="trade">Giao Lưu</option>
-                <option value="all">Tất Cả</option>
         </select>
     </div>
 
     <div class="widget filter giaoluuArea">
         <h4 class="widget-header">Phái Giao Lưu</h4>
         <select name="phaigiaoluu" id="selectPhaiGiaoLuu">
+            <option value="all">Tất cả</option>
             <% if(typeof menuView.phais !== 'undefined' && menuView.phais.length > 0){ %>
                 <% menuView.phais.forEach(function(phai){ %>
                     <option value="<%= phai._id %>"><%= phai.name %></option>
                 <% }) %>
-                <option value="all">Tất cả</option>
             <% } %>
         </select>
     </div>
@@ -215,6 +216,7 @@
                                     <option value="2">Phổ biến nhất</option>
                                     <option value="3">Giá thấp nhất</option>
                                     <option value="4">Giá cao nhất</option>
+                                    <option value="6">Nhiều lượt xem</option>
                                 </select>
                             </div>
 
@@ -233,7 +235,7 @@
                                        if(account.transaction_type == 'trade')
                                         account.price = 0
                                     %>
-                                    <div class="col-sm-12 col-lg-4 col-md-6 accountDiv" data-date="<%= account.originCreatedAt %>" data-rate="<%= account.totalRate %>" data-price="<%= account.price %>">
+                                    <div class="col-sm-12 col-lg-4 col-md-6 accountDiv" data-view="<%= account.totalView %>" data-date="<%= account.originCreatedAt %>" data-rate="<%= account.totalRate %>" data-price="<%= account.price %>">
                                         <!-- product card -->
                         <div class="product-item bg-light">
                             <div class="card">
@@ -269,6 +271,7 @@
                                     <ul style="margin-bottom: 3px;" class="list-inline product-meta">
                                         <li class="list-inline-item">
                                             <a style="color: red" href="/account/search?phai=<%= account.phai._id %>"><i class="fa fa-folder-open-o"></i><%= account.phai.name %></a>
+                                            <p style="padding: 0px; margin: 0px; display:inline-block; margin-left: 10px;font-size: 10px;"><i class="fas fa-eye"></i>  <%= account.totalView %></p>
                                         </li><br>
                                         <li class="list-inline-item">
                                             <a style="color: green" href=""><i class="fa fa-calendar"></i><%= account.createdAt %></a>

@@ -4,6 +4,8 @@ const config = {
         uri: 'mongodb://mongo:27017/TLBB-SHOP'
     },
 
+    pathStoreImageUpload: 'public/images/data',
+
     urlWebsite: 'https://localhost:3000',
 
     // account for db

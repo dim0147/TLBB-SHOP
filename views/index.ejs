@@ -38,25 +38,17 @@
 					<h2 style="color:rgb(255, 0, 200); font-weight: bold;">Xin lưu ý: Đây là website hoàn toàn miễn phí giúp bạn có thể tìm mua tài khoản ưng ý nhanh chóng, không phải nạp tiền, chỉ cần chụp ảnh trang bị tài khoản của bạn lên để người khác có thể xem đồ đạc, không phải đưa thông tin lên!</h2>
 					<h1>Thiên Long Shop </h1>
 					<p>Tham gia và tìm những nick ưng ý <br> hiện đang có ở tất cả server hoặc tạo bài đăng để bán tài khoản</p><br>
-					
 					<div class="short-popular-category-list text-center">
-						<h2>Những tìm kiếm phổ biến</h2>
-						<ul class="list-inline">
-							<li class="list-inline-item">
-								<a href="/account/search?ngoc=5f40d1dff5bc420c761b4b2b"><i class="fa fa-gg-circle" aria-hidden="true"></i> Full 6</a></li>
-							<li class="list-inline-item">
-								<a href="/account/search?thankhi=5f40d28ff5bc420c761b4b3d"><i class="fa fa-grav"></i> 3 Thuộc Tính</a>
-							</li>
-							<li class="list-inline-item">
-								<a href="/account/search?createdAt=-1"><i class="fa fa-upload" aria-hidden="true"></i> Vừa tải lên</a>
-							</li>
-							<li class="list-inline-item">
-								<a href="/account/search?vohon=5f40d1abf5bc420c761b4b24"><i class="fa fa-thermometer-three-quarters" aria-hidden="true"></i> Võ Hồn Toàn Mỹ</a>
-							</li>
-							<li class="list-inline-item">
-								<a href="/account/search?phai=5f40a245027ded0715fcd4ba"><i class="fab fa-accessible-icon"></i> Cái Bang</a>
-							</li>
-						</ul>
+						<% if(typeof mostSearch !== 'undefined' && mostSearch.length > 0){ %>
+							<h2 style="color:rgb(2, 238, 2)">Những tìm kiếm phổ biến</h2>
+							<ul class="list-inline">
+								<% mostSearch.forEach(function(search){ %>
+									<li class="list-inline-item">
+										<a href="/account/search?<%= search.slug %>=<%= search.idProperty %>"><i class="fas fa-search"></i> <%= search.nameItem %> <%= search.nameProperty %></a>
+									</li>
+								<% }) %>
+							</ul>
+						<% } %>
 					</div>
 					
 				</div>
@@ -188,10 +180,12 @@
 						
 					<% } %>
 				</div>
-			</div>
-			
-			
+				<div class="col text-center">
+					<a href="/account/search?sort=most-view"><button type="submit" class="btn btn-warning" style="font-weight: bold">Xem thêm <i class="fas fa-angle-double-right"></i></button></a>
+				</div>
+			</div>	
 		</div>
+		
 	</div>
 </section>
 
@@ -274,11 +268,105 @@
 					<% } %>
 				</div>
 			</div>
-			
+			<div class="col text-center">
+					<a href="/account/search?sort=most-view"><button type="submit" class="btn btn-success" style="font-weight: bold; margin-top: 20px;">Xem thêm <i class="fas fa-angle-double-right"></i></button></a>
+				</div>
 			
 		</div>
 	</div>
 </section>
+
+
+<% if (typeof accountEachServer !== 'undefined' && accountEachServer.length > 0){ %>
+	<% accountEachServer.forEach(server =>{ %>
+				<!--===========================================
+		=           Each server account section            =
+		============================================-->
+
+		<section class="popular-deals section bg-gray">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="section-title">
+							<h2><%= server.serverName %></h2>
+							<p>Những tài khoản máy chủ <%= server.serverName %>.</p>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<!-- offer 01 -->
+					<div class="col-lg-12">
+						<div class="trending-ads-slide">
+
+							<% if(typeof server.accounts !== 'undefined' && server.accounts.length > 0){ %>
+								<% server.accounts.forEach(function(account){ %>
+									
+									<div style="width:370px; height: 500px;" class="col-sm-12 col-lg-4">
+										<div class="product-item bg-light">
+										<div class="card">
+											<div class="thumb-content"> 
+												<% if(account.transaction_type == 'sell'){ %>
+													<div class="price"><%= account.price.toLocaleString('en-US', {style : 'currency', currency : 'VND'}); %></div> 
+												<% }else if (account.transaction_type == 'trade'){ %>
+													<div class="price giaoluu">Giao lưu <%= account.phaigiaoluu.name %></div> 
+												<% }else{ %>
+													<div class="price allPGL">- Giao lưu <%= account.phaigiaoluu.name %> <br> hoặc <br>- Bán: <%= account.price.toLocaleString('en-US', {style : 'currency', currency : 'VND'}); %></div>
+													<% } %> %>
+												<a href="/account/view-account/<%= account._id %>">
+												<img width="340px" height="255px" class="card-img-top" src="images/data/<%= account.image.url %>" alt="Card image cap">
+												</a>
+											</div>
+											<div class="card-body">
+												<h4 class="card-title"><a href="/account/view-account/<%= account._id %>"><%= account.title %></a></h4>
+												<ul class="list-inline product-meta">
+													<li class="list-inline-item">
+													<a style="color: red" href="/account/search?phai=<%= account.phai._id %>"><i class="fa fa-folder-open-o"></i><%= account.phai.name %></a>
+													</li>
+													<li class="list-inline-item">
+													<a href="#"><i class="fa fa-calendar"></i><%= account.createdAt %></a>
+													</li>
+
+													<li class="list-inline-item">
+														<a href="#"><i class="fas fa-eye"></i><%= account.totalView %></a>
+													</li>
+												</ul>
+												<p class="card-text">
+													Server: <%= account.server.name %><br>
+													Tên nhân vật: <%= account.c_name %><br>
+													Ngọc: <%= account.ngoc.name %><br>
+													Điêu Văn: <%= account.dieuvan.name %><br>
+													Võ Hồn: <%= account.vohon.name %>
+												</p>
+												<div class="product-ratings">
+													<ul class="list-inline">
+														<% if(account.rate == null || account.rate == 0) account.rate = 5%>
+														<% for(let i = 0; i < Math.floor(Number(account.rate)); i++){ %>
+															<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
+														<% } %>
+													<% for(let i = Math.floor(Number(account.rate)); i < 5; i++){ %>
+															<li class="list-inline-item"><i class="fa fa-star"></i></li>
+													<% } %>
+													</ul>
+												</div>
+											</div>
+										</div>
+										</div>
+									</div> 
+								<% }) %>
+								
+							<% } %>
+						</div>
+					</div>
+					<div class="col text-center">
+							<a href="/account/search?server=<%= server.serverId %>"><button type="submit" class="btn btn-dark" style="font-weight: bold; margin-top: 20px;">Xem thêm <i class="fas fa-angle-double-right"></i></button></a>
+						</div>
+					
+				</div>
+			</div>
+		</section>
+	<% }) %>
+<% } %>
+
 
 
 

@@ -6,6 +6,9 @@ const helper = require('../../help/helper');
 const cache = require('../../cache/cache');
 
 const accountModel = require('../../models/account');
+const searchResultModel = require('../../models/search-result');
+const itemModel = require('../../models/item');
+const item = require('../../models/item');
 
 dateFormat.i18n = {
     dayNames: [
@@ -21,13 +24,14 @@ dateFormat.i18n = {
     ]
 };
 
+// Validate query before sort
 exports.checkFields = async function(req, res, next){
     if(helper.isEmpty(req.query))
         return res.render('account/search', {title: 'Có lỗI xảy ra', error: 'Thiếu query'});
 
-    const allowField = ['c_name', 'min', 'max', 'phai', 'sort', 'transaction_type', 'phaigiaoluu', 'bosung'];
+    const allowField = ['c_name', 'min', 'max', 'phai', 'sort', 'transaction_type', 'phaigiaoluu', 'bosung', 'page', 'dataOnly'];
 
-    // Get item in menuView Cache, if not query
+    // Get item in menuView Cache, if not query then add to allowField
     let menuView = cache.getKey('menuView');
     if(typeof menuView === 'undefined'){
         menuView = await helper.getMenuData().catch(err => res.render('account/search', {title: 'Có lỗI xảy ra', error: 'Có lỗi xảy ra vui lòng thử lại sau'}))
@@ -35,19 +39,18 @@ exports.checkFields = async function(req, res, next){
         cache.setKey('menuView', menuView);
     }
 
-    // Push slug of item to allow field
+    // Push slug of item to allowField
     if(typeof menuView.items !== 'undefined' && menuView.items.length > 0){
         menuView.items.forEach(function(item){
             allowField.push(item.slug);
         });
     }
 
-    // Elevate field is one of allow field
+    // Elevate field is one of allowField if not remove that field
     for(var field in req.query){
         if(!allowField.includes(field))
-            res.render('account/search', {title: 'Có lỗI xảy ra', error: 'Trường không hợp lệ'});
+            delete req.query[field];
     }
-    
     next();
 }
 
@@ -125,6 +128,8 @@ function filterSpecialSort(req){
                     option.sort = {price: -1}
                 else if(req.query[field] == 'price-low')
                     option.sort = {price: 1}
+                else if (req.query[field] == 'most-view')
+                    option.sort = {totalView: -1}
             }
         }
 
@@ -186,6 +191,71 @@ function filterMongooseObjectId(req, condition){
     }
 }
 
+// Save search result to db
+function saveSearchRs(req){
+
+    //  List search save to db
+    let listSearchRs = [];
+
+    // List Promise of filter slug
+    let listPromises = [];
+
+    // Filter normal field with mongoose.Types.ObjectId
+    for(let field in req.query){
+
+        // Create new Promise
+        let promise = new Promise((resolve, reject) => {
+            // Find item by slug
+            itemModel.findOne({slug: field}, (err, item) => {
+                if(err) return reject(err);
+                if(item === null) return reject('Không tìm thấy item: ' + field);
+                
+                // Create search result to db, check if value field  is string
+                if(typeof req.query[field] === 'string'){
+                    if(!mongoose.Types.ObjectId.isValid(req.query[field])) return false;
+                    // Adding search result
+                    let searchRs = {
+                        item: item._id,
+                        property: mongoose.Types.ObjectId(req.query[field])
+                    }
+                    if(req.isAuthenticated()) // check if have user 
+                        searchRs.user = req.user._id;
+                    listSearchRs.push(searchRs);
+                }   
+                else{   //  If one field have more than one value, e.g: vo hon = ['tracviet', 'toanmy']
+                    let arr = req.query[field];
+                    for(let i = 0; i < arr.length; i++){
+                        let val = arr[i];
+                        if(!mongoose.Types.ObjectId.isValid(val)) return false;
+                        let searchRs = {
+                            item: item._id,
+                            property: mongoose.Types.ObjectId(val),
+                        }
+                        if(req.isAuthenticated()) // check if have user 
+                            searchRs.user = req.user._id;
+                        listSearchRs.push(searchRs);
+                    }
+                }
+                resolve();
+            });
+        });
+        // Add to list promise
+        listPromises.push(promise);
+
+    }
+    Promise.all(listPromises)
+    .then(() => {   // Save list of search result to db
+        if(listSearchRs.length > 0)
+            searchResultModel.insertMany(listSearchRs, err => {
+                if(err) return console.log('Có lổi xảy ra khi thêm search result vào db: ' + err);
+            })
+    })
+    .catch(err => {
+        console.log('Có lỗi xảy ra khi save result, vui lòng thử lại sau');
+        console.log(err);
+    })
+}
+
 function formatDate(accounts){
 
     accounts.forEach(function(account){
@@ -232,6 +302,9 @@ exports.renderPage = async function(req, res){
         } 
         condition = filterMgsObj.data.condition;
 
+        // Add search query to db
+        saveSearchRs(req);
+
         // Query part
         let queryPart = [
             {
@@ -262,6 +335,25 @@ exports.renderPage = async function(req, res){
                     as: 'image'
                     
                 }
+            },
+            {
+                $lookup: {
+                    from: 'views',
+                    let: {accountId: "$_id"},
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: { $eq: ['$account', '$$accountId'] }
+                            }
+                        },
+                    ],
+                    as: 'view'
+                }
+            },
+            {
+                $addFields: {
+                    totalView: {$size: '$view'}
+                }
             }
         ];
 
@@ -291,7 +383,7 @@ exports.renderPage = async function(req, res){
             ];
         }
 
-        // Unwind to using group
+        // Unwind rate calculate total rate to using group
         let unwindPart = [
             {
                 $unwind: {
@@ -328,6 +420,7 @@ exports.renderPage = async function(req, res){
                     createdAt: {$first: '$createdAt'},    
                     bosung: {$push: '$bosung'},    
                     totalRate: { $avg: "$rate.rate" },
+                    totalView: {$first: "$totalView"},
                     user: {
                         $first: 
                         {

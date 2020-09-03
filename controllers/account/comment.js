@@ -139,7 +139,6 @@ exports.getComments = async function (req, res){
     let payload = {}
     // Get comments(First time loading)
     if(req.query.first_load === 'true'){
-        console.log('first load');
         payload.condition = {
             account: mongoose.Types.ObjectId(req.query.accountId),
             parent: null

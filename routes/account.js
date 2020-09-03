@@ -1,9 +1,11 @@
 var express = require('express');
-var router = express.Router();
-
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+
+var router = express.Router();
+
+const config = require('../config/config');
 
 const viewAC = require('../controllers/account/view-account');
 const rateC = require('../controllers/account/rate');
@@ -22,13 +24,13 @@ var storage = multer.diskStorage({
         callback(null, true)
     },
     destination: function (req, file, cb) {
-      cb(null, 'public/images/data/')
+      cb(null, config.pathStoreImageUpload + '/')
     },
     filename: function (req, file, cb) {
         let nameImage = helper.generateRandomString(9) + path.extname(file.originalname);
         do{
             nameImage = helper.generateRandomString(9) + path.extname(file.originalname);
-        }while(fs.existsSync('public/images/data/' + nameImage))
+        }while(fs.existsSync(config.pathStoreImageUpload + '/' + nameImage))
       cb(null, nameImage)
     }
   })

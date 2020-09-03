@@ -1,4 +1,5 @@
 const waterfall = require('async-waterfall');
+const fs = require('fs');
 
 const phaiModel = require('../models/phai');
 const itemModel = require('../models/item');

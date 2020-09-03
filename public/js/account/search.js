@@ -3,6 +3,9 @@ $('document').ready(function(){
     let priceChange = false;
     let phaiGiaoLuuChange = false;
 
+    $('.giaoluuArea').hide();
+    $('.priceArea').hide();
+
     function getParameterByName(name, url) {
         if (!url) url = window.location.href;
         name = name.replace(/[\[\]]/g, '\\$&');
@@ -157,13 +160,62 @@ $('document').ready(function(){
     }
 
     function sortFirstLoad(){
-        $('.accountDiv').sort(function(a, b) {
-            if ($(a).attr('data-date') > $(b).attr('data-date')) {
-              return -1;
-            } else {
-              return 1;
-            }
-          }).appendTo($('.accountAreaRow'));
+        let sort = getParameterByName('sort');
+        if(sort == 'date-new'){
+            $('.accountDiv').sort(function(a, b) {
+                if (new Date($(a).attr('data-date')) > new Date($(b).attr('data-date'))) {
+                  return -1;
+                } else {
+                  return 1;
+                }
+              }).appendTo($('.accountAreaRow'));
+        }
+        else if (sort == 'date-old'){
+            $('.accountDiv').sort(function(a, b) {
+                if (new Date($(a).attr('data-date')) < new Date($(b).attr('data-date'))) {
+                  return -1;
+                } else {
+                  return 1;
+                }
+              }).appendTo($('.accountAreaRow'));
+        }
+        else if (sort == 'price-high'){
+            $('.accountDiv').sort(function(a, b) {
+                if ( Number($(a).attr('data-price')) > Number($(b).attr('data-price'))) {
+                  return -1;
+                } else {
+                  return 1;
+                }
+              }).appendTo($('.accountAreaRow'));
+        }
+        else if (sort == 'price-low'){
+            $('.accountDiv').sort(function(a, b) {
+                if ( Number($(a).attr('data-price')) < Number($(b).attr('data-price'))) {
+                  return -1;
+                } else {
+                  return 1;
+                }
+              }).appendTo($('.accountAreaRow'));
+        }
+        else if (sort == 'most-view'){
+            $('.accountDiv').sort(function(a, b) {
+                if ( Number($(a).attr('data-view')) > Number($(b).attr('data-view'))) {
+                  return -1;
+                } else {
+                  return 1;
+                }
+              }).appendTo($('.accountAreaRow'));
+        }
+        else{
+            $('.accountDiv').sort(function(a, b) {
+                if ($(a).attr('data-date') > $(b).attr('data-date')) {
+                  return -1;
+                } else {
+                  return 1;
+                }
+              }).appendTo($('.accountAreaRow'));
+        }
+        
     }
 
     function sortBySelect(){
@@ -210,6 +262,15 @@ $('document').ready(function(){
             else if(valueSelected == 4){ // Giá cao
                 $('.accountDiv').sort(function(a, b) {
                     if ( Number($(a).attr('data-price')) > Number($(b).attr('data-price'))) {
+                      return -1;
+                    } else {
+                      return 1;
+                    }
+                  }).appendTo($('.accountAreaRow'));
+            } 
+            else if(valueSelected == 6){ // Most view
+                $('.accountDiv').sort(function(a, b) {
+                    if ( Number($(a).attr('data-view')) > Number($(b).attr('data-view'))) {
                       return -1;
                     } else {
                       return 1;

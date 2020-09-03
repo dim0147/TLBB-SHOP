@@ -1,10 +1,11 @@
 const waterfall = require('async-waterfall');
 const dateFormat = require('dateformat');
+const mongoose = require('mongoose');
 
 const phaiModel = require('../models/phai');
 const accountModel = require('../models/account');
 const itemModel = require('../models/item');
-const viewModel = require('../models/view');
+const searchResultModel = require('../models/search-result');
 
 const cache = require('../cache/cache');
 const item = require('../models/item');
@@ -24,9 +25,9 @@ dateFormat.i18n = {
 };
 
 exports.indexPage = (req, res) =>{
-    // Get phais
+
     waterfall([
-        cb => { // phai
+        (cb) => { // Get phai
             // Get from cache
             let phais = cache.getKey('phais');
             if( typeof phais !== 'undefined') return cb(null, phais)
@@ -38,7 +39,7 @@ exports.indexPage = (req, res) =>{
                 return cb(null, phais);
             });
         },
-        (phais, cb) => {    // Server
+        (phais, cb) => {    // Get Server
             // Get from cache
             let servers = cache.getKey('servers');
             if(typeof servers !== 'undefined') return cb(null,{phais: phais, servers: servers});
@@ -237,7 +238,6 @@ exports.indexPage = (req, res) =>{
         (result, cb) => {   // Get recent account
             let recentAccount = cache.getKey('recentAccount');
             if(typeof recentAccount !== 'undefined'){
-                console.log('get key recentAccount');
                 result.recentAccount = recentAccount;
                 return cb(null, result);
             }
@@ -395,7 +395,6 @@ exports.indexPage = (req, res) =>{
                         account.createdAt = dateFormat(new Date(account.createdAt), "d mmmm, yyyy")
                     });
                     result.recentAccount = accounts;
-                    console.log('Set cache recent account');
                     cache.setKey('recentAccount', accounts, 60);
                     return cb(null, result);
                 });
@@ -495,13 +494,296 @@ exports.indexPage = (req, res) =>{
                 return cb(null, result);
             });
 
+        },
+        (result, cb) => {   // Get account for each server
+
+            let accountEachServer = cache.getKey('accountEachServer');
+            if(typeof accountEachServer !== 'undefined'){
+                result.accountEachServer = accountEachServer;
+                return cb(null, result);
+            }
+
+            if(result.items.length > 0){
+
+                // Server slug 
+                const slugServer = 'server';
+
+                // List property of server
+                let listServerId = [];
+
+                // Get list Id property of server slug
+                result.items.forEach(item => {
+                    if(item.slug == slugServer){
+                        item.properties.forEach(property => {
+                            listServerId.push({_id: mongoose.Types.ObjectId(property._id), name: property.name});
+                        })
+                    }     
+                });
+
+                // Get account for each server, check if list server is null
+                if(listServerId.length === 0) {
+                    result.accountEachServer = [];
+                    return cb(null, result);
+                }
+
+                // Create list promise query 6 account for each server
+                let listPromise = listServerId.map(server => {
+                    return new Promise((resolve, reject) => {
+                        // Query account for specific server
+                        accountModel.aggregate([
+                            {
+                                $match: {server: server._id}
+                            },
+                            {
+                                $lookup:{
+                                    from: 'views',
+                                    localField: '_id',
+                                    foreignField: 'account',
+                                    as: 'view'
+            
+                                }
+                            },
+                            {
+                                $lookup:{
+                                    from: 'rates',
+                                    localField: '_id',
+                                    foreignField: 'account',
+                                    as: 'rate'
+                                }
+                            },
+                            {
+                                $unwind:{
+                                    path: '$rate',
+                                    preserveNullAndEmptyArrays: true
+                                }
+                            },
+                            {
+                                $group:{
+                                    _id: "$_id",
+                                    title: {$first: '$title'},
+                                    c_name: {$first: '$c_name'},
+                                    server: {$first: '$server'},
+                                    phai: {$first: '$phai'},
+                                    ngoc: {$first: '$ngoc'},
+                                    dieuvan: {$first: '$dieuvan'},
+                                    vohon: {$first: '$vohon'},
+                                    view: {$first: '$view'},
+                                    rate: {$avg: '$rate.rate'},
+                                    transaction_type: {$first: '$transaction_type'},
+                                    price: {$first: '$price'},
+                                    phaigiaoluu: {$first: '$phaigiaoluu'},
+                                    createdAt: {$first: '$createdAt'},
+                                }
+                            },
+                            {
+                                $lookup:{
+                                    from: 'images',
+                                    localField: '_id',
+                                    foreignField: 'account',
+                                    as: 'image'
+                                }
+                            },
+                            {
+                                $project: {
+                                    _id: 1,
+                                    title: 1,
+                                    c_name: 1,
+                                    server: 1,
+                                    phai: 1,
+                                    ngoc: 1,
+                                    dieuvan: 1,
+                                    vohon: 1,
+                                    transaction_type: 1,
+                                    price: 1,
+                                    phaigiaoluu: 1,
+                                    rate: 1,
+                                    totalView: { $size: "$view" },
+                                    image: {
+                                        $cond: [
+                                            {$anyElementTrue: ['$image']},
+                                            {$arrayElemAt: ['$image', 0]},
+                                            'no-image.png'
+                                        ]
+                                    },
+                                    createdAt: 1,
+                                }
+                            },
+                            {
+                                $sort: {
+                                    createdAt: -1
+                                }
+                            },
+                            
+                            { $sample: { size: 6 } }
+                        ], function(err, accounts){
+                            if(err) return reject(err);
+                            // Check if have account, populate fields and format date
+                            if(accounts.length > 0){
+                                const popAcFields = [
+                                    {
+                                        path: 'phai',
+                                        model: 'phais',
+                                        select: '_id name'
+                                    },
+                                    {
+                                        path: 'server',
+                                        model: 'item-properties',
+                                        select: '_id name'
+                                    },
+                                    {
+                                        path: 'vohon',
+                                        model: 'item-properties',
+                                        select: '_id name'
+                                    },
+                                    {
+                                        path: 'amkhi',
+                                        model: 'item-properties',
+                                        select: '_id name'
+                                    },
+                                    {
+                                        path: 'thankhi',
+                                        model: 'item-properties',
+                                        select: '_id name'
+                                    },
+                                    {
+                                        path: 'tuluyen',
+                                        model: 'item-properties',
+                                        select: '_id name'
+                                    },
+                                    {
+                                        path: 'ngoc',
+                                        model: 'item-properties',
+                                        select: '_id name'
+                                    },
+                                    {
+                                        path: 'doche',
+                                        model: 'item-properties',
+                                        select: '_id name'
+                                    },
+                                    {
+                                        path: 'dieuvan',
+                                        model: 'item-properties',
+                                        select: '_id name'
+                                    },
+                                    {
+                                        path: 'longvan',
+                                        model: 'item-properties',
+                                        select: '_id name'
+                                    },
+                                    {
+                                        path: 'phaigiaoluu',
+                                        model: 'phais',
+                                        select: '_id name'
+                                    }
+                                ];
+                                accountModel.populate(accounts, popAcFields, (err, accounts) => {
+                                    if(err) return reject(err);
+                                    accounts.forEach(account =>{
+                                        account.createdAt = dateFormat(new Date(account.createdAt), "d mmmm, yyyy")
+                                    });
+                                    return resolve({serverId: server._id, serverName: server.name, accounts: accounts});
+                                });
+                            }
+                            else{
+                                resolve({serverId: server._id, serverName: server.name, accounts: []});
+                            }
+                        });
+                    });
+                })
+
+                // Trigger query for account of each server
+                Promise.all(listPromise)
+                .then(accountEachServer => {
+                    cache.setKey('accountEachServer', accountEachServer);
+                    result.accountEachServer = accountEachServer;
+                    cb(null, result);
+                })
+                .catch(err => {
+                    cb(err);
+                })
+            }
+        },
+        (result, cb) => { // Get most search
+            // Get from cached
+            let mostSearch = cache.getKey('mostSearch');
+            if(typeof mostSearch !== 'undefined'){
+                result.mostSearch = mostSearch;
+                return cb(null, result);
+            }
+
+            // If don't have query then save to cached
+            searchResultModel.aggregate([
+                {
+                    $lookup: {
+                        from: 'items',
+                        localField: 'item',
+                        foreignField: '_id',
+                        as: 'item'
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'item-properties',
+                        localField: 'property',
+                        foreignField: '_id',
+                        as: 'property'
+                    }
+                },
+                {
+                    $unwind: "$item"
+                },
+                {
+                    $unwind: "$property"
+                },
+                {
+                    $group:{
+                        _id: {idItem: "$item._id", idProperty: "$property._id"},
+                        slug: {$first: "$item.slug"},
+                        idProperty: {$first: "$property._id"},
+                        nameItem: {$first: "$item.name"},
+                        nameProperty: {$first: "$property.name"},
+                        totalSearch: {$sum: 1}
+                    }
+                },  
+                {
+                    $sort: {
+                        totalSearch: -1,
+                        nameItem: -1,
+                    }
+                },
+                {
+                    $group:{
+                        _id: "$_id.idItem",
+                        slug: {$first: "$slug"},
+                        idProperty: {$first: "$idProperty"},
+                        nameItem: {$first: "$nameItem"},
+                        nameProperty: {$first: "$nameProperty"},
+                        maxSearch: {$first: '$totalSearch'}
+                    }
+                },
+                {
+                    $limit: 5
+                }
+            ], function(err, mostSearch){
+                if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau');
+                if(mostSearch.length !== 0)
+                    cache.setKey('mostSearch', mostSearch, 5000);             
+                result.mostSearch = mostSearch;
+                cb(null, result);
+            });
         }
-    ], function(err, result){
+    ], function(err, result){   // Success
         if(err){
             return res.render('index', { title: 'Thiên Long Bát Bộ Shop', error: err });
         }
-
-        console.log(result.recentAccount);
-        res.render('index', { title: 'Thiên Long Bát Bộ Shop', phais: result.phais, servers: result.servers, mostViewAccount: result.mostViewAccount, recentAccount: result.recentAccount ,items: result.items });
+        res.render('index', { title: 'Thiên Long Bát Bộ Shop', 
+                              phais: result.phais, 
+                              servers: result.servers, 
+                              mostViewAccount: result.mostViewAccount, 
+                              recentAccount: result.recentAccount, 
+                              items: result.items, 
+                              mostSearch: result.mostSearch, 
+                              accountEachServer: result.accountEachServer 
+                            });
     });
 }

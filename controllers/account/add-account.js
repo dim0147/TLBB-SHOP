@@ -45,7 +45,6 @@ exports.renderAddAccount = (req, res) => {
         function(cb){
             phaiModel.find({}, (err, phais) => {
                 if(err){
-                    console.log(err);
                     cb("Có lỗi xảy ra, vui lòng thử lại sau");
                     return
                 }
@@ -55,7 +54,6 @@ exports.renderAddAccount = (req, res) => {
         function(phais, cb){
             addFieldModel.find({}, (err, addFields) => {
                 if(err){
-                    console.log(err);
                     cb("Có lỗi xảy ra, vui lòng thử lại sau");
                     return
                 }
@@ -65,7 +63,6 @@ exports.renderAddAccount = (req, res) => {
         function(phais, addFields, cb){
             itemModel.find().lean().exec((err, items) => {
                 if(err){
-                    console.log(err);
                     cb("Có lỗi xảy ra vui lòng thử lại sau!!!");
                     return
                 }
@@ -91,10 +88,10 @@ exports.renderAddAccount = (req, res) => {
         }
     ], function(err, result){
         if(err){
-            res.status(400).send(err);
+            res.render('account/add-account', {title: 'Thêm ', error: err});
             return
         }
-        res.render('account/add-account', {title:"Add new account", account: config.account, items: result.items, phais: result.phais, addFields: result.addFields, csrfToken: req.csrfToken()});
+        res.render('account/add-account', {title:"Add new account", items: result.items, phais: result.phais, addFields: result.addFields, csrfToken: req.csrfToken()});
     });
 }
 
@@ -195,16 +192,35 @@ let result = await new Promise((resolve, reject) =>{
 return result;
 }
 
-function removeAccount(account){
+function removeAccount(idAccount){
     waterfall([
-        cb => {
-            accountLinkAddFieldModel.deleteMany({accountId: account._id}, err => {
+        cb => { // Delete bosung fields
+            accountLinkAddFieldModel.deleteMany({accountId: idAccount}, err => {
                 if(err) return cb(err);
                 cb(null)
             });
         },
+        cb => { // Query images
+            imageModel.find({account: idAccount}, (err, images) => {
+                if(err) return cb(err);
+                cb(null, {images: images})
+            });
+        },
+        (result, cb) => {   // Remove image from db and storage
+            if(result.images.length > 0){
+                imageModel.deleteMany({account: idAccount}, err => {
+                    if(err) return cb(err);
+                    const listImagePath = result.images.map(image => config.pathStoreImageUpload + '/' + image.name);
+                    helper.deleteManyFiles(listImagePath);
+                    cb(null);
+                });
+            }
+            else{
+                cb(null);
+            }
+        },
         cb => {
-            accountModel.findOneAndDelete({_id: account._id}, err => {
+            accountModel.findOneAndDelete({_id: idAccount}, err => {
                 if(err) return cb(err);
                 cb(null)
             });
@@ -237,7 +253,7 @@ exports.addNewAccount = async (req, res) => {
     if(req.body.title.length > 25)
         return res.status(400).send("Tựa bài viết không được quá 20 kí tự!!!");
 
-    // Check Sell Or Trade
+    // Check postType
     if(req.body.postType != 'trade' && req.body.postType != 'sell' && req.body.postType != 'all')
         return res.status(400).send("Hình thức giao dịch không hợp lệ!!!");
         // Check price is valid
@@ -335,11 +351,15 @@ exports.addNewAccount = async (req, res) => {
                 return {accountId: newAccount._id, fieldId: idBosung}
             });
             accountLinkAddFieldModel.create(listAddFields, err => {
-                if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
+                if(err){
+                    err.message = 'Có lỗi xảy ra, vui lòng thử lại sau';
+                    err.accountId = newAccount._id;
+                    return cb(err)
+                } 
                 cb(null, newAccount);
             });
         },
-        // // Upload Image to imgur server
+        // Upload Image to imgur server
         // (newAccount, cb) => {
         //     let arrImages = req.files.map(image => {
         //         return image.buffer.toString('base64')
@@ -355,9 +375,13 @@ exports.addNewAccount = async (req, res) => {
         //         cb("Có lỗi xảy ra, không thể tải ảnh lên server, vui lòng thử lại sau");
         //     });
         // },
-        // Save link imgur image to db
-        (newAccount, cb) => {
-            if(req.files.length === 0) return cb("Có lỗi xảy ra, không có ảnh, vui lòng thử lại sau")
+        
+        (newAccount, cb) => {   // Save image to db
+            if(req.files.length === 0){
+                err.message = 'Có lỗi xảy ra, không có ảnh, vui lòng thử lại sau';
+                err.accountId = newAccount._id;
+                return cb(err);
+            }
             let listImages = req.files.map(image => {
                 return {
                     url: image.filename,
@@ -366,12 +390,28 @@ exports.addNewAccount = async (req, res) => {
                 }
             });
             imageModel.create(listImages, err => {
-                if (err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
+                if (err){
+                    err.message = 'Có lỗi xảy ra, vui lòng thử lại sau';
+                    err.accountId = newAccount._id;
+                    return cb(err);
+                }
                 cb(null, "Tạo bài đăng thành công !!!");
             });
         }
     ], function(err, result){
-        if(err) return res.status(400).send(err)
+        if(err){
+            // Check if have account id remove image and remove account from db
+            if(typeof err.message === "string" && typeof err.accountId !== "undefined"){
+                removeAccount(err.accountId);   //  Delete account and image from db
+                if(req.files.length > 0){   // Delete image from storage
+                    const listImagePath = req.files.map(image => image.path);
+                    helper.deleteManyFiles(listImagePath);
+                }
+                return res.status(400).send(err.message)
+            }else{
+                return res.status(400).send(err)
+            }
+        } 
         res.send(result);
     })
     
