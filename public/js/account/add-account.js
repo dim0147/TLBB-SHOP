@@ -1,4 +1,23 @@
 $(document).ready(function(){
+
+    if(!isNaN(Number($('#priceSellFake').val()))){
+        let price = Number($('#priceSellFake').val()).toLocaleString('en-US', {style : 'currency', currency : 'VND'});
+        $('#priceSellFake').val(price); 
+    }
+    $('#priceSellFake').on('blur', function() {
+        let price = Number(this.value);
+        if(isNaN(price))
+            return alert('Xin hãy nhập giá bằng số')
+        $('#priceSell').val(price);
+        price = price.toLocaleString('en-US', {style : 'currency', currency : 'VND'});
+        this.value = price;
+    });
+
+    $('#priceSellFake').on('click', function(){
+        this.value = $('#priceSell').val();
+    })
+
+
     // Show images when adding success
     var imagesPreview = function(input, placeToInsertImagePreview) {
         if (input.files) {
@@ -74,7 +93,7 @@ $(document).ready(function(){
             showAlert("Xin hãy chấp nhận điều khoản!", 0);
             return;
         }
-        if($('#banRadio').is(':checked') && $("#priceSell").val().length === 0){
+        if($('#banRadio').is(':checked') && ($("#priceSell").val().length === 0 || Number($("#priceSell").val()) === 0)){
             showAlert("Xin hãy nhập giá", 0);
             return;
         }
@@ -83,7 +102,7 @@ $(document).ready(function(){
             return;
         }
 
-        if($('#allRadio').is(':checked') && $("#priceSell").val().length === 0){
+        if($('#allRadio').is(':checked') && ($("#priceSell").val().length === 0 || Number($("#priceSell").val()) === 0) ){
             showAlert("Xin hãy nhập giá", 0);
             return;
         }
@@ -92,13 +111,56 @@ $(document).ready(function(){
             showAlert("Hãy chọn ít nhất 10 ảnh để có thể tiếp tục", 0);
             return;
         }
+
+        const formData = new FormData( this );
+
+        const fieldsNoCheck = ['images', 'bosung'];
+
+        // Remove blank fields
+        for(var pair of formData.entries()){
+            const field = pair[0];
+            const value = pair[1];
+            if(!fieldsNoCheck.includes(field) && value.length == 0)
+                formData.delete(field);
+        }
+
+        // Check transaction
+        const postType = formData.get('postType');
+        if(postType === 'trade'){
+            const phaigiaoluu = formData.get('phaigiaoluu');
+            if(phaigiaoluu === null)
+                return showAlert('Phái giao lưu bỏ trống');
+            formData.delete('price');
+        }
+        else if(postType === 'sell'){
+            const price = formData.get('price');
+            if(price === null || isNaN(price))
+                return showAlert('Giá không hợp lệ!')
+            formData.delete('phaigiaoluu');
+        }
+        else if(postType === 'all'){
+            const phaigiaoluu = formData.get('phaigiaoluu');
+            if(phaigiaoluu === null)
+                return showAlert('Phái giao lưu bỏ trống');
+            const price = formData.get('price');
+            if(price === null || isNaN(price))
+                return showAlert('Giá không hợp lệ!')
+        }
+        else{
+            return showAlert('Hình thức không hợp lệ');
+        }
+
+        for(var pair of formData.entries()){
+            console.log(pair[0], pair[1]);
+        }
+
         $('#submit').prop("disabled",true);
         setAllowPointer($("#submit"), false);    
         showAlert("Đang tạo bài đăng...", 3);
         $.ajax( {
             url: '/account/add-account?_csrf=' + $('#_csrf').val(),
             type: 'POST',
-            data: new FormData( this ),
+            data: formData,
             processData: false,
             contentType: false,
             success: res => {

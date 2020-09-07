@@ -25,7 +25,6 @@ dateFormat.i18n = {
 };
 
 exports.indexPage = (req, res) =>{
-
     waterfall([
         (cb) => { // Get phai
             // Get from cache
@@ -702,6 +701,11 @@ exports.indexPage = (req, res) =>{
                     cb(err);
                 })
             }
+            else{
+                result.accountEachServer = [];
+                cb(null, result);
+            }
+            
         },
         (result, cb) => { // Get most search
             // Get from cached

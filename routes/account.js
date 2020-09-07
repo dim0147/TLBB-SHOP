@@ -8,6 +8,7 @@ var router = express.Router();
 const config = require('../config/config');
 
 const viewAC = require('../controllers/account/view-account');
+const editAC = require('../controllers/account/edit-account');
 const rateC = require('../controllers/account/rate');
 const commentC = require('../controllers/account/comment');
 const likedC = require('../controllers/account/liked');
@@ -15,14 +16,6 @@ const searchC = require('../controllers/account/search');
 const helper = require('../help/helper');
 
 var storage = multer.diskStorage({
-    fileFilter: function (req, file, callback) {
-        var ext = path.extname(file.originalname);
-        if(ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') {
-            req.errorImage = true;
-            return callback(null, true)
-        }
-        callback(null, true)
-    },
     destination: function (req, file, cb) {
       cb(null, config.pathStoreImageUpload + '/')
     },
@@ -36,14 +29,30 @@ var storage = multer.diskStorage({
   })
 
 
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: storage,
+  fileFilter: function (req, file, callback) {
+    var ext = path.extname(file.originalname);
+    if(ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') {
+        req.errorImage = true;
+        return callback(new Error('Ảnh không hợp lệ'))
+    }
+    callback(null, true)
+  }, 
+});
 
 const addAC = require('../controllers/account/add-account');
 
+//---------------------------ACCOUNT-------
 /* Create account post listing. */
 router.get('/add-account', addAC.renderAddAccount);
 
-router.post('/add-account', upload.array('images'), addAC.checkBody, addAC.addNewAccount)
+router.post('/add-account', upload.array('images'), addAC.checkBody, addAC.addNewAccount);
+
+/* Edit account post listing. */
+router.get('/edit-account/:id', editAC.checkParamRenderPage ,editAC.renderPage);
+
+router.patch('/edit-account/:id', upload.array('images'), editAC.updateAccount);
 
 /* GET detail account. */
 router.get('/view-account/:id', viewAC.checkBody ,viewAC.renderPage);
@@ -52,6 +61,7 @@ router.get('/view-account/:id', viewAC.checkBody ,viewAC.renderPage);
 router.get('/search',searchC.checkFields, searchC.renderPage);
 
 
+//---------------------------USER-------
 /* CREATE user rating. */
 router.post('/create-rating', rateC.validateBody, rateC.createRating);
 

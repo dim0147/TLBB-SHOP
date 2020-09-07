@@ -14,7 +14,6 @@ exports.validationBody = [
 ]
 
 exports.likeHandler = function (req, res){
-    console.log(req.body);
     if(!req.isAuthenticated()) return res.status(400).send("Xin hãy đăng nhập!")
 
     waterfall([

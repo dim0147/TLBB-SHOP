@@ -3,10 +3,6 @@ const waterfall = require('async-waterfall');
 
 const cache = require('../cache/cache');
 const config = require('../config/config');
-
-const phaiModel = require('../models/phai');
-const itemModel = require('../models/item');
-
 const helper = require('../help/helper');
 
 dateFormat.i18n = {

@@ -149,7 +149,6 @@ exports.getComments = async function (req, res){
         payload.limit = 6
     }   // Get more comments
     else if(req.query.continueId !== 'false' && req.query.parentId === 'false'){
-        console.log('continueId without parent');
         payload.condition = {
             account: mongoose.Types.ObjectId(req.query.accountId),
             parent: null,
@@ -161,7 +160,6 @@ exports.getComments = async function (req, res){
         payload.limit = 6
     }
     else if(req.query.continueId !== 'false' && req.query.parentId !== 'false'){
-        console.log('continueId without parent');
         payload.condition = {
             account: mongoose.Types.ObjectId(req.query.accountId),
             parent: mongoose.Types.ObjectId(req.query.parentId),
@@ -482,7 +480,6 @@ function mergeCountCommentLeft(comments, countArr) {
 
             let isDone = countArr.some(count => {
                 if(count._id == reply._id){
-                    console.log('equal!!!!!');
                     comments.data[i].replies = {
                         totalLeft: count.countLeft,
                         data: comments.data[i].replies

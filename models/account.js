@@ -1,11 +1,18 @@
 const mongoose = require('mongoose');
+const waterfall = require('async-waterfall');
+
 const config = require('../config/config');
 
+const itemModel = require('../models/item');
+const itemPropertyModel = require('../models/item_property');
+const phaiModel = require('../models/phai');
+
+
 const accountSchema = mongoose.Schema({
-    title: {type: String, required: true},
-    c_name: {type: String, required: true},
-    phai: {type: mongoose.Schema.Types.ObjectId, ref: 'phais',required: true},
-    level: {type: Number, required: true},
+    title: {type: String, required: true, minlength: 5, maxlength: 40},
+    c_name: {type: String, required: true, minlength: 2, maxlength: 20},
+    phai: {type: mongoose.Schema.Types.ObjectId, ref: 'phais', required: true},
+    level: {type: Number, required: true, min: 1, max: 119},
     server: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
     vohon: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
     amkhi: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
@@ -17,12 +24,194 @@ const accountSchema = mongoose.Schema({
     longvan: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
     transaction_type: {type: String, required: true, enum: config.account.transaction_type},
     price: {type: Number},
-    phaigiaoluu: {type: mongoose.Schema.Types.ObjectId, ref: 'phais',required: true},
-    status: {type: String, required: true, enum: config.account.status, default: 'pending'},
+    phaigiaoluu: {type: mongoose.Schema.Types.ObjectId, ref: 'phais'},
+    status: {type: String, required: true, enum: config.account.status, default: 'pending', required: true},
     phone: Number,
     loinhan: String,
     contactFB: {type: String, required: true},
-    userId: {type: mongoose.Schema.Types.ObjectId, ref:'users'}
+    userId: {type: mongoose.Schema.Types.ObjectId, ref:'users', required: true}
 },{ timestamps: { createdAt: 'createdAt' , updatedAt: 'updatedAt'} } );
+
+accountSchema.pre('save', function(next) {
+    // Initialize the list of field to check
+    const fields = ['server', 'vohon', 'amkhi', 'thankhi', 'tuluyen','ngoc','doche','dieuvan','longvan'];
+    
+    // Initialize list promise
+    const listPromise = [];
+
+
+    // Checking phai
+    if(!mongoose.Types.ObjectId.isValid(this.phai))
+      return next("Phái không hợp lệd !");
+    let phaiPromise = new Promise((resolve, reject) => {
+      phaiModel.countDocuments({_id: this.phai}, (err, count) =>{
+        if(err) return reject(err);
+        if(count === 0) return reject("Phái không tìm thấy");
+        resolve();
+      });
+    });
+    listPromise.push(phaiPromise);
+
+    // Checking phaigiaoluu
+    if(typeof this.phaigiaoluu !== 'undefined'){
+      let phaiGLPromise = new Promise((resolve, reject) => {
+        phaiModel.countDocuments({_id: this.phaigiaoluu}, (err, count) =>{
+          if(err) return reject(err);
+          if(count === 0) return reject("Phái giao lưu không tìm thấy");
+          resolve();
+        });
+      });
+      listPromise.push(phaiGLPromise);
+    }
+    
+    // Loop though field of current document for checking fields
+    for(const field in this){
+
+      // If current field include one of field to check
+      if(fields.includes(field)){
+
+        // Check if is mongoId 
+        if(!mongoose.Types.ObjectId.isValid(this[field]))
+          return next("Object id không hợp lệ " + field + ' value ' + this[field]);
+
+        // Create new promise
+        const promise = new Promise((resolve, reject) => {
+          waterfall([
+            // Check item property is exist
+            (cb) => {
+              itemPropertyModel.findOne({_id: this[field]}).exec(function(err, property){
+                if(err) return cb(err);
+                if(property === null) return cb("Không tìm thấy property " + field + " value " + this[field]);
+                cb(null, {idItem: property.itemId, slug: field});
+              });
+            },
+            // Check if item property is correct with slug
+            (result, cb) => {
+              itemModel.countDocuments({_id: result.idItem, slug: result.slug}, function(err, count){
+                if(err) return cb(err);
+                if (count === 0) return cb("Item property không hợp lệ với slug: " + result.slug);
+                cb(null);
+              });
+            }
+          ], function(err, result){
+            if(err) return reject(err);
+            resolve();
+          });
+        });
+
+        // Push new promise to list Promise
+        listPromise.push(promise);
+
+      }
+
+    }
+
+    Promise.all(listPromise)
+    .then((result) => {
+      next();
+    })
+    .catch((err) => {
+      console.log(err);
+      next(err);
+    })
+
+});
+
+accountSchema.pre('updateOne', function(next) {
+  const doc = this.getUpdate();
+
+  // Initialize the list of field to check
+  const fields = ['server', 'vohon', 'amkhi', 'thankhi', 'tuluyen','ngoc','doche','dieuvan','longvan'];
+  
+  // Initialize list promise
+  const listPromise = [];
+
+  // Checking phai
+  if(typeof doc.phai !== 'undefined'){
+
+    // If not mongoose object id
+    if(!mongoose.Types.ObjectId.isValid(doc.phai))
+      return next("Phái không hợp lệ!");
+
+    // Check if is id of phai
+    let phaiPromise = new Promise((resolve, reject) => {
+      phaiModel.countDocuments({_id: doc.phai}, (err, count) =>{
+        if(err) return reject(err);
+        if(count === 0) return reject("Phái không tìm thấy");
+        resolve();
+      });
+    });
+
+    listPromise.push(phaiPromise);
+
+  }
+
+  // Checking phaigiaoluu
+  if(typeof doc.phaigiaoluu !== 'undefined'){
+
+  let phaiGLPromise = new Promise((resolve, reject) => {
+    phaiModel.countDocuments({_id: doc.phaigiaoluu}, (err, count) =>{
+      if(err) return reject(err);
+      if(count === 0) return reject("Phái giao lưu không tìm thấy");
+      resolve();
+    });
+  });
+
+  listPromise.push(phaiGLPromise);
+  }
+
+  // Loop though field of current document for checking fields
+  for(const field in doc){
+
+    // If current field include one of field to check
+    if(fields.includes(field)){
+
+      // Check if is mongoId 
+      if(!mongoose.Types.ObjectId.isValid(doc[field]))
+        return next("Object id không hợp lệ " + field + ' value ' + doc[field]);
+
+      // Create new promise
+      const promise = new Promise((resolve, reject) => {
+        waterfall([
+          // Check item property is exist
+          (cb) => {
+            itemPropertyModel.findOne({_id: doc[field]}).exec(function(err, property){
+              if(err) return cb(err);
+              if(property === null) return cb("Không tìm thấy property " + field + " value " + doc[field]);
+              cb(null, {idItem: property.itemId, slug: field});
+            });
+          },
+          // Check if item property is correct with slug
+          (result, cb) => {
+            itemModel.countDocuments({_id: result.idItem, slug: result.slug}, function(err, count){
+              if(err) return cb(err);
+              if (count === 0) return cb("Item property không hợp lệ với slug: " + result.slug);
+              cb(null);
+            });
+          }
+        ], function(err, result){
+          if(err) return reject(err);
+          resolve();
+        });
+      });
+
+      // Push new promise to list Promise
+      listPromise.push(promise);
+
+    }
+
+  }
+
+  Promise.all(listPromise)
+    .then((result) => {
+      next();
+    })
+    .catch((err) => {
+      console.log(err);
+      next(err);
+    })
+});
+
+
 
 module.exports = mongoose.model('accounts', accountSchema);

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <% include ../partials/head %>
+  <style>
+.divCurrentImage {
+  display: inline;
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+
+.divCurrentImage .btn {
+  position: absolute;
+  left: 90%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  background-color: #555;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.divCurrentImage .btn:hover {
+  background-color: black;
+}
+  </style>
+</head>
+
+<body class="body-wrapper">
+  <% include ../partials/menu %>
+<section class="ad-post bg-gray py-5">
+    <% if(typeof csrfToken !== "undefined"){ %>
+        <input id="_csrf" type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <% } %>
+    <div class="container">
+        <% if(typeof error !== 'undefined'){ %>
+            <h1><%= error %></h1>
+        <% }else{ %>
+            <form id="formSubmit" action="/account/add-account" method="post" enctype="multipart/form-data" >
+                <% if(typeof account !== 'undefined'){ %>
+                    <input type="hidden" name="idAccount" value="<%= account._id %>">
+                <!-- Post Your ad start -->
+                <fieldset class="border border-gary p-4 mb-5">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <h3>Chỉnh sửa Tài Khoản</h3>
+                            </div>
+                            <div class="col-lg-6">
+                                <h6 class="font-weight-bold pt-4 pb-1">Tiêu Đề:</h6>
+                                <h6 style="font-size: 14px;letter-spacing: 0;color: #848484;">Không được quá 40 ký tự</h6>
+                                <input id="title" type="text" name="title" class="border w-100 p-2 bg-white text-capitalize" placeholder="Nick Full 6 + 7, tu cao,... Chú ý: Không được quá 20 kí tự." value="<%= account.title %>" required>
+                                
+                                <h6 class="font-weight-bold pt-4 pb-1">Tên Nhân Vật:</h6>
+                                <h6 style="font-size: 14px;letter-spacing: 0;color: #848484;">Không được quá 20 ký tự</h6>
+                                <input id="nameCharacter" type="text" name="c_name" class="border w-100 p-2 bg-white text-capitalize" placeholder="" value="<%= account.c_name %>" required>
+                                
+                                <h6 class="font-weight-bold pt-4 pb-1">Cấp:</h6>
+                                <input id="level" type="number" name="level" class="border w-100 p-2 bg-white text-capitalize" placeholder="" min="1" max="119" value="<%= Number(account.level) %>" required>
+                                
+                                <h6 class="font-weight-bold pt-4 pb-1">Phái:</h6>
+                                <% if(typeof phais !== 'undefined'){ %>
+                                    <select name="phai" id="inputGroupSelect" class="w-100">
+                                        <% phais.forEach((eachPhai, i) =>{ %>
+                                            <% if(account.phai.toString() == eachPhai._id.toString()){ %>
+                                                <option value="<%= eachPhai._id %>" selected><%= eachPhai.name %></option>
+                                            <% }else{ %>
+                                                <option value="<%= eachPhai._id %>"><%= eachPhai.name %></option>
+                                            <% } %>
+                                        <% }) %>
+                                    </select>
+                                <% } %>
+                                
+                                <% if(typeof items !== 'undefined'){ %>
+                                    <% for(let i = 0; i < Math.floor(items.length / 2); i++){ %>
+                                        <h6 class="font-weight-bold pt-4 pb-1"><%= items[i].name %></h6>
+                                        <div class="row px-3">
+                                        <% items[i].detail.forEach(option => {  %>
+                                            <div class="col-lg-4 mr-lg-4 my-2 rounded bg-white">
+                                                <% if( account.hasOwnProperty(items[i].slug) && (account[items[i].slug].toString() == option._id.toString())){ %>
+                                                    <input type="radio" name="<%= items[i].slug %>" value="<%= option._id %>" id="personal" checked>
+                                                <% }else{ %>
+                                                    <input type="radio" name="<%= items[i].slug %>" value="<%= option._id %>" id="personal">
+                                                <% } %>
+                                                <label for="personal" class="py-2"><%= option.name %></label>
+                                            </div>
+                                            <% }) %>
+                                        </div>
+                                    <% } %>    
+                                <% } %>
+
+                            </div>
+                            <div class="col-lg-6">
+                                <% if(typeof items !== 'undefined') { %>
+                                    <% let number = items.length;
+                                        if(number % 2 === 0 ){ 
+                                            number = Math.round(items.length / 2);
+                                        }else{ 
+                                            number = Math.round(items.length / 2) - 1;
+                                        } %>
+                                    <% for(let i = number; i < items.length; i++){ %>
+                                        <h6 class="font-weight-bold pt-4 pb-1"><%= items[i].name %></h6>
+                                        <div class="row px-3">
+                                        <% items[i].detail.forEach(option => {  %>
+                                            <div class="col-lg-4 mr-lg-4 my-2 rounded bg-white">
+                                                <% if( account.hasOwnProperty(items[i].slug) && (account[items[i].slug].toString() == option._id.toString())){ %>
+                                                    <input type="radio" name="<%= items[i].slug %>" value="<%= option._id %>" id="personal" checked>
+                                                <% }else{ %>
+                                                    <input type="radio" name="<%= items[i].slug %>" value="<%= option._id %>" id="personal">
+                                                <% } %>
+                                                <label for="personal" class="py-2"><%= option.name %></label>
+                                            </div>
+                                            <% }) %>
+                                        </div>
+                                    <% } %>
+                                <% } %>
+
+                            
+
+                                <h6 class="font-weight-bold pt-4 pb-1">Bổ sung:</h6>
+                                <div class="row px-3">
+                                    <% if(typeof addFields !== 'undefined') { %>
+                                            <% addFields.forEach((eachBosung, i) => { %>
+                                            <div class="col-lg-4 mr-lg-4 my-2 rounded bg-white">
+                                                <% let isOneOfAccount = false; %>
+                                               <% for(let i = 0; i < account.bosung.length; i++){ %>
+                                                    <% if(account.bosung[i].fieldId.toString() == eachBosung._id.toString()){ %>
+                                                        <input type="checkbox" value="<%= eachBosung._id %>" class="bosungCheckBox" id="personal" checked>
+                                                        <% isOneOfAccount = true;
+                                                            break; // break current for i loop, not forEach
+                                                        %>
+                                                    <% } %>
+                                               <% } %>
+                                                <% if(!isOneOfAccount){ %>
+                                                <input type="checkbox" value="<%= eachBosung._id %>" class="bosungCheckBox" id="personal">
+                                                <% } %>
+                                                <label for="personal" class="py-2"><%= eachBosung.name %></label>
+                                            </div> 
+                                        <% }) %>
+                                        </div>
+                                    <% } %>
+
+                                <div class="price">
+                                    <h6 class="font-weight-bold pt-4 pb-1">Hình thức:</h6>
+                                    <div class="row px-3">
+                                        <div class="col-lg-4 mr-lg-4 my-2 rounded bg-white">
+                                            <% if(account.transaction_type == 'sell'){ %>
+                                                <input id="banRadio" type="radio" name="postType" value="sell" id="personal" checked>
+                                            <% }else{ %>
+                                                <input id="banRadio" type="radio" name="postType" value="sell" id="personal">
+                                            <% } %>
+                                            <label for="personal" class="py-2">Bán</label>
+                                        </div> 
+                                        <div class="col-lg-4 mr-lg-4 rounded bg-white my-2 ">
+                                            <input id="priceSell" type="hidden" name="price" class="border-0 py-2 w-100 price" placeholder="Nhập Giá"
+                                                id="price" min="0" value="<%= account.price %>">
+                                            <input id="priceSellFake" type="currency" class="border-0 py-2 w-100 price" placeholder="Nhập Giá"
+                                                id="price" min="0" value="<%= account.price %>">
+                                        </div>
+
+                                        <div class="col-lg-4 mr-lg-4 my-2 rounded bg-white">
+                                        <% if(account.transaction_type == 'trade'){ %>
+                                            <input id="giaoluuRadio" type="radio" name="postType" value="trade" id="personal" checked>
+                                        <% }else{ %>
+                                            <input id="giaoluuRadio" type="radio" name="postType" value="trade" id="personal">
+                                        <% } %>
+                                        <label for="personal" class="py-2">Giao lưu</label>
+                                        </div> 
+
+                                    <select name="phaigiaoluu" id="inputGroupSelect" class="w-50">
+                                        <% if(typeof phais !== "undefined"){ %>
+                                            <% phais.forEach((eachPhai, i) =>{ %>
+                                                <% if(account.transaction_type == 'trade' && (account.phaigiaoluu.toString() == eachPhai._id.toString())){ %>
+                                                    <option value="<%= eachPhai._id %>" selected><%= eachPhai.name %></option>
+                                                <% }else{ %>
+                                                    <option value="<%= eachPhai._id %>"><%= eachPhai.name %></option>
+                                                <% } %>
+                                            <% }) %>
+                                            </select>
+                                        <% } %>
+
+                                        <div class="col-lg-4 mr-lg-4 my-2 rounded bg-white">
+                                            <% if(account.transaction_type == 'all'){ %>
+                                                <input id="allRadio" type="radio" name="postType" value="all" id="personal" checked>
+                                            <% }else{ %>
+                                                <input id="allRadio" type="radio" name="postType" value="all" id="personal">
+                                            <% } %>
+                                            <label for="personal" class="py-2">Bán + Giao Lưu</label>
+                                        </div> 
+                                    </div>
+
+                                    <h6 class="font-weight-bold pt-4 pb-1">Mô tả:</h6>
+                                    <textarea name="loinhan" id="" class="border p-3 w-100" rows="7" placeholder="Viết thêm mô tả cho tài khoản này e.g: Thần khí hoả độc" value="<%= account.loinhan %>"><%= account.loinhan %></textarea>
+                                </div>
+
+                                <h6 class="font-weight-bold pt-4 pb-1">Tải ảnh lên:</h6>
+                                <div class="choose-file text-center my-4 py-4 rounded" id="dragArea">
+                                    <label for="file-upload">
+                                        <span class="d-block font-weight-bold text-dark">Kéo ảnh vào đây để tải lên</span>
+                                        <span class="d-block">hoặc</span>
+                                        <span class="d-block btn bg-primary text-white my-3 select-files"><i class="fas fa-images"></i>  Chọn ảnh</span>
+                                        <span class="d-block">Ảnh tải lên tối đa: 50, yêu cầu ít nhất 10 ảnh</span>
+                                        <input type="file" class="form-control-file d-none cmm" id="file-upload" name="images" accept="image/*" multiple>
+                                        
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                </fieldset>
+                <!-- Post Your ad end -->
+                <fieldset class="border p-4 my-5 seller-information bg-gray">
+                <div class="row">
+                    <p style="text-align: center;">Ảnh sẽ thêm </p>
+                    <div class="gallery"></div>
+                </div>
+
+                <% if(typeof account.images !== 'undefined' && account.images.length > 0){ %>
+                <hr>
+                <div class="row">
+                        <p style="text-align: center;">Ảnh hiện đang có (bấm vào dấu '-' để huỷ)</p>
+                        <div class="currentImage">
+                            <% account.images.forEach(image => { %>
+                                <div class="divCurrentImage">
+                                    <img style="margin: 10px;" src="/images/data/<%= image.url %>" alt="" width="150" height="120">
+                                    <button type="button" data-image="<%= image.url %>" class="btn btnRemoveImage"><i class="fas fa-minus-square"></i></button>
+                                </div>
+                            <% }) %>
+                        </div>
+                </div>
+                <% } %>
+            </fieldset>
+            
+
+                <!-- seller-information start -->
+                <fieldset class="border p-4 my-5 seller-information bg-gray">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <h3>Thông tin liên hệ</h3>
+                        </div>
+                        <div class="col-lg-6">
+                            <h6 class="font-weight-bold pt-4 pb-1">Link facebook của bạn để người mua có thể liên hệ:</h6>
+                            <input type="text" placeholder="https://www.facebook.com/" class="border w-100 p-2" name="contactFB" value="<%= account.contactFB %>" required>
+                            <h6 class="font-weight-bold pt-4 pb-1">Số điện thoại:</h6>
+                            <input name="phone" type="text" placeholder="Tuỳ Chọn" value="<%= account.phone %>" class="border w-100 p-2">
+                        </div>
+                    
+                    </div>
+                </fieldset>
+        
+
+                <!-- submit button -->
+                <div class="checkbox d-inline-flex">
+                    <input id="conditionCB" type="checkbox" id="terms-&-condition" class="mt-1">
+                    <label for="terms-&-condition" class="ml-2">Bằng cách nhấp chuột, bạn phải đồng ý với
+                        <span> <a class="text-success" href="terms-condition.html">Điều khoản & Điều kiện và Quy tắc Đăng.</a></span>
+                    </label>
+                </div>
+                <div id="alert" class="alert alert-danger d-none" role="alert">
+                    This is a danger alert—check it out!
+                </div>
+                <button id="submit" type="submit" class="btn btn-primary d-block mt-2">Lưu</button>
+                <% } %>
+            </form>
+        <% } %>
+    </div>
+</section>
+<!--============================
+=            Footer            =
+=============================-->
+
+<% include ../partials/footer %>
+<script src="/js/account/edit-account.js"></script>
+</body>
+
+</html>

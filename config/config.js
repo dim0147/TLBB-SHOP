@@ -11,7 +11,8 @@ const config = {
     // account for db
     account: {
         transaction_type: ["sell", "trade", "all"],
-        status: ['pending', 'approve', 'done']
+        status: ['pending', 'approve', 'done'],
+        field: ['title', 'c_name', 'level', 'phai', 'vohon', 'amkhi', 'dieuvan', 'ngoc', 'thankhi', 'tuluyen', 'doche', 'longvan', 'server', 'postType', 'price', 'phaigiaoluu', 'loinhan', 'contactFB', 'phone']
     },
 
     session: {

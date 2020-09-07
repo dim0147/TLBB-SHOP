@@ -16,24 +16,23 @@
 					<a class="nav-link" href="/">Trang chủ <span class="sr-only"></span></a>
 				</li>
 
-				<!-- Phái -->
-				<li class="nav-item dropdown">
-					<a class="nav-link dropdown-toggle" id="phai" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Phái</a>
-					<ul class="dropdown-menu" aria-labelledby="phai">
-				<% if(menuView.phais.length > 0){ %>
-					<% menuView.phais.forEach(function(phai){ %>
-						<li class="dropdown-item" href="/account/search?phai=<%=phai._id%>"><a><%= phai.name %></a></li>						
-					<% }) %>
-						</ul>
+				<% if(typeof menuView !== 'undefined' && typeof menuView.phais !== 'undefined' && menuView.phais.length > 0){ %>
+					<!-- Phái -->
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle" id="phai" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Phái</a>
+						<ul class="dropdown-menu" aria-labelledby="phai">
+						<% menuView.phais.forEach(function(phai){ %>
+							<li class="dropdown-item" href="/account/search?phai=<%=phai._id%>"><a><%= phai.name %></a></li>						
+						<% }) %>
+							</ul>
 				<% } %>
 				</li>
 
+				<% if(typeof menuView !== 'undefined' && typeof menuView.items !== 'undefined' && menuView.items.length > 0){ %>
 				<!-- Item Propety -->
 				<li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle" id="dropdown1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Thể loại</a>
 					<ul class="dropdown-menu" aria-labelledby="dropdown1">
-
-						<% if(menuView.items.length > 0){ %>
 							<% menuView.items.forEach(function(item){ %>
 								<li class="dropdown-item dropdown">
 									<a class="dropdown-toggle" id="<%= item._id %>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><%= item.name %></a>
@@ -70,7 +69,7 @@
 			
 			<form class="form-inline mt-2 mt-md-0">
 				<ul class="navbar-nav ml-auto mt-10">
-					<% if(userSS){ %>
+					<% if(typeof userSS != "undefined" && userSS){ %>
 					<li class="nav-item dropdown dropdown-slide">
 						<a class="nav-link dropdown-toggle" href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 							<img style="padding-bottom: 2px; margin-right: 10px;" src="<%= userSS.urlImage %>" width=50 height=40 class="rounded-circle" style="padding: 0; margin: 0">
@@ -78,7 +77,7 @@
 						</a>
 						<!-- Dropdown list -->
 						<div class="dropdown-menu">
-							<a class="dropdown-item" href="category.html">Thông Tin Cá Nhân</a>
+							<a class="dropdown-item" href="/user/profile">Thông Tin Cá Nhân</a>
 							<a class="dropdown-item" href="/user/logout">Đăng Xuất</a>
 						</div>
 					</li>

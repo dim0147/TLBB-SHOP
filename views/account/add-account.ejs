@@ -23,9 +23,11 @@
                             </div>
                             <div class="col-lg-6">
                                 <h6 class="font-weight-bold pt-4 pb-1">Tiêu Đề:</h6>
-                                <input id="title" type="text" name="title" class="border w-100 p-2 bg-white text-capitalize" placeholder="Nick Full 6 + 7, tu cao,..." required>
-                                
+                                <h6 style="font-size: 14px;letter-spacing: 0;color: #848484;">Không được quá 40 ký tự</h6>
+                                <input id="title" type="text" name="title" class="border w-100 p-2 bg-white text-capitalize" placeholder="Nick Full 6 + 7, tu cao,.. Chú Ý: Không được quá 20 kí tự." required>
+                               
                                 <h6 class="font-weight-bold pt-4 pb-1">Tên Nhân Vật:</h6>
+                                <h6 style="font-size: 14px;letter-spacing: 0;color: #848484;">Không được quá 20 ký tự</h6>
                                 <input id="nameCharacter" type="text" name="c_name" class="border w-100 p-2 bg-white text-capitalize" placeholder="" required>
                                 
                                 <h6 class="font-weight-bold pt-4 pb-1">Cấp:</h6>
@@ -98,8 +100,10 @@
                                             <label for="personal" class="py-2">Bán</label>
                                         </div> 
                                         <div class="col-lg-4 mr-lg-4 rounded bg-white my-2 ">
-                                            <input id="priceSell" type="number" name="price" class="border-0 py-2 w-100 price" placeholder="Nhập Giá"
+                                            <input id="priceSell" type="hidden" name="price" class="border-0 py-2 w-100 price" placeholder="Nhập Giá"
                                                 id="price" min="0">
+                                            <input id="priceSellFake" type="currency" class="border-0 py-2 w-100 price" placeholder="Nhập Giá"
+                                                id="price" min="0" value="">
                                         </div>
 
                                         <div class="col-lg-4 mr-lg-4 my-2 rounded bg-white">
@@ -156,7 +160,7 @@
                         </div>
                         <div class="col-lg-6">
                             <h6 class="font-weight-bold pt-4 pb-1">Link facebook của bạn để người mua có thể liên hệ:</h6>
-                            <input type="text" placeholder="https://www.facebook.com/" class="border w-100 p-2" name="contactfb" required>
+                            <input type="text" placeholder="https://www.facebook.com/" class="border w-100 p-2" name="contactFB" required>
                             <h6 class="font-weight-bold pt-4 pb-1">Số điện thoại:</h6>
                             <input name="phone" type="text" placeholder="Tuỳ Chọn" class="border w-100 p-2">
                         </div>

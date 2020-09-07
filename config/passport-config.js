@@ -13,11 +13,15 @@ const userModel = require('../models/user');
 
 
 passport.serializeUser( (user, done) => {
-    done(null, {_id: user._id, name: user.name, urlImage: user.urlImage, type: user.type, created_at: user.created_at});
+    done(null, user);
 });
 
 passport.deserializeUser(function(user, done){
-    done(null, user);
+    userModel.findById(user._id, function(err, user){
+        if(err) return done(err);
+        if(user == null) return done('Không thấy user');
+        done(null, user);
+    });
 });
 
 passport.use('local.register', new LocalStrategy({passReqToCallback: true}, (req, username, password, done) => {
@@ -99,6 +103,7 @@ passport.use(new FacebookStrategy({
                 cb(null, false)
             });
         },
+        // If exist user than update name and image
         (user, cb) => {
             if(user === false) return cb(null, false)
             userModel.findOneAndUpdate({_id: user._id}, {name: profile.displayName, urlImage: 'http://graph.facebook.com/' + profile.id +'/picture?type=square'}, err => {

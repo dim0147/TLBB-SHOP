@@ -9,7 +9,6 @@ exports.checkEmptyRequest = function(req, arrayProperty, arrayNoCheckNull = []){
     for (var i = 0; i < arrayProperty.length; i++){
         let property = arrayProperty[i];
         if(typeof req[property] === 'undefined'){
-            console.log('fail ' + property);
             return true;
         }
         if(!arrayNoCheckNull.includes(property) && req[property].length === 0)
@@ -102,11 +101,17 @@ exports.generateRandomString = function(length){
 exports.deleteManyFiles = function(arrFiles){
     try {
         arrFiles.forEach(path => fs.existsSync(path) && fs.unlinkSync(path));
-        console.log('Delete image files success!');
         return true;
       } catch (err) {
         console.error(err)
         return false;
       }
+}
+
+exports.isEmptyObject = obj => {
+    if(Object.keys(obj).length > 0){
+        return false;    
+    }
+    return true
 }
 

@@ -13,6 +13,7 @@ const passport = require('passport');
 
 const registerAC = require('../controllers/user/register');
 const loginAC = require('../controllers/user/login');
+const profileAC = require('../controllers/user/profile');
 const logoutAC = require('../controllers/user/logout');
 
 
@@ -36,6 +37,10 @@ router.get('/login/facebook/callback', passport.authenticate('facebook'), loginA
 router.get('/login/google', passport.authenticate('google', {scope: ['profile', 'email']}));
 
 router.get('/login/google/callback', passport.authenticate('google'), loginAC.callbackAuthenticate);
+
+/* Profile . */
+router.get('/profile', profileAC.renderPage);
+
 
 
 /* Logout . */
