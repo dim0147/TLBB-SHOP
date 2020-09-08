@@ -316,7 +316,7 @@ $('document').ready(function(){
                         '                                        <div style="display: inline-block;">'+
                         '                                            <span style="display: inline;color:rgb(0, 240, 240);font-size:15px;">'+
                         '                                                Tên: '+account.c_name+'<br>'+
-                        '                                                Server: '+account.server.name+ '<br>' + 
+                        '                                                Server: '+account.server.name+ ' ('+ account.sub_server.name +')<br>' + 
                                                                         account.transaction_type +
                         '                                            </span>'+
                         '                                        </div>'+

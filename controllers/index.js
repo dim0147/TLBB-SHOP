@@ -9,6 +9,7 @@ const searchResultModel = require('../models/search-result');
 
 const cache = require('../cache/cache');
 const item = require('../models/item');
+const config = require('../config/config');
 
 dateFormat.i18n = {
     dayNames: [
@@ -53,8 +54,25 @@ exports.indexPage = (req, res) =>{
                 {
                     $lookup: {
                         from: 'item-properties',
-                        localField: '_id',
-                        foreignField: 'itemId',
+                        let: {idItem: "$_id"},
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $eq: ['$itemId', '$$idItem']
+                                    },
+                                    parent: null
+                                }
+                            },
+                            {
+                                $lookup: {
+                                    from: 'item-properties',
+                                    localField: '_id',
+                                    foreignField: 'parent',
+                                    as: 'sub_properties'
+                                }
+                            }
+                        ],
                         as: 'properties'
                     }
                 }
@@ -102,6 +120,7 @@ exports.indexPage = (req, res) =>{
                         title: {$first: '$title'},
                         c_name: {$first: '$c_name'},
                         server: {$first: '$server'},
+                        sub_server: {$first: '$sub_server'},
                         phai: {$first: '$phai'},
                         ngoc: {$first: '$ngoc'},
                         dieuvan: {$first: '$dieuvan'},
@@ -128,6 +147,7 @@ exports.indexPage = (req, res) =>{
                         title: 1,
                         c_name: 1,
                         server: 1,
+                        sub_server: 1,
                         phai: 1,
                         ngoc: 1,
                         dieuvan: 1,
@@ -162,68 +182,12 @@ exports.indexPage = (req, res) =>{
                 }
             ], function(err, accounts){ // Accounts done
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
-                const popAcFields = [
-                    {
-                        path: 'phai',
-                        model: 'phais',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'server',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'vohon',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'amkhi',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'thankhi',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'tuluyen',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'ngoc',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'doche',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'dieuvan',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'longvan',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'phaigiaoluu',
-                        model: 'phais',
-                        select: '_id name'
-                    }
-                ];
+
                 if(accounts.length === 0){ // If don't have
                     result.mostViewAccount = accounts;
                     return cb(null, result);
                 } 
-                accountModel.populate(accounts, popAcFields, (err, accounts) => { // Populate fields
+                accountModel.populate(accounts, config.account.popAcFields, (err, accounts) => { // Populate fields
                     if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
                     accounts.forEach(account =>{
                         account.createdAt = dateFormat(new Date(account.createdAt), "d mmmm, yyyy")
@@ -272,6 +236,7 @@ exports.indexPage = (req, res) =>{
                         title: {$first: '$title'},
                         c_name: {$first: '$c_name'},
                         server: {$first: '$server'},
+                        sub_server: {$first: '$sub_server'},
                         phai: {$first: '$phai'},
                         ngoc: {$first: '$ngoc'},
                         dieuvan: {$first: '$dieuvan'},
@@ -298,6 +263,7 @@ exports.indexPage = (req, res) =>{
                         title: 1,
                         c_name: 1,
                         server: 1,
+                        sub_server: 1,
                         phai: 1,
                         ngoc: 1,
                         dieuvan: 1,
@@ -327,68 +293,12 @@ exports.indexPage = (req, res) =>{
                 }
             ], function(err, accounts){
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
-                const popAcFields = [
-                    {
-                        path: 'phai',
-                        model: 'phais',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'server',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'vohon',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'amkhi',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'thankhi',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'tuluyen',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'ngoc',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'doche',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'dieuvan',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'longvan',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'phaigiaoluu',
-                        model: 'phais',
-                        select: '_id name'
-                    }
-                ];
+
                 if(accounts.length === 0){ // If don't have
                     result.recentAccount = accounts;
                     return cb(null, result);
                 } 
-                accountModel.populate(accounts, popAcFields, (err, accounts) => { // Populate fields
+                accountModel.populate(accounts, config.account.popAcFields, (err, accounts) => { // Populate fields
                     if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
                     accounts.forEach(account =>{
                         account.createdAt = dateFormat(new Date(account.createdAt), "d mmmm, yyyy")
@@ -408,16 +318,17 @@ exports.indexPage = (req, res) =>{
             }
 
             itemModel.aggregate([
-                {
-                    $lookup:{
+                {   
+                    $lookup:{ // Find parent item properties
                         from: 'item-properties',
                         let: {idItem: '$_id'},
                         pipeline: [
                             {
-                                $match:{
+                                $match: {
                                     $expr:{
                                         $eq: ['$itemId', '$$idItem']
-                                    }
+                                    },
+                                    parent: null
                                 }
                             },
                             {
@@ -464,9 +375,55 @@ exports.indexPage = (req, res) =>{
                             },
                             {
                                 $project: {
+                                    _id: 1,
                                     itemId: 1,
                                     name: 1,
-                                    totalAccount: {$size: "$account"}                                    
+                                    slug: 1,
+                                    totalAccount: {$size: "$account"}                                          
+                                }
+                            },
+                            {
+                                $lookup: { // Find sub item property
+                                    from: 'item-properties',
+                                    let: {parent: '$_id'},
+                                    pipeline: [
+                                        {
+                                            $match: {
+                                                $expr: {
+                                                    $eq: ['$parent', '$$parent']
+                                                }
+                                            }
+                                        },
+                                        {
+                                            $lookup:{
+                                                from: 'accounts',
+                                                let: {idProperty: '$_id'},
+                                                pipeline:[
+                                                    {
+                                                        $match:{
+                                                            $or: [
+                                                                {
+                                                                    $expr:{ $eq: ['$sub_server', '$$idProperty']}
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                ],
+                                                as: 'account'
+                                            }
+                                        },
+                                        {
+                                            $project: {
+                                                _id: 1,
+                                                itemId: 1,
+                                                name: 1,
+                                                slug: 1,
+                                                totalAccount: {$size: "$account"}                                          
+                                            }
+                                        }
+                                    ],
+                                    as: 'sub_properties'
+
                                 }
                             }
                         ],
@@ -482,7 +439,9 @@ exports.indexPage = (req, res) =>{
                             _id: 1,
                             itemId: 1,
                             name: 1,
-                            totalAccount: 1
+                            totalAccount: 1,
+                            slug: 1,
+                            sub_properties: 1
                         }
                     }
                 }
@@ -562,6 +521,7 @@ exports.indexPage = (req, res) =>{
                                     title: {$first: '$title'},
                                     c_name: {$first: '$c_name'},
                                     server: {$first: '$server'},
+                                    sub_server: {$first: '$sub_server'},
                                     phai: {$first: '$phai'},
                                     ngoc: {$first: '$ngoc'},
                                     dieuvan: {$first: '$dieuvan'},
@@ -588,6 +548,7 @@ exports.indexPage = (req, res) =>{
                                     title: 1,
                                     c_name: 1,
                                     server: 1,
+                                    sub_server: 1,
                                     phai: 1,
                                     ngoc: 1,
                                     dieuvan: 1,
@@ -618,64 +579,8 @@ exports.indexPage = (req, res) =>{
                             if(err) return reject(err);
                             // Check if have account, populate fields and format date
                             if(accounts.length > 0){
-                                const popAcFields = [
-                                    {
-                                        path: 'phai',
-                                        model: 'phais',
-                                        select: '_id name'
-                                    },
-                                    {
-                                        path: 'server',
-                                        model: 'item-properties',
-                                        select: '_id name'
-                                    },
-                                    {
-                                        path: 'vohon',
-                                        model: 'item-properties',
-                                        select: '_id name'
-                                    },
-                                    {
-                                        path: 'amkhi',
-                                        model: 'item-properties',
-                                        select: '_id name'
-                                    },
-                                    {
-                                        path: 'thankhi',
-                                        model: 'item-properties',
-                                        select: '_id name'
-                                    },
-                                    {
-                                        path: 'tuluyen',
-                                        model: 'item-properties',
-                                        select: '_id name'
-                                    },
-                                    {
-                                        path: 'ngoc',
-                                        model: 'item-properties',
-                                        select: '_id name'
-                                    },
-                                    {
-                                        path: 'doche',
-                                        model: 'item-properties',
-                                        select: '_id name'
-                                    },
-                                    {
-                                        path: 'dieuvan',
-                                        model: 'item-properties',
-                                        select: '_id name'
-                                    },
-                                    {
-                                        path: 'longvan',
-                                        model: 'item-properties',
-                                        select: '_id name'
-                                    },
-                                    {
-                                        path: 'phaigiaoluu',
-                                        model: 'phais',
-                                        select: '_id name'
-                                    }
-                                ];
-                                accountModel.populate(accounts, popAcFields, (err, accounts) => {
+
+                                accountModel.populate(accounts, config.account.popAcFields, (err, accounts) => {
                                     if(err) return reject(err);
                                     accounts.forEach(account =>{
                                         account.createdAt = dateFormat(new Date(account.createdAt), "d mmmm, yyyy")

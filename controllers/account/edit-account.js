@@ -95,8 +95,25 @@ exports.renderPage = (req, res) => {
                 {
                     $lookup:{
                         from: 'item-properties',
-                        localField: '_id',
-                        foreignField: 'itemId',
+                        let: {idItem: '$_id'},
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $eq: ['$itemId', '$$idItem']
+                                    },
+                                    parent: null
+                                }
+                            },
+                            {
+                                $lookup:{
+                                    from: 'item-properties',
+                                    localField: '_id',
+                                    foreignField: 'parent',
+                                    as: 'sub_properties'
+                                }
+                            }
+                        ],
                         as: 'detail'
                     } 
                 }
@@ -370,18 +387,22 @@ exports.updateAccount =  async (req, res) => {
                     (req.body.postType === 'all' && (typeof req.body.price === 'undefined' || typeof req.body.phaigiaoluu === 'undefined') )
                 )
                     throw new Error('Lỗi postType');
+                // Check if is sell
                 if(req.body.postType === 'sell'){
                     if(isNaN(req.body.price))
                         throw new Error('Giá không hợp lệ')
                 }
+                // Check if is trade
                 else if(req.body.postType === 'trade'){
                     if(!mongoose.Types.ObjectId.isValid(req.body.phaigiaoluu))
                         throw new Error('Phái giao lưu không hợp lệ')
                 }
+                // Check if is both
                 else if(req.body.postType === 'all'){
                     if(isNaN(req.body.price) || !mongoose.Types.ObjectId.isValid(req.body.phaigiaoluu))
                         throw new Error('Lỗi postType all')
                 }
+                // Assign post type to transaction type and remove postType field and 
                 req.body.transaction_type = req.body.postType;
                 delete req.body.postType;
             }
@@ -400,7 +421,6 @@ exports.updateAccount =  async (req, res) => {
             await updateAccount(idAccount, req.body, session);
 
             // Check if have image add or image delete, calculate if less than 10 or more than 50 image return error
-
             if( (typeof req.files !== 'undefined' && req.files.length > 0) || listImgDel !== null ){
                 const totalImage = await getTotalImageAccount(idAccount);
                 //  Check if total (image + image add) - image del < 10 or more than 50

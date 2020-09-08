@@ -88,6 +88,23 @@
                                                 <% } %>
                                                 <label for="personal" class="py-2"><%= option.name %></label>
                                             </div>
+
+                                            <% if(typeof option.sub_properties !== "undefined" && option.sub_properties.length > 0) { %>
+                                                <% option.sub_properties.forEach(function(subProperty){ %>
+                                                    <div class="col-lg-4 mr-lg-4 my-2 rounded bg-white">
+                                                        <% if( account.hasOwnProperty(option.slug) && (account[option.slug].toString() == subProperty._id.toString())){ %>
+                                                            <input type="radio" name="<%= option.slug %>" value="<%= subProperty._id %>" id="personal" checked>
+                                                        <% }else{ %>
+                                                            <input type="radio" name="<%= option.slug %>" value="<%= subProperty._id %>" id="personal">
+                                                        <% } %>
+                                                        <label for="personal" class="py-2"><%= subProperty.name %></label>
+                                                    </div>
+                                                <% }) %>
+                                                <div class="col-lg-8 mr-lg-4 my-2 rounded">
+                                                    <label for="personal" class="py-2"></label>
+                                                </div>
+                                            <% } %>
+                                            
                                             <% }) %>
                                         </div>
                                     <% } %>    
@@ -114,6 +131,22 @@
                                                 <% } %>
                                                 <label for="personal" class="py-2"><%= option.name %></label>
                                             </div>
+
+                                            <% if(typeof option.sub_properties !== "undefined" && option.sub_properties.length > 0) { %>
+                                                <% option.sub_properties.forEach(function(subProperty){ %>
+                                                    <div class="col-lg-4 mr-lg-4 my-2 rounded bg-white">
+                                                        <% if( account.hasOwnProperty(option.slug) && (account[option.slug].toString() == subProperty._id.toString())){ %>
+                                                            <input type="radio" name="<%= option.slug %>" value="<%= subProperty._id %>" id="personal" checked>
+                                                        <% }else{ %>
+                                                            <input type="radio" name="<%= option.slug %>" value="<%= subProperty._id %>" id="personal">
+                                                        <% } %>
+                                                        <label for="personal" class="py-2"><%= subProperty.name %></label>
+                                                    </div>
+                                                <% }) %>
+                                                <div class="col-lg-8 mr-lg-4 my-2 rounded">
+                                                    <label for="personal" class="py-2"></label>
+                                                </div>
+                                            <% } %>
                                             <% }) %>
                                         </div>
                                     <% } %>

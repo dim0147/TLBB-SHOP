@@ -12,7 +12,69 @@ const config = {
     account: {
         transaction_type: ["sell", "trade", "all"],
         status: ['pending', 'approve', 'done'],
-        field: ['title', 'c_name', 'level', 'phai', 'vohon', 'amkhi', 'dieuvan', 'ngoc', 'thankhi', 'tuluyen', 'doche', 'longvan', 'server', 'postType', 'price', 'phaigiaoluu', 'loinhan', 'contactFB', 'phone']
+        field: ['title', 'c_name', 'level', 'phai', 'vohon', 'amkhi', 'dieuvan', 'ngoc', 'thankhi', 'tuluyen', 'doche', 'longvan', 'server', 'sub_server','postType', 'price', 'phaigiaoluu', 'loinhan', 'contactFB', 'phone'],
+        popAcFields: [
+            {
+                path: 'phai',
+                model: 'phais',
+                select: '_id name'
+            },
+            {
+                path: 'server',
+                model: 'item-properties',
+                select: '_id name'
+            },
+            {
+                path: 'vohon',
+                model: 'item-properties',
+                select: '_id name'
+            },
+            {
+                path: 'amkhi',
+                model: 'item-properties',
+                select: '_id name'
+            },
+            {
+                path: 'thankhi',
+                model: 'item-properties',
+                select: '_id name'
+            },
+            {
+                path: 'tuluyen',
+                model: 'item-properties',
+                select: '_id name'
+            },
+            {
+                path: 'ngoc',
+                model: 'item-properties',
+                select: '_id name'
+            },
+            {
+                path: 'doche',
+                model: 'item-properties',
+                select: '_id name'
+            },
+            {
+                path: 'dieuvan',
+                model: 'item-properties',
+                select: '_id name'
+            },
+            {
+                path: 'longvan',
+                model: 'item-properties',
+                select: '_id name'
+            },
+            {
+                path: 'phaigiaoluu',
+                model: 'phais',
+                select: '_id name'
+            },
+            {
+                path: 'sub_server',
+                model: 'item-properties',
+                select: '_id name'
+            }
+        ]
     },
 
     session: {

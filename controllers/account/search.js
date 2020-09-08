@@ -4,11 +4,12 @@ const dateFormat = require('dateformat');
 
 const helper = require('../../help/helper');
 const cache = require('../../cache/cache');
+const config = require('../../config/config');
 
 const accountModel = require('../../models/account');
 const searchResultModel = require('../../models/search-result');
 const itemModel = require('../../models/item');
-const item = require('../../models/item');
+
 
 dateFormat.i18n = {
     dayNames: [
@@ -29,7 +30,7 @@ exports.checkFields = async function(req, res, next){
     if(helper.isEmpty(req.query))
         return res.render('account/search', {title: 'Có lỗI xảy ra', error: 'Thiếu query'});
 
-    const allowField = ['c_name', 'min', 'max', 'phai', 'sort', 'transaction_type', 'phaigiaoluu', 'bosung', 'page', 'dataOnly'];
+    const allowField = ['c_name', 'min', 'max', 'phai', 'sort', 'sub_server', 'transaction_type', 'phaigiaoluu', 'bosung', 'page', 'dataOnly'];
 
     // Get item in menuView Cache, if not query then add to allowField
     let menuView = cache.getKey('menuView');
@@ -405,6 +406,7 @@ exports.renderPage = async function(req, res){
                     phai: {$first: '$phai'},
                     level: {$first: '$level'},
                     server: {$first: '$server'},
+                    sub_server: {$first: '$sub_server'},
                     vohon: {$first: '$vohon'},
                     amkhi: {$first: '$amkhi'},
                     thankhi: {$first: '$thankhi'},
@@ -471,64 +473,8 @@ exports.renderPage = async function(req, res){
             },
             (accounts, cb) => {
                 if(accounts[0].data.length === 0) return cb(null, accounts[0].data);
-                const popAcFields = [
-                    {
-                        path: 'phai',
-                        model: 'phais',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'server',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'vohon',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'amkhi',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'thankhi',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'tuluyen',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'ngoc',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'doche',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'dieuvan',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'longvan',
-                        model: 'item-properties',
-                        select: '_id name'
-                    },
-                    {
-                        path: 'phaigiaoluu',
-                        model: 'phais',
-                        select: '_id name'
-                    }
-                ];
-                accountModel.populate(accounts[0].data, popAcFields, (err, acs) => {
+
+                accountModel.populate(accounts[0].data, config.account.popAcFields, (err, acs) => {
                     if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
                     // Format date 
                     acs = formatDate(acs);

@@ -155,7 +155,7 @@
 											 </li>
 										 </ul>
 										 <p class="card-text">
-											 Server: <%= account.server.name %><br>
+											 Server: <%= account.server.name %> (<%= account.sub_server.name %>)<br>
 											 Tên nhân vật: <%= account.c_name %><br>
 											 Ngọc: <%= account.ngoc.name %><br>
 											 Điêu Văn: <%= account.dieuvan.name %><br>
@@ -242,7 +242,7 @@
 											 </li>
 										 </ul>
 										 <p class="card-text">
-											 Server: <%= account.server.name %><br>
+											 Server: <%= account.server.name %> (<%= account.sub_server.name %>) <br>
 											 Tên nhân vật: <%= account.c_name %><br>
 											 Ngọc: <%= account.ngoc.name %><br>
 											 Điêu Văn: <%= account.dieuvan.name %><br>
@@ -331,7 +331,7 @@
 													</li>
 												</ul>
 												<p class="card-text">
-													Server: <%= account.server.name %><br>
+													Server: <%= account.sub_server.name %><br>
 													Tên nhân vật: <%= account.c_name %><br>
 													Ngọc: <%= account.ngoc.name %><br>
 													Điêu Văn: <%= account.dieuvan.name %><br>
@@ -415,6 +415,11 @@
 										<ul class="category-list" >
 											<% item.properties.forEach(property =>{ %>
 												<li><a href="/account/search?<%= item.slug %>=<%= property._id %>"><%= property.name %> <span><%= property.totalAccount %></span></a></li>
+												<% if(property.sub_properties.length > 0) { %>
+													<% property.sub_properties.forEach(function(sub_property){ %>
+														<li><a href="/account/search?<%= property.slug %>=<%= sub_property._id %>">		+ <%= sub_property.name %> <span><%= sub_property.totalAccount %></span></a></li>
+													<% }) %>
+												<% } %>
 											<% }) %>
 											
 										</ul>

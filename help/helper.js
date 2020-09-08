@@ -38,7 +38,16 @@ exports.getMenuData = function(){
                                   $match: {
                                       $expr:{
                                           $eq: ['$itemId', '$$idItem']
-                                      }
+                                      },
+                                      parent: null
+                                  }
+                              },
+                              {
+                                  $lookup: {
+                                      from: 'item-properties',
+                                      localField: '_id',
+                                      foreignField: 'parent',
+                                      as: 'sub_properties'
                                   }
                               }
                           ],

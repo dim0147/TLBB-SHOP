@@ -13,7 +13,8 @@ const accountSchema = mongoose.Schema({
     c_name: {type: String, required: true, minlength: 2, maxlength: 20},
     phai: {type: mongoose.Schema.Types.ObjectId, ref: 'phais', required: true},
     level: {type: Number, required: true, min: 1, max: 119},
-    server: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
+    server: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties', required: true},
+    sub_server: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties', required: true},
     vohon: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
     amkhi: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
     thankhi: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
@@ -42,7 +43,7 @@ accountSchema.pre('save', function(next) {
 
     // Checking phai
     if(!mongoose.Types.ObjectId.isValid(this.phai))
-      return next("Phái không hợp lệd !");
+      return next("Phái không hợp lệ!");
     let phaiPromise = new Promise((resolve, reject) => {
       phaiModel.countDocuments({_id: this.phai}, (err, count) =>{
         if(err) return reject(err);
@@ -63,6 +64,19 @@ accountSchema.pre('save', function(next) {
       });
       listPromise.push(phaiGLPromise);
     }
+
+    // Checking server and sub server
+    if(!mongoose.Types.ObjectId.isValid(this.server) || !mongoose.Types.ObjectId.isValid(this.sub_server))
+      return next("Server không hợp lệ!");
+    let serverPromise = new Promise((resolve, reject) => {
+      itemPropertyModel.findOne({_id: this.sub_server, parent: this.server}).exec((err, property) => {
+        if(err) return reject(err);
+        if(property === null) return reject("Sub Server không trùng với Server");
+        resolve();
+      });
+    });
+    listPromise.push(serverPromise);
+
     
     // Loop though field of current document for checking fields
     for(const field in this){
@@ -158,6 +172,23 @@ accountSchema.pre('updateOne', function(next) {
   });
 
   listPromise.push(phaiGLPromise);
+  }
+
+  // Checking server and sub server
+  if(typeof doc.server !== "undefined" || typeof doc.sub_server !== "undefined"){
+    if(typeof doc.server === "undefined" || typeof doc.sub_server === "undefined")
+      return next("Server missing field");
+
+      if(!mongoose.Types.ObjectId.isValid(doc.server) || !mongoose.Types.ObjectId.isValid(doc.sub_server))
+        return next("Server không hợp lệ!");
+      let serverPromise = new Promise((resolve, reject) => {
+        itemPropertyModel.findOne({_id: doc.sub_server, parent: doc.server}).exec((err, property) => {
+          if(err) return reject(err);
+          if(property === null) return reject("Sub Server không trùng với Server");
+          resolve();
+        });
+      });
+      listPromise.push(serverPromise);
   }
 
   // Loop though field of current document for checking fields

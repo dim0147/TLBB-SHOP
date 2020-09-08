@@ -45,8 +45,25 @@ exports.renderAddAccount = (req, res) => {
                 {
                     $lookup:{
                         from: 'item-properties',
-                        localField: '_id',
-                        foreignField: 'itemId',
+                        let: {idItem: '$_id'},
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $eq: ['$itemId', '$$idItem']
+                                    },
+                                    parent: null
+                                }
+                            },
+                            {
+                                $lookup:{
+                                    from: 'item-properties',
+                                    localField: '_id',
+                                    foreignField: 'parent',
+                                    as: 'sub_properties'
+                                }
+                            }
+                        ],
                         as: 'detail'
                     } 
                 }
@@ -83,6 +100,7 @@ exports.checkBody = [
     body('doche', 'Đồ chế không hợp lệ').isMongoId(),
     body('longvan', 'Long văn không hợp lệ').isMongoId(),
     body('server', 'Server không hợp lệ').isMongoId(),
+    body('sub_server', 'Server không hợp lệ').isMongoId(),
     body('postType', 'Hình thức không hợp lệ').notEmpty().custom(value => {
         const allowString = config.account.transaction_type;
         if(!allowString.includes(value)){

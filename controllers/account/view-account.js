@@ -8,7 +8,9 @@ const imageModel = require('../../models/image');
 const acLinkAddFieldModel = require('../../models/account-link-addfield');
 const rateModel = require('../../models/rate')
 const viewModel = require('../../models/view');
-const account = require('../../models/account');
+
+const config = require('../../config/config');
+
 
 dateFormat.i18n = {
     dayNames: [
@@ -36,56 +38,12 @@ exports.checkBody = [
 ]
 
 exports.renderPage = (req, res) => {
-    const popAcFields = [
-        {
-            path: 'phai',
-            model: 'phais'
-        },
-        {
-            path: 'server',
-            model: 'item-properties'
-        },
-        {
-            path: 'vohon',
-            model: 'item-properties'
-        },
-        {
-            path: 'amkhi',
-            model: 'item-properties'
-        },
-        {
-            path: 'thankhi',
-            model: 'item-properties'
-        },
-        {
-            path: 'tuluyen',
-            model: 'item-properties'
-        },
-        {
-            path: 'ngoc',
-            model: 'item-properties'
-        },
-        {
-            path: 'doche',
-            model: 'item-properties'
-        },
-        {
-            path: 'dieuvan',
-            model: 'item-properties'
-        },
-        {
-            path: 'longvan',
-            model: 'item-properties'
-        },
-        {
-            path: 'phaigiaoluu',
-            model: 'phais'
-        },
-        {
-            path: 'userId',
-            model: 'users'
-        }
-    ];
+    let popAcFields = config.account.popAcFields;
+    popAcFields.push({
+        path: 'userId',
+        model: 'users'
+    });
+
     const popBosungField = {path: 'fieldId', model: 'add-fields'};
     waterfall([
         //  Find account with id
