@@ -9,6 +9,7 @@ const config = require('../../config/config');
 const accountModel = require('../../models/account');
 const searchResultModel = require('../../models/search-result');
 const itemModel = require('../../models/item');
+const itemPropertyModel = require('../../models/item_property');
 
 
 dateFormat.i18n = {
@@ -30,7 +31,20 @@ exports.checkFields = async function(req, res, next){
     if(helper.isEmpty(req.query))
         return res.render('account/search', {title: 'Có lỗI xảy ra', error: 'Thiếu query'});
 
-    const allowField = ['c_name', 'min', 'max', 'phai', 'sort', 'sub_server', 'transaction_type', 'phaigiaoluu', 'bosung', 'page', 'dataOnly'];
+    // Field allow to search
+    const allowField = [
+            'c_name', 
+            'min', 
+            'max', 
+            'phai', 
+            'sort', 
+            'sub_server', 
+            'transaction_type', 
+            'phaigiaoluu', 
+            'bosung', 
+            'page', 
+            'dataOnly'
+    ];
 
     // Get item in menuView Cache, if not query then add to allowField
     let menuView = cache.getKey('menuView');
@@ -66,6 +80,7 @@ function filterSpecialSort(req){
             itemPerPage: 9,
             skip: 0
         };
+
         let listBosung = [];
 
         //  Filer special sort
@@ -139,8 +154,6 @@ function filterSpecialSort(req){
             option.skip = (Number(req.query.page) - 1) * option.itemPerPage;
         }
             
-
-
         // Successfully
         return {
             OK: true,
@@ -153,16 +166,21 @@ function filterSpecialSort(req){
 }
 
 function rmvSpecialField(req){
-    delete req.query.min;
-    delete req.query.max;
-    delete req.query.phaigiaoluu;
-    delete req.query.sort;
-    delete req.query.bosung;
-    delete req.query.phai;
-    delete req.query.transaction_type;
-    delete req.query.page;
-    delete req.query.c_name;
-    delete req.query.dataOnly;
+    let allowField = ['sub_server'];
+    let menuView = cache.getKey('menuView');
+
+    // Push slug of item to allowField
+    if(typeof menuView.items !== 'undefined' && menuView.items.length > 0){
+        menuView.items.forEach(function(item){
+            allowField.push(item.slug);
+        });
+    }
+
+    // Elevate field is one of allowField if not remove that field
+    for(var field in req.query){
+        if(!allowField.includes(field))
+            delete req.query[field];
+    }
     return req;
 }
 
@@ -195,9 +213,6 @@ function filterMongooseObjectId(req, condition){
 // Save search result to db
 function saveSearchRs(req){
 
-    //  List search save to db
-    let listSearchRs = [];
-
     // List Promise of filter slug
     let listPromises = [];
 
@@ -206,50 +221,116 @@ function saveSearchRs(req){
 
         // Create new Promise
         let promise = new Promise((resolve, reject) => {
-            // Find item by slug
-            itemModel.findOne({slug: field}, (err, item) => {
-                if(err) return reject(err);
-                if(item === null) return reject('Không tìm thấy item: ' + field);
-                
-                // Create search result to db, check if value field  is string
-                if(typeof req.query[field] === 'string'){
-                    if(!mongoose.Types.ObjectId.isValid(req.query[field])) return false;
-                    // Adding search result
-                    let searchRs = {
-                        item: item._id,
-                        property: mongoose.Types.ObjectId(req.query[field])
-                    }
-                    if(req.isAuthenticated()) // check if have user 
-                        searchRs.user = req.user._id;
-                    listSearchRs.push(searchRs);
-                }   
-                else{   //  If one field have more than one value, e.g: vo hon = ['tracviet', 'toanmy']
-                    let arr = req.query[field];
-                    for(let i = 0; i < arr.length; i++){
-                        let val = arr[i];
-                        if(!mongoose.Types.ObjectId.isValid(val)) return false;
-                        let searchRs = {
-                            item: item._id,
-                            property: mongoose.Types.ObjectId(val),
+           waterfall([
+            (cb) => {
+                if(typeof req.query[field] == 'string'){ // If one property only
+                    itemPropertyModel.findById(req.query[field]).exec((err, property) => {
+                        if(err) return cb(err);
+                        if(property === null) return cb("Không tìm thấy property");
+                        // Check if property have parent or not
+                        if(typeof property.parent != 'undefined'){ 
+                            cb(null, {properties: [property], parent: true});
+                        }else{
+                            cb(null, {properties: [property], parent: false});
                         }
-                        if(req.isAuthenticated()) // check if have user 
-                            searchRs.user = req.user._id;
-                        listSearchRs.push(searchRs);
-                    }
+                    });
                 }
-                resolve();
-            });
+                else{ // If have more than one property 
+                    const promises = req.query[field].map(function(idProperty){
+                        return new Promise((resolve, reject) =>{ // Query property
+                            itemPropertyModel.findById(idProperty).exec((err, property) => {
+                                if(err) return reject(err);
+                                if(property === null) return reject("Không tìm thấy property");
+                                resolve(property);
+                            });
+                        });
+                    });
+                    // Trigger promise all 
+                    Promise.all(promises)
+                    .then(properties => {   
+                        // Get first element to check
+                        const isParent = typeof properties[0].parent !== "undefined" ? true : false;
+
+                        // Check if other property have parent like isParent or not, return false if error, true if all is correct
+                        const notSameType = properties.some(property => {
+                            if(isParent == true && typeof property.parent === 'undefined')
+                                return true;
+                            else if(isParent == false && typeof property.parent !== 'undefined')
+                                return true;
+                        });
+                        if(notSameType == true)
+                            return cb("Lỗi parent property");
+
+                        cb(null, {properties: properties, parent: isParent})
+                    })
+                    .catch(err => {
+                        return cb(err);
+                    })
+                }
+            },
+            (result, cb) => {
+                if(result.parent == false){
+                    // Find item by slug
+                    itemModel.findOne({slug: field}).exec((err, item) => {
+                        if(err) return cb(err);
+                        if(item === null) return cb("Không tìm thấy item");
+                        const notValidProperty = result.properties.some(property => {
+                            if(item._id.toString() != property.itemId.toString())
+                                return true;
+                        });
+                        if(notValidProperty)
+                            return cb("Id property không trùng với id item");
+                        result.itemId = item._id;
+                        cb(null, result);
+                    });
+                }else{
+                    // Query parent field of properties
+                    itemPropertyModel.populate(result.properties, 'parent', function(err, properties){
+                        if(err) return cb(err);
+                        // Check if not same slug in parent of each property value
+                        const notSameSlug = properties.some(property => {
+                            if(typeof property.parent.slug === 'undefined' || property.parent.slug.toString() !== field)
+                                return true;
+                        })
+                        if(notSameSlug){
+                            return cb("Slug không giống nhau!");
+                        }
+                        result.itemId = result.properties[0].itemId;
+                        cb(null, result);
+                    })
+                    
+                }
+            }
+           ], function(err, result){
+               if(err) return reject(err);
+               resolve(result);           
+           });
         });
         // Add to list promise
         listPromises.push(promise);
 
     }
     Promise.all(listPromises)
-    .then(() => {   // Save list of search result to db
-        if(listSearchRs.length > 0)
-            searchResultModel.insertMany(listSearchRs, err => {
-                if(err) return console.log('Có lổi xảy ra khi thêm search result vào db: ' + err);
-            })
+    .then(result => {   // Save list of search result to db
+        console.log('rs');
+        console.log(result);
+        if(result.length > 0){
+            let payload = [];
+            // Loop through result
+            result.map(element => {
+                element.properties.map(property => {
+                    payload.push({
+                        item: element.itemId,
+                        property: property._id,
+                        user: req.isAuthenticated() ? req.user._id : null
+                    })
+                });
+            });
+            console.log(payload);
+            searchResultModel.insertMany(payload, err => {
+                if(err) return console.log(err);
+            });
+        }
     })
     .catch(err => {
         console.log('Có lỗi xảy ra khi save result, vui lòng thử lại sau');

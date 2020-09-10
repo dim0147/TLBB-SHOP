@@ -44,7 +44,11 @@
 							<ul class="list-inline">
 								<% mostSearch.forEach(function(search){ %>
 									<li class="list-inline-item">
-										<a href="/account/search?<%= search.slug %>=<%= search.idProperty %>"><i class="fas fa-search"></i> <%= search.nameItem %> <%= search.nameProperty %></a>
+										<% if(search.parentProperty.length === 0){ %>
+											<a href="/account/search?<%= search.slug %>=<%= search.idProperty %>"><i class="fas fa-search"></i> <%= search.nameItem %> <%= search.nameProperty %></a>
+										<% }else if (search.parentProperty.length > 0){ %>
+											<a href="/account/search?<%= search.parentProperty[0].slug %>=<%= search.idProperty %>"><i class="fas fa-search"></i> <%= search.nameItem %> <%= search.parentProperty[0].name %>  <%= search.nameProperty %></a>
+										<% } %>
 									</li>
 								<% }) %>
 							</ul>

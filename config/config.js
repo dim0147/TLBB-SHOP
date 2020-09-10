@@ -12,7 +12,33 @@ const config = {
     account: {
         transaction_type: ["sell", "trade", "all"],
         status: ['pending', 'approve', 'done'],
-        field: ['title', 'c_name', 'level', 'phai', 'vohon', 'amkhi', 'dieuvan', 'ngoc', 'thankhi', 'tuluyen', 'doche', 'longvan', 'server', 'sub_server','postType', 'price', 'phaigiaoluu', 'loinhan', 'contactFB', 'phone'],
+        allowField: [
+            'title', 
+            'c_name', 
+            'level', 
+
+            'phai',
+
+            'vohon', 
+            'amkhi', 
+            'dieuvan', 
+            'ngoc', 
+            'thankhi', 
+            'tuluyen', 
+            'doche', 
+            'longvan', 
+            'server',
+
+            'sub_server', // parent field
+
+            'postType', 
+            'price', 
+            'phaigiaoluu',
+
+            'loinhan', 
+            'contactFB', 
+            'phone'
+        ],
         popAcFields: [
             {
                 path: 'phai',

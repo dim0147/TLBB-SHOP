@@ -122,7 +122,7 @@ exports.checkBody = [
 function filterAllowField(bodyRequest){
     //  Setup field update
     const speField = ['bosung'];
-    const allowField = config.account.field.concat(speField);
+    const allowField = config.account.allowField.concat(speField);
 
     //  Remove non-field
     for(let field in bodyRequest){

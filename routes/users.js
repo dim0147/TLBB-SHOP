@@ -41,6 +41,8 @@ router.get('/login/google/callback', passport.authenticate('google'), loginAC.ca
 /* Profile . */
 router.get('/profile', profileAC.renderPage);
 
+router.patch('/profile/update-profile', profileAC.checkBodyUpdateProfile ,profileAC.updateProfile);
+
 
 
 /* Logout . */

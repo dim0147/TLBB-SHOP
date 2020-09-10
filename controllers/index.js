@@ -633,8 +633,24 @@ exports.indexPage = (req, res) =>{
                 {
                     $lookup: {
                         from: 'item-properties',
-                        localField: 'property',
-                        foreignField: '_id',
+                        let: { idItemSearch: "$property" },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $eq: ['$_id', '$$idItemSearch']
+                                    }
+                                }
+                            },
+                            {
+                                $lookup: {
+                                    from: 'item-properties',
+                                    localField: 'parent',
+                                    foreignField: '_id',
+                                    as: 'parentProperty'
+                                }
+                            }
+                        ],
                         as: 'property'
                     }
                 },
@@ -651,6 +667,7 @@ exports.indexPage = (req, res) =>{
                         idProperty: {$first: "$property._id"},
                         nameItem: {$first: "$item.name"},
                         nameProperty: {$first: "$property.name"},
+                        parentProperty: {$first: "$property.parentProperty"},
                         totalSearch: {$sum: 1}
                     }
                 },  
@@ -667,6 +684,7 @@ exports.indexPage = (req, res) =>{
                         idProperty: {$first: "$idProperty"},
                         nameItem: {$first: "$nameItem"},
                         nameProperty: {$first: "$nameProperty"},
+                        parentProperty: {$first: "$parentProperty"},
                         maxSearch: {$first: '$totalSearch'}
                     }
                 },
@@ -674,6 +692,8 @@ exports.indexPage = (req, res) =>{
                     $limit: 5
                 }
             ], function(err, mostSearch){
+                console.log('mostSearc');
+                console.log(mostSearch);
                 if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau');
                 if(mostSearch.length !== 0)
                     cache.setKey('mostSearch', mostSearch, 5000);             
