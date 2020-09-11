@@ -692,8 +692,6 @@ exports.indexPage = (req, res) =>{
                     $limit: 5
                 }
             ], function(err, mostSearch){
-                console.log('mostSearc');
-                console.log(mostSearch);
                 if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau');
                 if(mostSearch.length !== 0)
                     cache.setKey('mostSearch', mostSearch, 5000);             

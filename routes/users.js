@@ -38,10 +38,18 @@ router.get('/login/google', passport.authenticate('google', {scope: ['profile', 
 
 router.get('/login/google/callback', passport.authenticate('google'), loginAC.callbackAuthenticate);
 
-/* Profile . */
+/* Profile User . */
 router.get('/profile', profileAC.renderPage);
 
 router.patch('/profile/update-profile', profileAC.checkBodyUpdateProfile ,profileAC.updateProfile);
+
+router.patch('/profile/update-password', profileAC.checkBodyUpdatePassWord ,profileAC.updatePassword);
+
+
+/* Profile Account . */
+router.get('/profile/accounts', profileAC.renderProfileAccount);
+
+router.get('/profile/get-accounts', profileAC.getAccount);
 
 
 

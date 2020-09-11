@@ -37,9 +37,7 @@
                         <div class="widget dashboard-links">
                             <ul>
                                 <li><a style="color: green" class="my-1 d-inline-block" href="/user/profile"><i class="fas fa-user-circle"></i>  Thông tin cá nhân</a></li>
-                                <li><a class="my-1 d-inline-block" href="">Saved Offer <span>(5)</span></a></li>
-                                <li><a class="my-1 d-inline-block" href="">Favourite Stores <span>(3)</span></a></li>
-                                <li><a class="my-1 d-inline-block" href="">Recommended</a></li>
+                                <li><a class="my-1 d-inline-block" href="/user/profile/accounts"><i class="fas fa-cart-plus"></i>   Tài khoản đã đăng</a></li>
                             </ul>
                         </div>
                     </div>
@@ -79,25 +77,26 @@
                                 <!-- Change Password -->
                             <div class="widget change-password">
                                 <h3 class="widget-header user">Đổi mật khẩu</h3>
-                                <form action="#">
                                     <!-- Current Password -->
                                     <div class="form-group">
                                         <label for="current-password">Mật khẩu hiện tại</label>
-                                        <input type="password" class="form-control" id="current-password" name="password">
+                                        <input type="password" class="form-control" id="password" name="password">
                                     </div>
                                     <!-- New Password -->
                                     <div class="form-group">
                                         <label for="new-password">Mật khẩu mới</label>
-                                        <input type="password" class="form-control" id="new-password" name="new-password">
+                                        <input type="password" class="form-control" id="new_password" name="new_password">
                                     </div>
                                     <!-- Confirm New Password -->
                                     <div class="form-group">
                                         <label for="confirm-password">Xác nhận mật khẩu</label>
-                                        <input type="password" class="form-control" id="confirm-password">
+                                        <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+                                    </div>
+                                    <div id="alert-password" class="alert alert-danger d-none" role="alert">
+                                        This is a danger alert—check it out!
                                     </div>
                                     <!-- Submit Button -->
                                     <button class="btn btn-transparent" id="btnChangePassword">Đổi mật khẩu</button>
-                                </form>
                             </div>
                             </div>
                         <% } %>

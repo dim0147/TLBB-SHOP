@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const passwordHash = require('password-hash');
 
 
 const userSchema = mongoose.Schema({
@@ -13,9 +14,13 @@ const userSchema = mongoose.Schema({
     role: {type: String, required: true, enum: ['admin', 'user'], default: 'user'}
 }, { timestamps: { createdAt: 'created_at' } });
 
+userSchema.statics.hashPassword = function(password){
+    const passwordCrypt = passwordHash.generate(password);
+    return passwordCrypt;
+}
 
-
-
-
+userSchema.statics.validatePassword = function(passwordToValidate, hash){
+    return passwordHash.verify(passwordToValidate, hash)
+}
 
 module.exports = mongoose.model('users', userSchema);

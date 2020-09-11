@@ -3,12 +3,9 @@ const LocalStrategy = require('passport-local').Strategy;
 const waterfall = require('async-waterfall');
 const config = require('./config');
 const passwordHash = require('password-hash');
-const RememberStrategy = require('passport-remember-me').Strategy;
-const tokenGenerate = require('rand-token');
 const FacebookStrategy = require('passport-facebook').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
-const tokenModel = require('../models/token');
 const userModel = require('../models/user');
 
 

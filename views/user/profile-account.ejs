@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <% include ../partials/head %>
+  <style>
+      
+      .titleP{
+          color: red!important;
+      }
+      .titleP:hover{
+          color: rgb(165, 53, 59)!important;
+      }
+
+      .nameP{
+          color: rgb(66, 129, 138)!important;
+      }
+      .nameP:hover{
+          color: rgb(9, 198, 223)!important;
+      }
+
+  </style>
+</head>
+
+<body class="body-wrapper">
+  <% include ../partials/menu %>
+  <% if(typeof csrfToken !== "undefined"){ %>
+    <input type="hidden" id="_csrf" value="<%= csrfToken %>">
+  <% } %>
+  <section class="user-profile section">
+	<div class="container">
+		<div class="row">
+            <% if(typeof error !== 'undefined'){ %>
+                <h1><%= error %></h1>
+            <% } %>
+
+            <% if(typeof accounts !== 'undefined'){ %>
+                <div class="col-md-10 offset-md-1 col-lg-3 offset-lg-0">
+                    <div class="sidebar">
+                        <!-- User Widget -->
+                        <div class="widget user">
+                            <!-- User Image -->
+                            <div class="image d-flex justify-content-center">
+                                <img src="<%= user.urlImage %>" alt="" class="">
+                            </div>
+                            <!-- User Name -->
+                            <h5 class="text-center"><%= user.name %></h5>
+                            <div class="text-center">
+                                <% if(user.type == "google"){ %>
+                                        <i style="color:red!important"  class="fab fa-google"></i>
+                                <% } %>
+                            </div>
+                        </div>
+                        <!-- Dashboard Links -->
+                        <div class="widget dashboard-links">
+                            <ul>
+                                <li><a  class="my-1 d-inline-block" href="/user/profile"><i class="fas fa-user-circle"></i>  Thông tin cá nhân</a></li>
+                                <li><a style="color: green" class="my-1 d-inline-block" href="/user/profile/accounts"><i class="fas fa-cart-plus"></i>   Tài khoản đã đăng</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>    
+
+                <div class="col-md-10 offset-md-1 col-lg-9 offset-lg-0">
+                    
+                <table id="table_id" class="display">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Hình ảnh</th>
+                            <th>Tiêu đề</th>
+                            <th>Tên nhân vật</th>
+                            <th>Phái</th>
+                            <th>Server</th>
+                            <th>Hình thức</th>
+                            <th>Giá</th>
+                            <th>Phái Giao lưu</th>
+                            <th>Ngọc</th>
+                            <th>Ngày Đăng</th>
+                            <th>Đánh Giá</th>
+                            <th>Lượt Xem</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                </table>
+                </div>
+
+            <% } %>
+		</div>
+	</div>
+</section>
+
+
+
+<!--============================
+=            Footer            =
+=============================-->
+
+<% include ../partials/footer %>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.21/datatables.min.css"/>
+ 
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.21/datatables.min.js"></script>
+
+<script src="/js/user/profile-account.js"></script>
+
+</body>
+
+</html>

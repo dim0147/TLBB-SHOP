@@ -50,7 +50,7 @@ $(document).ready(function(){
             success: function(res){
                 $(button).prop('disabled', false);
                 setAllowPointer(button, true);
-                showAlert('Cập nhật thành công!', 1);
+                showAlert(res, 1);
             },
             error: function(err){
                 $(button).prop('disabled', false);
@@ -61,6 +61,46 @@ $(document).ready(function(){
 
     });
 
+    $("#btnChangePassword").click(function(){
+        const password = $('#password').val();
+        if(password.length === 0)
+            return showAlert('Xin hãy nhập mật khẩu', 2, $('#alert-password'));
+        const newPassword = $('#new_password').val();
+        if(newPassword.length === 0)
+            return showAlert('Xin hãy nhập mật khẩu mới', 2,  $('#alert-password'));
+        const confirmPassword = $('#confirm_password').val();
+        if(confirmPassword.length === 0)
+            return showAlert('Xin hãy nhập confirm mật khẩu', 2,  $('#alert-password'));
+
+        if(newPassword != confirmPassword)    
+            return showAlert('Xác nhận mật khẩu không chính xác', 0,  $('#alert-password'));
+
+        const button = this;
+        $(this).prop('disabled', true);
+        setAllowPointer(this, false);
+        showAlert('Xin hãy chờ...', 3, $('#alert-password'));
+
+        $.ajax({
+            url: '/user/profile/update-password',
+            method: 'PATCH',
+            data: {
+                password: password,
+                new_password: newPassword,
+                confirm_password: confirmPassword,
+                _csrf: $('#_csrf').val()
+            },
+            success: function(res){
+                $(button).prop('disabled', false);
+                setAllowPointer(button, true);
+                showAlert(res, 1, $('#alert-password'));
+            },
+            error: function(err){
+                $(button).prop('disabled', false);
+                setAllowPointer(button, true);
+                showAlert('Có lỗi xảy ra: ' + err.responseText, 0, $('#alert-password'));
+            }
+        });
+    })
    
 
 });
