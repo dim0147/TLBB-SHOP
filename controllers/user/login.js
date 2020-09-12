@@ -2,7 +2,6 @@ const passport = require('passport');
 var tokenGenerate = require('rand-token');
 const config = require('../../config/config')
 
-const tokenModel = require('../../models/token');
 const { body, validationResult } = require('express-validator');
 
 exports.renderPage = (req, res) => {

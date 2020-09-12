@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
   <% include ../partials/head %>
+  <link rel="stylesheet" type="text/css" href="/plugins/DataTables/datatables.min.css"/>
+  <link rel="stylesheet" href="/plugins/iziToast/iziToast.min.css">
   <style>
       
       .titleP{
-          color: red!important;
+          color:red!important;
       }
       .titleP:hover{
           color: rgb(165, 53, 59)!important;
@@ -17,6 +19,39 @@
       .nameP:hover{
           color: rgb(9, 198, 223)!important;
       }
+
+      .btnEdit{
+        padding: .25rem .5rem;
+        font-size: .875rem;
+        border-radius: .2rem;
+        margin: 5px;
+      }
+
+      .btnRemove{
+        padding: .25rem .5rem;
+        font-size: .875rem;
+        border-radius: .2rem;
+        margin: 5px;
+      }
+
+      .btnMarkAsDone{
+        padding: .25rem .5rem;
+        font-size: .875rem;
+        border-radius: .2rem;
+        margin: 5px;
+      }
+
+      .btnLock{
+        padding: .25rem .5rem;
+        font-size: .875rem;
+        border-radius: .2rem;
+        margin: 5px;
+      }
+
+      #table_id {
+        table-layout: fixed;
+    width: 100%; 
+        }
 
   </style>
 </head>
@@ -61,14 +96,33 @@
                 </div>    
 
                 <div class="col-md-10 offset-md-1 col-lg-9 offset-lg-0">
+                    <!-- Edit Profile Welcome Text -->
+                    <div class="widget welcome-message">
+                        <h2><i class="fas fa-cart-arrow-down"></i>   Danh sách tài khoản đã đăng của bạn</h2>
+                        <p>- Bạn có thể sắp xếp theo cột bằng cách nhấp vào cột cần sắp xếp</p>
+                        <p>- Bạn có thể tìm kiếm thông qua ô tìm kiếm, những cột sau đây được tìm kiếm sau khi bạn nhập từ khoá:</p>
+                        <p>+ Id (lấy id ở cuối url, ví dụ: /view-account/53detcdee ở đây '53detcdee' là id) </p>
+                        <p>+ Tiêu đề</p>
+                        <p>+ Tên nhân vật</p>
+                        <p>+ Server</p>
+                        <p>+ Hình thức giao dịch</p>
+                        <p>+ Giá (chỉ cần nhập số, ví dụ tìm tài khoản đ300.000 nhập 300000)</p>
+                        <p>+ Phái giao lưu</p>
+                        <p>+ Ngọc</p>
+                        <p>+ Trạng thái</p>
+                    </div>
+
                     
-                <table id="table_id" class="display">
+                </div>
+
+                <table id="table_id" class="display" width="100%">
                     <thead>
                         <tr>
                             <th>Id</th>
                             <th>Hình ảnh</th>
                             <th>Tiêu đề</th>
                             <th>Tên nhân vật</th>
+                            <th>Trạng thái</th>
                             <th>Phái</th>
                             <th>Server</th>
                             <th>Hình thức</th>
@@ -82,7 +136,8 @@
                         </tr>
                     </thead>
                 </table>
-                </div>
+
+               
 
             <% } %>
 		</div>
@@ -96,9 +151,9 @@
 =============================-->
 
 <% include ../partials/footer %>
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.21/datatables.min.css"/>
  
-<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.21/datatables.min.js"></script>
+<script src="/plugins/DataTables/datatables.min.js"></script>
+<script src="/plugins/iziToast/iziToast.min.js"></script>
 
 <script src="/js/user/profile-account.js"></script>
 

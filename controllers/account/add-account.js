@@ -159,8 +159,6 @@ function sendError(message, req, res){
     res.status(400).send(message);
 }
 
-
-
 exports.addNewAccount = async (req, res) => {
 
 // ----------------------------- VALIDATION ----------------

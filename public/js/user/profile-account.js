@@ -1,5 +1,12 @@
 $(document).ready(function(){
-    $('#table_id').DataTable({
+    function setAllowPointer(element, value, type = 'pointer'){
+        if(value)
+            $(element).css('cursor', type);
+        else
+            $(element).css('cursor', 'not-allowed');
+    }
+
+    const table = $('#table_id').DataTable({
         language: {
             "decimal":        "",
             "emptyTable":     "Không có tài khoản",
@@ -48,11 +55,25 @@ $(document).ready(function(){
             { 
                 targets: 4, 
                 render: function(data, t, row){
+                    if(data == 'Đang đăng')
+                        data = '<p style="color: rgb(238, 142, 15)"><i class="fas fa-dolly-flatbed"></i>   ' + data + '</p>';
+                    else if(data == 'Xong')
+                        data = '<p style="color: rgb(78, 177, 99)"><i class="fas fa-check"></i>   ' + data + '</p>';
+                    else if(data == 'Khoá')
+                        data = '<p style="color:  rgb(160, 192, 72)"><i class="fas fa-lock"></i>  ' + data + '</p>';
+                    else
+                        data = '<p>  ' + data + '</p>';
+                    return data;
+                }
+            },
+            { 
+                targets: 5, 
+                render: function(data, t, row){
                     return '<p style="color: rgb(74, 206, 85)!important">'+data+'</p>'
                 }
             },
             { 
-                targets: 6, 
+                targets: 7, 
                 render: function(data, t, row){
                     let div = null;
                     if(data == "Bán và giao lưu")
@@ -65,7 +86,7 @@ $(document).ready(function(){
                 }
             },
             {
-                targets: 7, 
+                targets: 8, 
                 render: function(data){
                     let div = null;
                     if(data == null)
@@ -76,7 +97,7 @@ $(document).ready(function(){
                 }
             },
             {
-                targets: 8, 
+                targets: 9, 
                 render: function(data){
                     let div = null;
                     if(data == 'Không có')
@@ -87,10 +108,10 @@ $(document).ready(function(){
                 }
             },
             {
-                targets: 11,
+                targets: 12,
                 render: function(data){
                     if (data == null)
-                        data = 5;
+                        data = 0;
                     data = Math.floor(data);
                     let divStart = '';
                     for(let i = 0; i < data; i++){
@@ -104,7 +125,7 @@ $(document).ready(function(){
                 }
             },
             {
-                targets: 12,
+                targets: 13,
                 render: function(data){
                     if (data == 0)
                         return '<p>Chưa có lượt xem</p>' 
@@ -113,11 +134,25 @@ $(document).ready(function(){
                 }
             },
             { // DO HERE
-                targets: 13, 
+                targets: 14, 
                 searchable: false,
                 sortable: false,
-                render: function(){
-                    return '<button class="btn btn-warning btn-small"><i class="fa fa-home"></i></button>';
+                render: function(data, t, row){
+                    let button = '';
+                    if(row[4] === 'Đang đăng'){
+                        button += '<button data-name-account="'+row[3]+'" data-id-account="'+ row[0]+'" title="Đánh dấu đã xong" class="btn btn-success btn-sm btnMarkAsDone"><i class="fas fa-check-circle"></i></button>' +
+                        '<a target="_blank" href="/account/edit-account/'+ row[0]+'"><button title="Chỉnh sửa" class="btn btn-warning btn-sm btnEdit"><i class="fas fa-edit"></i></button></a>'+
+                        '<button data-name-account="'+row[3]+'" data-id-account="'+ row[0]+'" title="Xoá tài khoản" class="btn btn-danger btn-sm btnRemove"><i class="fas fa-trash-alt"></i></button>';
+                    }
+                    else if(row[4] === 'Xong'){
+                        button += '<button data-name-account="'+row[3]+'" data-id-account="'+ row[0]+'" title="Xoá tài khoản" class="btn btn-danger btn-sm btnRemove"><i class="fas fa-trash-alt"></i></button>';
+                    }
+                    else if(row[4] === 'Khoá'){
+                        button += '<button data-id-account="'+ row[0]+'" title="Lí do bị khoá" class="btn btn-info btn-sm btnLock"><i class="fas fa-question-circle"></i></button>';
+                    }
+                        
+                                    
+                    return button;
                 }
             },
         ],
@@ -126,7 +161,153 @@ $(document).ready(function(){
         serverSide: true,
         ajax: {
             url: '/user/profile/get-accounts',
-            type: 'GET'
+            type: 'GET',
+            error: function (error) {
+                iziToast.error({title: 'Có lỗi khi tải dữ liệu', message: error.responseText, timeout: false})
+            }
         }
     })
+
+    $(document).on('click', '.btnMarkAsDone',function(){
+        const button = this;
+
+        setAllowPointer(button, false);
+        $(button).prop("disabled",true);
+
+        const c_name = $(button).attr('data-name-account');
+        const idAccount = $(button).attr('data-id-account');
+
+        let instanceRemoving = null;
+
+        iziToast.show({ // Show confirm dialog
+            theme: 'dark',
+            close: false,
+            icon: 'fas fa-question-circle',
+            overlay: 'false',
+            title: 'Xác nhận',
+            message: 'Bạn muốn đánh dấu tài khoản '+ c_name +' này đã hoàn thành? Bạn không thể chỉnh sửa tài khoản này khi đã đánh dấu hoàn thành',
+            position: 'center',
+            progressBarColor: 'rgb(0, 255, 184)',
+            buttons: [
+                ['<button><i class="fas fa-check"></i>  Đánh dấu đã xong</button>', // If click button confirm
+                    function (instance, toast) {
+                        instance.hide({transitionOut: 'fadeOutUp'}, toast, 'mark'); // hide current confirm dialog
+                        iziToast.show({ // Create toast removing...
+                            theme: 'dark',
+                            icon: 'fas fa-angle-double-left',
+                            close: false,
+                            message: 'Đang đánh dấu hoàn thành tài khoản '+c_name+' ...',
+                            timeout: false,
+                            onOpening: function(instance, toast){
+                                instanceRemoving = toast; // set instance of removing
+                            },
+                        });
+                        $.ajax({
+                            url: '/account/mark-done',
+                            method: 'PATCH',
+                            data: {
+                                id: idAccount,
+                                status: 'done',
+                                _csrf: $('#_csrf').val()
+                            },
+                            success: function(res){ // Hide instance removing and display success message
+                                iziToast.hide({transitionOut: 'fadeOutUp'}, instanceRemoving)
+                                iziToast.success({title: 'Thành công', message: res})
+                                table.draw(false);
+                            },
+                            error: function(err){ // Hide instance removing and display error message
+                                iziToast.hide({transitionOut: 'fadeOutUp'}, instanceRemoving)
+                                iziToast.error({title: 'Có lỗi', message: err.responseText})
+                                setAllowPointer(button, true);
+                                $(button).prop("disabled", false);
+                            }
+                        });
+                    }
+                ], // true to focus
+                [
+                    '<button><i class="fas fa-times"></i>   Huỷ</button>', 
+                    function (instance, toast) {
+                        instance.hide({transitionOut: 'fadeOutUp'}, toast, 'discard');
+                    }
+                ]
+            ],
+            onClosing: function(instance, toast, closedBy){
+                if(closedBy !== 'mark'){
+                    setAllowPointer(button, true);
+                    $(button).prop("disabled", false);
+                }
+            }
+        });
+    });
+
+    $(document).on('click', '.btnRemove', function(){
+        const button = this;
+
+        setAllowPointer(button, false);
+        $(button).prop("disabled",true);
+
+        let instanceRemoving = null;
+
+        const c_name = $(button).attr('data-name-account');
+        const idAccount = $(button).attr('data-id-account');
+
+        iziToast.show({ // Show confirm dialog
+            backgroundColor: 'rgb(187, 83, 83)',
+            close: false,
+            icon: 'fas fa-exclamation-circle',
+            overlay: 'false',
+            title: 'Xác nhận',
+            message: 'Bạn muốn xoá tài khoản ' + c_name + '?',
+            position: 'center',
+            progressBarColor: 'rgb(0, 255, 184)',
+            buttons: [
+                ['<button><i class="fas fa-trash"></i>  Xoá</button>', // If click button confirm
+                    function (instance, toast) {
+                        instance.hide({transitionOut: 'fadeOutUp'}, toast, 'delete'); // hide current confirm dialog
+                        iziToast.show({ // Create toast removing...
+                            theme: 'dark',
+                            icon: 'fas fa-trash',
+                            close: false,
+                            message: 'Đang xoá tài khoản '+c_name+' ...',
+                            timeout: false,
+                            onOpening: function(instance, toast){
+                                instanceRemoving = toast; // set instance of removing
+                            },
+                        });
+                        $.ajax({
+                            url: '/account/remove-account',
+                            method: 'DELETE',
+                            data: {
+                                id: idAccount,
+                                _csrf: $('#_csrf').val()
+                            },
+                            success: function(res){ // Hide instance removing and display success message
+                                iziToast.hide({transitionOut: 'fadeOutUp'}, instanceRemoving)
+                                iziToast.success({title: 'Thành công', message: res})
+                                table.draw(false);
+                            },
+                            error: function(err){ // Hide instance removing and display error message
+                                iziToast.hide({transitionOut: 'fadeOutUp'}, instanceRemoving)
+                                iziToast.error({title: 'Có lỗi', message: err.responseText})
+                                setAllowPointer(button, true);
+                                $(button).prop("disabled", false);
+                            }
+                        });
+                    }
+                ], // true to focus
+                [
+                    '<button><i class="fas fa-times"></i>   Huỷ</button>', 
+                    function (instance, toast) {
+                        instance.hide({transitionOut: 'fadeOutUp'}, toast, 'discard');
+                    }
+                ]
+            ],
+            onClosing: function(instance, toast, closedBy){
+                if(closedBy !== 'delete'){
+                    setAllowPointer(button, true);
+                    $(button).prop("disabled", false);
+                }
+            }
+        });
+    })  
 })

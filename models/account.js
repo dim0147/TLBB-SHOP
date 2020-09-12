@@ -77,6 +77,10 @@ accountSchema.pre('save', function(next) {
     });
     listPromise.push(serverPromise);
 
+    // Checking if status is pending or not
+    if(typeof this.status !== "undefined" && this.status != "pending"){
+      return next("Status không hợp lệ");
+    }
     
     // Loop though field of current document for checking fields
     for(const field in this){

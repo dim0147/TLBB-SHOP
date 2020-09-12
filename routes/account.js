@@ -9,6 +9,10 @@ const config = require('../config/config');
 
 const viewAC = require('../controllers/account/view-account');
 const editAC = require('../controllers/account/edit-account');
+const addAC = require('../controllers/account/add-account');
+const removeAC = require('../controllers/account/remove-account');
+const setStatusAC = require('../controllers/account/set-status-account');
+
 const rateC = require('../controllers/account/rate');
 const commentC = require('../controllers/account/comment');
 const likedC = require('../controllers/account/liked');
@@ -41,18 +45,20 @@ const upload = multer({
   }, 
 });
 
-const addAC = require('../controllers/account/add-account');
 
-//---------------------------ACCOUNT-------
+
+//---------------------------ACCOUNT------------------------------------
+
 /* Create account post listing. */
 router.get('/add-account', addAC.renderAddAccount);
-
 router.post('/add-account', upload.array('images'), addAC.checkBody, addAC.addNewAccount);
 
 /* Edit account post listing. */
 router.get('/edit-account/:id', editAC.checkParamRenderPage ,editAC.renderPage);
-
 router.patch('/edit-account/:id', upload.array('images'), editAC.updateAccount);
+
+/* Mark account as done by user. */
+router.patch('/mark-done', setStatusAC.checkBody, setStatusAC.markDoneAccount);
 
 /* GET detail account. */
 router.get('/view-account/:id', viewAC.checkBody ,viewAC.renderPage);
@@ -60,8 +66,11 @@ router.get('/view-account/:id', viewAC.checkBody ,viewAC.renderPage);
 /* Search account. */
 router.get('/search',searchC.checkFields, searchC.renderPage);
 
+/* Remove account. */
+router.delete('/remove-account', removeAC.checkBody, removeAC.removeAccount);
 
-//---------------------------USER-------
+
+//---------------------------USER--------------------------------------
 /* CREATE user rating. */
 router.post('/create-rating', rateC.validateBody, rateC.createRating);
 

@@ -11,7 +11,7 @@ const config = {
     // account for db
     account: {
         transaction_type: ["sell", "trade", "all"],
-        status: ['pending', 'approve', 'done'],
+        status: ['pending', 'done', 'lock'],
         allowField: [
             'title', 
             'c_name', 

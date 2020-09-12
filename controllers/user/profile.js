@@ -253,29 +253,31 @@ exports.getAccount = function(req, res){
             sortCondition.c_name = sortColum.dir == 'asc' ? 1 : -1;
             break;
         case 4:
-            sortCondition.phai = sortColum.dir == 'asc' ? 1 : -1;
+            sortCondition.status = sortColum.dir == 'asc' ? 1 : -1;
         case 5:
+            sortCondition.phai = sortColum.dir == 'asc' ? 1 : -1;
+        case 6:
             sortCondition.server = sortColum.dir == 'asc' ? 1 : -1;
             break;
-        case 6:
+        case 7:
             sortCondition.transaction_type = sortColum.dir == 'asc' ? 1 : -1;
             break;
-        case 7:
+        case 8:
             sortCondition.price = sortColum.dir == 'asc' ? 1 : -1;
             break;
-        case 8:
+        case 9:
             sortCondition.phaigiaoluu = sortColum.dir == 'asc' ? 1 : -1;
             break;
-        case 9:
+        case 10:
             sortCondition.ngoc = sortColum.dir == 'asc' ? 1 : -1;
             break;
-        case 10:
+        case 11:
             sortCondition.createdAt = sortColum.dir == 'asc' ? 1 : -1;
             break;
-        case 11:
+        case 12:
             sortCondition.rates = sortColum.dir == 'asc' ? 1 : -1;
             break;
-        case 12:
+        case 13:
             sortCondition.views = sortColum.dir == 'asc' ? 1 : -1;
             break;
         default:
@@ -286,14 +288,16 @@ exports.getAccount = function(req, res){
     if(textSearch !==  ''){
         condition.push({title: {$regex: textSearch, $options: 'i'}});
         condition.push({c_name: {$regex: textSearch, $options: 'i'}});
-        condition.push({level: {$regex: textSearch, $options: 'i'}});
         condition.push({server: {$regex: textSearch, $options: 'i'}});
         condition.push({sub_server: {$regex: textSearch, $options: 'i'}});
         condition.push({transaction_type: {$regex: textSearch, $options: 'i'}});
         condition.push({price: isNaN(textSearch) ? {$regex: textSearch, $options: 'i'} : Number(textSearch)});
         condition.push({phaigiaoluu: {$regex: textSearch, $options: 'i'}});
         condition.push({ngoc: {$regex: textSearch, $options: 'i'}});
+        condition.push({status: {$regex: textSearch, $options: 'i'}});
     }
+    if(mongoose.Types.ObjectId.isValid(textSearch))
+        condition.push({_id: mongoose.Types.ObjectId(textSearch)});
 
     const lookupAggregate = [
         {
@@ -400,7 +404,8 @@ exports.getAccount = function(req, res){
                 phaigiaoluuDoc: {$first: '$phaigiaoluuDoc'},
                 subServerDoc: {$first: '$subServerDoc'},
                 serverDoc: {$first: '$serverDoc'},
-                userId: {$first: '$userId'}
+                userId: {$first: '$userId'},
+                status: {$first: '$status'}
             }
         },
         {
@@ -431,6 +436,16 @@ exports.getAccount = function(req, res){
                             {case: {$eq: ['$transaction_type', 'all']}, then: "Bán và giao lưu"}
                         ],
                         default: "Không hợp lệ"
+                    }
+                },
+                status: {
+                    $switch: {
+                        branches: [
+                            {case: {$eq: ['$status', 'pending']}, then: 'Đang đăng'},
+                            {case: {$eq: ['$status', 'done']}, then: 'Xong'},
+                            {case: {$eq: ['$status', 'lock']}, then: 'Khoá'}
+                        ],
+                        default: 'Không hợp lệ'
                     }
                 },
                 price: 1,
@@ -498,9 +513,12 @@ exports.getAccount = function(req, res){
     ]
     
     const pipelineAggregate = lookupAggregate.concat(unwindAggregate, groupAggregate, projectAggregate, matchAggregate, facetAggregate);
-    // console.log(pipelineAggregate);
+
     accountModel.aggregate(pipelineAggregate, async function(err, result) {
-        if(err) console.log(err)   
+
+        if(err){
+            return res.status(400).send('có lỗi vui lòng thủ lại sau');
+        }
 
         let payload = {};
         const data = [];
@@ -517,7 +535,7 @@ exports.getAccount = function(req, res){
         } 
         else{
                 const totalAccounts = await accountModel.estimatedDocumentCount();
-                payload.accounts = result[0].accounts,
+                payload.accounts = result[0].accounts;
                 payload.totalAccount = result[0].totalAccount[0].total;
                 payload.accounts.forEach(function(account){
                 const payload = [
@@ -525,6 +543,7 @@ exports.getAccount = function(req, res){
                     account.image,
                     account.title,
                     account.c_name,
+                    account.status,
                     account.phai,
                     account.server + ' - ' + account.sub_server,
                     account.transaction_type,
@@ -545,7 +564,6 @@ exports.getAccount = function(req, res){
                 data: data
             }
         }
-        
         res.send(returnData);
     })
 }
