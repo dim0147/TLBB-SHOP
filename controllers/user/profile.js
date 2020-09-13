@@ -369,7 +369,15 @@ exports.getAccount = function(req, res){
                 views: {$size: '$views'}
             }
         }
-    ]
+    ];
+
+    const addFieldsAggregate = [
+        {
+            $addFields: {
+                totalRates : { $size: '$rates'}
+            }
+        }
+    ];
 
     const unwindAggregate = [
         {
@@ -405,7 +413,8 @@ exports.getAccount = function(req, res){
                 subServerDoc: {$first: '$subServerDoc'},
                 serverDoc: {$first: '$serverDoc'},
                 userId: {$first: '$userId'},
-                status: {$first: '$status'}
+                status: {$first: '$status'},
+                totalRates: {$first: '$totalRates'}
             }
         },
         {
@@ -461,7 +470,8 @@ exports.getAccount = function(req, res){
                 rates: 1,
                 createdAt: 1,
                 updatedAt: 1,
-                userId: 1
+                userId: 1,
+                totalRates: 1
             }
         }
     ]
@@ -512,10 +522,9 @@ exports.getAccount = function(req, res){
         }
     ]
     
-    const pipelineAggregate = lookupAggregate.concat(unwindAggregate, groupAggregate, projectAggregate, matchAggregate, facetAggregate);
+    const pipelineAggregate = lookupAggregate.concat(addFieldsAggregate, unwindAggregate, groupAggregate, projectAggregate, matchAggregate, facetAggregate);
 
     accountModel.aggregate(pipelineAggregate, async function(err, result) {
-
         if(err){
             return res.status(400).send('có lỗi vui lòng thủ lại sau');
         }
@@ -551,7 +560,7 @@ exports.getAccount = function(req, res){
                     account.phaigiaoluu,
                     account.ngoc,
                     dateFormat(new Date(account.createdAt), "d mmmm, yyyy"),
-                    account.rates,
+                    [account.rates, account.totalRates],
                     account.views
 
                 ];

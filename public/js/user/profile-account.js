@@ -60,7 +60,7 @@ $(document).ready(function(){
                     else if(data == 'Xong')
                         data = '<p style="color: rgb(78, 177, 99)"><i class="fas fa-check"></i>   ' + data + '</p>';
                     else if(data == 'Khoá')
-                        data = '<p style="color:  rgb(160, 192, 72)"><i class="fas fa-lock"></i>  ' + data + '</p>';
+                        data = '<p style="color:  red"><i class="fas fa-lock"></i>  ' + data + '</p>';
                     else
                         data = '<p>  ' + data + '</p>';
                     return data;
@@ -110,17 +110,20 @@ $(document).ready(function(){
             {
                 targets: 12,
                 render: function(data){
-                    if (data == null)
-                        data = 0;
-                    data = Math.floor(data);
+                    if (data[0] == null)
+                        data[0] = 0;
+                    data[0] = Math.floor(data[0]);
                     let divStart = '';
-                    for(let i = 0; i < data; i++){
+                    for(let i = 0; i < data[0]; i++){
                         divStart += '<span style="color: red"><i class="fas fa-star"></i></span>'
                     }
-                    for(let i = data; i < 5; i++){
+                    for(let i = data[0]; i < 5; i++){
                         divStart += '<span style="color: red"><i class="far fa-star"></i></span>'
                     }
-
+                    if(data[1] === 0)
+                        divStart += '<p>(chưa có đánh giá)</p>'
+                    else
+                        divStart += '<p>('+data[1]+' lượt)</p>'
                     return divStart;
                 }
             },
@@ -140,15 +143,17 @@ $(document).ready(function(){
                 render: function(data, t, row){
                     let button = '';
                     if(row[4] === 'Đang đăng'){
-                        button += '<button data-name-account="'+row[3]+'" data-id-account="'+ row[0]+'" title="Đánh dấu đã xong" class="btn btn-success btn-sm btnMarkAsDone"><i class="fas fa-check-circle"></i></button>' +
+                        button += '<a href="/account/view-account/'+row[0]+'"><button title="Xem tài khoản này" class="btn btn-dark btn-sm btnSee"><i class="fas fa-eye"></i></button></a>' +
+                        '<button data-name-account="'+row[3]+'" data-id-account="'+ row[0]+'" title="Đánh dấu đã xong" class="btn btn-success btn-sm btnMarkAsDone"><i class="fas fa-check-circle"></i></button>' +
                         '<a target="_blank" href="/account/edit-account/'+ row[0]+'"><button title="Chỉnh sửa" class="btn btn-warning btn-sm btnEdit"><i class="fas fa-edit"></i></button></a>'+
                         '<button data-name-account="'+row[3]+'" data-id-account="'+ row[0]+'" title="Xoá tài khoản" class="btn btn-danger btn-sm btnRemove"><i class="fas fa-trash-alt"></i></button>';
                     }
                     else if(row[4] === 'Xong'){
-                        button += '<button data-name-account="'+row[3]+'" data-id-account="'+ row[0]+'" title="Xoá tài khoản" class="btn btn-danger btn-sm btnRemove"><i class="fas fa-trash-alt"></i></button>';
+                        button += '<a href="/account/view-account/'+row[0]+'"><button title="Xem tài khoản này" class="btn btn-dark btn-sm btnSee"><i class="fas fa-eye"></i></button></a>' +
+                        '<button data-name-account="'+row[3]+'" data-id-account="'+ row[0]+'" title="Xoá tài khoản" class="btn btn-danger btn-sm btnRemove"><i class="fas fa-trash-alt"></i></button>';
                     }
                     else if(row[4] === 'Khoá'){
-                        button += '<button data-id-account="'+ row[0]+'" title="Lí do bị khoá" class="btn btn-info btn-sm btnLock"><i class="fas fa-question-circle"></i></button>';
+                        button += '<button data-name-account="'+row[3]+'" data-id-account="'+ row[0]+'" title="Xem lí do bị khoá" class="btn btn-info btn-sm btnLock"><i class="fas fa-question-circle"></i></button>';
                     }
                         
                                     
@@ -310,4 +315,76 @@ $(document).ready(function(){
             }
         });
     })  
+
+    $(document).on('click', '.btnLock', function(){
+        const button = this;
+        setAllowPointer(button, false);
+        $(button).prop('disabled', true);
+        $(button).html('<i class="fas fa-spinner fa-pulse"></i>');
+
+        const idAccount = $(button).attr('data-id-account');
+        const c_name = $(button).attr('data-name-account');
+
+        $.ajax({
+            url: '/account/get-lock-reason',
+            type: 'GET',
+            data: {
+                id: idAccount
+            },
+            success: function(res){
+                let divReason = '';
+                let title = '';
+                if(typeof res === 'object' && res.length > 0){
+                    title = 'Khoá vào ngày: ' + dateFormat(new Date(res[Number(res.length) - 1].createdAt), "d mmmm, yyyy");
+                    res.forEach(function(reason){ // Convert date and create div
+                        reason.createdAt = dateFormat(new Date(reason.createdAt), "d mmmm, yyyy");
+                        divReason += '- ' + reason.reason + '<br>';
+                    })
+                }
+                else{
+                    divReason = 'Không tìm thấy, vui lòng thử lại sau';
+                    title = 'Có lỗi xảy ra';
+                }
+                iziToast.show({
+                    theme: 'dark',
+                    icon: 'fas fa-lock',
+                    iconColor: 'yellow',
+                    progressBar: false,
+                    title: title,
+                    message: divReason,
+                    position: 'center', 
+                    overlay: true,
+                    timeout: false,
+                    layout: 2,
+                    onClosing: function(instance, toast, closedBy){
+                        setAllowPointer(button, true);
+                        $(button).prop('disabled', false);
+                        $(button).html('<i class="fas fa-question-circle" aria-hidden="true"></i>')
+                    }
+                });
+            },
+            error: function(err){
+                console.log(err);
+            }
+        })
+
+        // iziToast.error({
+        //     title: 'Có lỗi xảy ra',
+        //     message: 'Bạn không có quyền xem',
+        //     overlay: true,
+        //     timeout: false,
+        //     position: 'center', 
+        //     layout: 2,
+        //     onClosing: function(instance, toast, closedBy){
+        //             setAllowPointer(button, true);
+        //             $(button).prop('disabled', false);
+        //             $(button).html('<i class="fas fa-question-circle" aria-hidden="true"></i>')
+        //     }
+        // });
+
+        
+
+        
+    });
+
 })

@@ -238,5 +238,85 @@ $(document).ready(function(){
 
     });
 
+    $('#markBtn').click(function(e){
+        e.preventDefault();
+        const button = this;
+        setAllowPointer(button, false);
+        $(button).prop('disabled', true);
+        $.ajax({
+            url: '/account/mark-done',
+            type: 'PATCH',
+            data: {
+                id: $('#idAccount').val(),
+                status: 'done',
+                _csrf: $('#_csrf').val()
+            },
+            success: function(res){
+                showAlert(res, 1);
+                setTimeout(function(){ window.location.href = '/account/view-account/' + $('#idAccount').val() }, 3000);
+            },
+            error: function(error){
+                showAlert(error.responseText, 0);
+                setAllowPointer(button, true);
+                $(button).prop('disabled', false);
+            }
+        })
+    })
+
+    $('#removeBtn').click(function(e){
+        e.preventDefault();
+        const button = this;
+        setAllowPointer(button, false);
+        $(button).prop('disabled', true);
+
+        iziToast.show({
+            timeout: false,
+            progressBar: false,
+            close: false,
+            backgroundColor: ' rgb(179, 11, 11)',
+            messageColor: 'rgb(75, 224, 107)',
+            titleColor: 'rgb(75, 224, 107)',
+            icon: 'fas fa-exclamation-triangle',
+            overlay: true,
+            title: 'Xác nhận',
+            message: 'Bạn muốn xoá tài khoản này?',
+            position: 'center',
+            buttons: [
+                ['<button><i class="fas fa-trash"></i>  Xoá</button>', function (instance, toast) {
+         
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'confirm');
+                    $.ajax({
+                        url: '/account/remove-account',
+                        type: 'DELETE',
+                        data: {
+                            id: $('#idAccount').val(),
+                            _csrf: $('#_csrf').val()
+                        },
+                        success: function(res){
+                            showAlert(res, 1);
+                            setTimeout(function(){ window.location.href = '/' }, 3000);
+                        },
+                        error: function(error){
+                            showAlert(error.responseText, 0);
+                            setAllowPointer(button, true);
+                            $(button).prop('disabled', false);
+                        }
+                    })
+         
+                }],
+                ['<button><i class="far fa-times-circle"></i>  Huỷ</button>', function (instance, toast) {
+         
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'discard');
+         
+                }],
+            ],
+            onClosing: function(instance, toast, closedBy){
+                if(closedBy != 'confirm'){
+                    setAllowPointer(button, true);
+                    $(button).prop('disabled', false);
+                }
+            }
+        });
+    })
 
 });

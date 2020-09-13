@@ -12,7 +12,7 @@ const viewModel = require('../../models/view');
 const accountLinkAddfieldsModel = require('../../models/account-link-addfield');
 const commentModel = require('../../models/comment');
 const likeModel = require('../../models/like');
-
+const lockReasonModel = require('../../models/lock-reason');
 
 exports.checkBody = [
     body('id', 'Id không hợp lệ').isMongoId(),
@@ -59,6 +59,12 @@ exports.removeAccount = async (req, res) => {
             },
             (cb) => { // dell bosung
                 accountLinkAddfieldsModel.deleteMany({accountId: account._id}, {session: session}, err => {
+                    if(err) return cb(err);
+                    cb(null);
+                });
+            },
+            (cb) => { // dell reason
+                lockReasonModel.deleteMany({account: account._id}, {session: session}, err => {
                     if(err) return cb(err);
                     cb(null);
                 });

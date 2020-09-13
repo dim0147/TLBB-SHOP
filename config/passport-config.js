@@ -51,6 +51,7 @@ passport.use('local.register', new LocalStrategy({passReqToCallback: true}, (req
                 password: passwordCrypt,
                 name: req.body.name,
                 email: req.body.email,
+                urlImage: '/images/member.png',
                 idFacebook: null,
                 type: 'web'
             }, (err, user) => {

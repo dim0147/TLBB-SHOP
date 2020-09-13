@@ -13,11 +13,23 @@ POST https://localhost:3000/user/login HTTP/1.1
 Content-Type: application/json
 
 {
-    "_csrf": "bHBTmM83-e8g4r_F-_tLRQvnWKjRh4yPaIZU",
-    "username": "user",
+    "_csrf": "i269aWQJ-NvevryCAoLpFkQf4gsds6mytEKg",
+    "username": "user10",
     "password": "user",
     "remember_me": "true"
 }
+
+###
+POST https://localhost:3000/account/create-comment HTTP/1.1
+Content-Type: application/json
+
+{
+    "_csrf": "i269aWQJ-NvevryCAoLpFkQf4gsds6mytEKg",
+    "comment": "Nick hay vãi loz",
+    "accountId": "5f570be132605009d16f4056",
+    "parent": "5f5db2c61be45113c7b20c35"
+}
+
 ###
 GET https://localhost:3000/account/edit-account/5f51ad4a7acdce085044542a HTTP/1.1
 content-type: application/json

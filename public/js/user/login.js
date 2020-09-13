@@ -53,9 +53,7 @@ $(document).ready(function(){
                 _csrf: $('#_csrf').val()
             },
             success: res => {
-                showAlert(res, 1);
-                $(this).prop("disabled",false);
-                setAllowPointer(this, true);
+                window.location.href = res;
             },
             error: err => {
                 showAlert("Có lỗi xảy ra: " + err.responseText, 0);

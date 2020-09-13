@@ -51,8 +51,14 @@ exports.renderPage = (req, res) => {
             accountModel.findById(req.params.id).populate(popAcFields).exec((err, account) => {
                 if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau');
                 if(account === null) return cb('Không tìm thấy tài khoản này!')
+                if(account.status.toString() == 'lock') return cb('Tài khoản bị khoá')
                 account = account.toObject();
                 account.userId.created_at = dateFormat(new Date(account.userId.created_at), 'd mmmm, yyyy')
+                if(req.isAuthenticated() && account.userId._id.toString() == req.user._id){
+                    account.isOwner = true;
+                    console.log('ok');
+                }
+
                 cb(null, account);
             });
         },

@@ -384,6 +384,9 @@ exports.renderPage = async function(req, res){
         } 
         condition = filterMgsObj.data.condition;
 
+        // Add condition status = 'pending'
+        condition.status = 'pending';
+
         // Add search query to db
         saveSearchRs(req);
 

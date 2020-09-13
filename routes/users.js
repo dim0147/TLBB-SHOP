@@ -17,39 +17,72 @@ const profileAC = require('../controllers/user/profile');
 const logoutAC = require('../controllers/user/logout');
 
 
-/* Create user . */
-router.get('/register', registerAC.renderPage);
+function redirectOldUrl(req, res, next){ // redirect when user login or register finish
+    if(req.session.oldUrl){
+        res.send(req.session.oldUrl)
+        req.session.oldUrl = null;
+    }
+    else
+        res.send('/user/profile');
+}
 
-router.post('/register', registerAC.validateUser, registerAC.registerAccount);
+function isLogin(req, res, next){ // if not login save current url to session then redirect to login page
+    if(!req.isAuthenticated()){
+        req.session.oldUrl = '/user' + req.url;
+        return res.redirect('/user/login');
+    }
+    next();
+}
+
+function checkNoLogin(req, res, next){ // check if no login, if login already redirect to oldUrl if exist
+    if(!req.isAuthenticated())
+        return next();
+    else{
+        if(req.session.oldUrl){
+            res.redirect(req.session.oldUrl)
+            req.session.oldUrl = null;
+        }
+        else
+            res.redirect('/');
+    }
+        
+}
+
+
+
+/* Create user . */
+router.get('/register', checkNoLogin, registerAC.renderPage);
+
+router.post('/register', checkNoLogin, registerAC.validateUser, registerAC.registerAccount, redirectOldUrl);
 
 
 /* Login user . */
-router.get('/login', loginAC.renderPage);
+router.get('/login', checkNoLogin, loginAC.renderPage);
 
-router.post('/login', loginAC.validateUser, loginAC.addNewAccount, loginAC.rememberMeTokenCheck);
+router.post('/login', checkNoLogin, loginAC.validateUser, loginAC.addNewAccount, loginAC.rememberMeTokenCheck, redirectOldUrl);
 
 /* Login With Facebook . */
-router.get('/login/facebook', passport.authenticate('facebook', {scope: ['email', 'public_profile']}));
+router.get('/login/facebook', checkNoLogin, passport.authenticate('facebook', {scope: ['email', 'public_profile']}));
 
 router.get('/login/facebook/callback', passport.authenticate('facebook'), loginAC.callbackAuthenticate);
 
 /* Login With Google . */
-router.get('/login/google', passport.authenticate('google', {scope: ['profile', 'email']}));
+router.get('/login/google', checkNoLogin, passport.authenticate('google', {scope: ['profile', 'email']}));
 
 router.get('/login/google/callback', passport.authenticate('google'), loginAC.callbackAuthenticate);
 
 /* Profile User . */
-router.get('/profile', profileAC.renderPage);
+router.get('/profile', isLogin, profileAC.renderPage);
 
-router.patch('/profile/update-profile', profileAC.checkBodyUpdateProfile ,profileAC.updateProfile);
+router.patch('/profile/update-profile', isLogin, profileAC.checkBodyUpdateProfile, profileAC.updateProfile);
 
-router.patch('/profile/update-password', profileAC.checkBodyUpdatePassWord ,profileAC.updatePassword);
+router.patch('/profile/update-password', isLogin, profileAC.checkBodyUpdatePassWord, profileAC.updatePassword);
 
 
 /* Profile Account . */
-router.get('/profile/accounts', profileAC.renderProfileAccount);
+router.get('/profile/accounts', isLogin, profileAC.renderProfileAccount);
 
-router.get('/profile/get-accounts', profileAC.getAccount);
+router.get('/profile/get-accounts', isLogin, profileAC.getAccount);
 
 
 

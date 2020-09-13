@@ -65,6 +65,7 @@ exports.renderPage = (req, res) => {
                 if(accounts.length === 0) return cb("Không tìm thấy tài khoản")
                 if(accounts[0].user[0].length === 0) return cb("Không tìm thấy user")
                 if(accounts[0].user[0]._id.toString() != req.user._id) return cb('Bạn không có quyền chỉnh sửa tài khoản này');
+                if(accounts[0].status.toString() != 'pending') return cb('Tài khoản này không thể chỉnh sửa');
                 cb(null, {account: accounts[0]})
             })
         },
@@ -172,6 +173,7 @@ function checkUserAccount(idAccount, userId){
             if(err) return reject(new Error('Có lỗi xảy ra vui lòng thử lại sau'));
             if(account === null) return reject(new Error("Tài khoản không tìm thấy"));
             if(account.userId.toString() != userId) return reject(new Error("Bạn không thể chỉnh sửa tài khoản ày!"));
+            if(account.status.toString() != 'pending') return reject(new Error("Tài khoản này không thể chỉnh sửa"));
             resolve();
         });
     });

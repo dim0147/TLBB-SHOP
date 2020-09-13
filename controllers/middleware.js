@@ -24,7 +24,6 @@ dateFormat.i18n = {
 // Set user session and convert image, user created day
 exports.setUserSession = function(req, res, next) {
     if(req.isAuthenticated()){
-        if(req.user.type === 'web') req.user.urlImage = config.urlWebsite + '/images/member.png';
         if(typeof req.user.created_at === 'object')
             req.user.created_at = dateFormat(new Date(req.user.created_at), "d mmmm, yyyy")
       }

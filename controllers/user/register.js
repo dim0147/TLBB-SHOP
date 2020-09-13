@@ -36,7 +36,7 @@ exports.registerAccount = function(req, res, next) {
       }
       req.logIn(user, function(err) {
         if (err) { return next(err); }
-        return res.send("Đăng kí thành công!!!")
+        return next();
       });
     })(req, res, next);
 }

@@ -3,6 +3,7 @@
 <head>
   <% include ../partials/head %>
   <link rel="stylesheet" type="text/css" href="/plugins/DataTables/datatables.min.css"/>
+
   <link rel="stylesheet" href="/plugins/iziToast/iziToast.min.css">
   <style>
       
@@ -47,6 +48,12 @@
         border-radius: .2rem;
         margin: 5px;
       }
+      .btnSee{
+        padding: .25rem .5rem;
+        font-size: .875rem;
+        border-radius: .2rem;
+        margin: 5px;
+      }
 
       #table_id {
         table-layout: fixed;
@@ -57,6 +64,7 @@
 </head>
 
 <body class="body-wrapper">
+
   <% include ../partials/menu %>
   <% if(typeof csrfToken !== "undefined"){ %>
     <input type="hidden" id="_csrf" value="<%= csrfToken %>">
@@ -153,7 +161,9 @@
 <% include ../partials/footer %>
  
 <script src="/plugins/DataTables/datatables.min.js"></script>
+
 <script src="/plugins/iziToast/iziToast.min.js"></script>
+
 
 <script src="/js/user/profile-account.js"></script>
 

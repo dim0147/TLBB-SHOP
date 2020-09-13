@@ -15,13 +15,13 @@ exports.validateBody = [
 ]
 
 exports.createRating = function(req, res){
-    //  Check if no login
-    if(!req.isAuthenticated())  return res.status(403).send("Đăng nhập để tiếp tục");
     waterfall([
         //  Check if account is exist
         cb => {
             accountModel.findOne({_id: req.body.accountId}, (err, account) => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
+                if(account === null) return cb("Không tìm thấy tài khoản")
+                if(account.status.toString() != 'pending') return cb("Không thể đánh giá tài khoản này")
                 cb(null);
             });
         },

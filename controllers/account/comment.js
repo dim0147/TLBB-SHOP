@@ -48,19 +48,22 @@ exports.validateBodyGetComments = [
 ]
 
 exports.createComment = function (req, res){
-    if(!req.isAuthenticated())  return res.status(401).send("Xin hãy đăng nhập")
+
     waterfall([
         //  Check if account is exist
         cb => {
             accountModel.findById(req.body.accountId).exec((err, account) => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau" + err)
                 if(account === null) return cb('Không tìm thấy account')
+                if(account.status.toString() == 'lock') return cb('Tài khoản này không thể bình luận')
                 cb(null)
             });
         },
         //  Check if parent comment is existing
         cb => {
-            if(req.body.parent.length === 0) return cb(null)
+            console.log(typeof req.body.parent);
+            if(req.body.parent === null || typeof req.body.parent !== 'string' || req.body.parent == '') return cb(null)
+            if(!mongoose.Types.ObjectId.isValid(req.body.parent)) return cb("Parent comment không hợp lệ");
             commentModel.findById(req.body.parent, (err, comment) => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
                 if(comment === null) return cb('Không tìm thấy id bình luận!')
@@ -74,7 +77,7 @@ exports.createComment = function (req, res){
                     user: req.user._id, 
                     comment: req.body.comment
                 }
-            if(req.body.parent.length > 0)
+            if(req.body.parent != '' && mongoose.Types.ObjectId.isValid(req.body.parent))
                 commentObject.parent = req.body.parent
             commentModel.create(commentObject, (err, comment) => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau" + err)
@@ -147,7 +150,7 @@ exports.getComments = async function (req, res){
             createdAt: -1
         }
         payload.limit = 6
-    }   // Get more comments
+    }   // Get more main comments
     else if(req.query.continueId !== 'false' && req.query.parentId === 'false'){
         payload.condition = {
             account: mongoose.Types.ObjectId(req.query.accountId),
@@ -158,7 +161,7 @@ exports.getComments = async function (req, res){
             createdAt: -1
         };
         payload.limit = 6
-    }
+    }   // Get more replies comments
     else if(req.query.continueId !== 'false' && req.query.parentId !== 'false'){
         payload.condition = {
             account: mongoose.Types.ObjectId(req.query.accountId),
@@ -237,7 +240,7 @@ exports.getComments = async function (req, res){
                         as: 'likes'
                     }
                 },
-                {   // Get req user like
+                {   // Get current session user like
                         $lookup: {
                             from: 'likes',
                             let: {commentId: '$_id'},
@@ -437,7 +440,8 @@ exports.getComments = async function (req, res){
                     
                 });
             });
-
+            
+            // Merge two promises
             countRepliesComment.unshift(countMainComments);
             Promise.all(countRepliesComment).then((result => cb(null, comments, result))).catch((err) => cb(err));
         },
@@ -449,7 +453,7 @@ exports.getComments = async function (req, res){
             cb(null, comments);
         }
     ], function(err, result){
-        if(err) return console.log(err);
+        if(err) return res.status.send(err);
         // console.log(result);
         return res.send(result)
     });

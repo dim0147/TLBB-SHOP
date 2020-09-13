@@ -39,7 +39,7 @@ exports.rememberMeTokenCheck = (req, res, next) => {
     // issue a remember me cookie if the option was checked
     if (req.body.remember_me == 'false') 
         req.session.cookie.expires = false;
-    return res.send("Đăng nhập thành công")
+    return next();
 }
 
 exports.callbackAuthenticate = function(req, res){

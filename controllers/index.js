@@ -109,6 +109,11 @@ exports.indexPage = (req, res) =>{
                     }
                 },
                 {
+                    $match:{
+                        status: 'pending'
+                    }
+                },
+                {
                     $unwind:{
                         path: '$rate',
                         preserveNullAndEmptyArrays: true
@@ -225,6 +230,11 @@ exports.indexPage = (req, res) =>{
                     }
                 },
                 {
+                    $match:{
+                        status: 'pending'
+                    }
+                },
+                {
                     $unwind:{
                         path: '$rate',
                         preserveNullAndEmptyArrays: true
@@ -338,6 +348,7 @@ exports.indexPage = (req, res) =>{
                                     pipeline:[
                                         {
                                             $match:{
+                                                status: 'pending',
                                                 $or: [
                                                     {
                                                         $expr:{ $eq: ['$vohon', '$$idProperty']}
@@ -401,6 +412,7 @@ exports.indexPage = (req, res) =>{
                                                 pipeline:[
                                                     {
                                                         $match:{
+                                                            status: 'pending',
                                                             $or: [
                                                                 {
                                                                     $expr:{ $eq: ['$sub_server', '$$idProperty']}
@@ -490,7 +502,7 @@ exports.indexPage = (req, res) =>{
                         // Query account for specific server
                         accountModel.aggregate([
                             {
-                                $match: {server: server._id}
+                                $match: {server: server._id, status: 'pending'}
                             },
                             {
                                 $lookup:{

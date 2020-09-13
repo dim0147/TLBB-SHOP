@@ -2,15 +2,22 @@
 <html lang="en">
 <head>
 	<% include ../partials/head %>
+	<link rel="stylesheet" href="/plugins/iziToast/iziToast.min.css">
 	<style> 
-	.more-replies { 
-			text-align: right;
-		} 
+		.more-replies { 
+				text-align: right;
+			} 
 		.more-replies:hover { 
 			color:rgb(120, 199, 120); 
 			cursor: pointer;
 			text-align: right;
 		} 
+		.btnOwner {
+			padding: .25rem .5rem;
+			font-size: .875rem;
+			line-height: 1.5;
+			border-radius: .2rem;
+		}
 	</style> 
 </head>
 
@@ -41,7 +48,17 @@
 					<% } %>
 					<% if(typeof account !== 'undefined'){ %>
 					<h1 style="color: rgb(0, 38, 255)" class="product-title"><%= account.title %></h1>
-					<div class="rateProduct" data-rating="<%= account.totalRate %> "></div>
+					<% if(account.status == 'done'){ %>
+						<h1 style="color: green"><i class="fas fa-check"></i>   Tài khoản đã hoàn thành giao dịch</h1>
+					<% } %>
+					<div>
+						<% for(let i = 0; i < account.totalRate; i++){ %>
+							<span style="color: rgb(223, 223, 27)"><i class="fas fa-star"></i></span>
+						<% } %>
+						<% for(let i = account.totalRate; i < 5; i++){ %>
+							<span style="color:  rgb(223, 223, 27)"><i class="far fa-star"></i></span>
+						<% } %>
+					</div>
 					<% } %>
 					<div class="product-meta">
 						<ul class="list-inline">
@@ -53,6 +70,14 @@
 							<% } %>
 						</ul>
 					</div>
+
+					<% if(typeof account !== 'undefined' && account.isOwner) { %>
+						<% if(account.status == 'pending'){ %>
+							<a href="/account/edit-account/<%= account._id %>"><button type="button" class="btn btn-warning btn-sm btnOwner"><i class="fas fa-edit"></i>  Chỉnh sửa</button></a>
+							<button type="button" id="btnMark" class="btn btn-success btn-sm btnOwner"><i class="fas fa-check"></i>  Đánh dấu hoàn thành</button>
+						<% } %>
+						<button type="button" id="btnRemove" class="btn btn-danger btn-sm btnOwner"><i class="fas fa-trash"></i>  Xoá</button>
+					<% } %>
 
 					<% if(typeof images !== 'undefined' && images.length > 0) { %>
 					<!-- product slider -->
@@ -251,9 +276,13 @@
 						<p class="member-time">Thành viên kể từ <%= account.userId.created_at %></p>
 						<a href="" style="color: green">Xem tất cả các tài khoản được đăng bởi <%= account.userId.name %></a>
 						<ul class="list-inline mt-20">
-							<li class="list-inline-item"><a href="<%= account.contactFB %>" target="_blank" class="btn btn-contact d-inline-block  btn-success px-lg-5 my-1 px-md-3"><i class="fas fa-sms"></i>  Liên Hệ</a></li>
-							<li class="list-inline-item"><a href="" class="btn btn-offer d-inline-block btn-warning ml-n1 my-1 px-lg-4 px-md-3"><i class="fab fa-accusoft"></i>    Đưa Ra 
-								Đề Nghị</a></li>
+							<% if(!account.isOwner){ %>
+								<li class="list-inline-item"><a href="<%= account.contactFB %>" target="_blank" class="btn btn-contact d-inline-block  btn-success px-lg-5 my-1 px-md-3"><i class="fas fa-sms"></i>  Liên Hệ</a></li>
+							<% } %>
+							<% if(account.status == 'pending' && !account.isOwner){ %>
+								<li class="list-inline-item"><a href="" class="btn btn-offer d-inline-block btn-warning ml-n1 my-1 px-lg-4 px-md-3"><i class="fab fa-accusoft"></i>    Đưa Ra 
+									Đề Nghị</a></li>
+							<% } %>
 							<% if(typeof account.phone !== "undefined" && account.phone != null){ %>
 								<li><a href="tel:<%= account.phone %>"><h6 style="font-size: 14px;letter-spacing: 0;color: #848484;"><i class="fa fa-phone" aria-hidden="true"></i> Gọi   <%= account.phone %></h6></a></li>
 							<% } %>
@@ -263,7 +292,7 @@
 					<!-- Map Widget -->
 					<div class="widget map">
 						<div class="map">
-							<div id="map_canvas" data-latitude="51.507351" data-longitude="-0.127758"></div>
+							<div id="map_canvas" data-latitude="10.823099" data-longitude="106.629662"></div>
 						</div>
 					</div>
 					<!-- Rate Widget -->
@@ -311,7 +340,7 @@
 						<p>Bạn có tài khoản cần bán? Hãy
 							tạo bài đăng ngay.
 						</p>
-						<a href="" class="btn btn-transparent-white"><i class="fa fa-plus-circle" aria-hidden="true"></i>  Tạo bài đăng</a>
+						<a href="/account/add-account" class="btn btn-transparent-white"><i class="fa fa-plus-circle" aria-hidden="true"></i>  Tạo bài đăng</a>
 					</div>
 
 				</div>
@@ -326,6 +355,7 @@
 =============================-->
 
 <% include ../partials/footer %>
+<script src="/plugins/iziToast/iziToast.min.js"></script>
 <script src="/js/account/view-account.js"></script>
 
 </body>

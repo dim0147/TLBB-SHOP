@@ -4,11 +4,6 @@ $("document").ready(function() {
         rating: $('.starrr').attr('data-rating')
     })
 
-    $('.rateProduct').starrr({
-        rating: $('.rateProduct').attr('data-rating'),
-        readOnly: true
-    });
-
     function fetchComment(){
         
         if($('#loginFB').length) return
@@ -22,7 +17,6 @@ $("document").ready(function() {
                 parentId: false
             },
             success: function(res){
-                console.log(res);
                 displayComment(res);
                 
             },
@@ -543,5 +537,136 @@ $("document").ready(function() {
 
         $(btnReplyElement).parent().parent().after(myvar)
     }
+
+    $('#btnMark').click(function(e){
+        e.preventDefault();
+        const button = this;
+        setAllowPointer(button, false);
+        $(button).prop('disabled', true);
+        iziToast.show({
+            timeout: false,
+            progressBar: false,
+            close: false,
+            backgroundColor: 'green',
+            messageColor: 'rgb(185, 204, 78)',
+            titleColor: 'rgb(212, 195, 37)',
+            icon: 'fa fa-question',
+            overlay: true,
+            title: 'Bạn muốn đánh dấu tài khoản này đã hoàn thành',
+            message: 'Bạn không thể chỉnh sửa tài khoản này khi đã đánh dấu hoàn thành, bạn muốn tiếp tục?',
+            position: 'center',
+            buttons: [
+                ['<button><i class="fas fa-check"></i>  Đánh dấu hoàn thành</button>', function (instance, toast) {
+         
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'confirm');
+                    $.ajax({
+                        url: '/account/mark-done',
+                        type: 'PATCH',
+                        data: {
+                            id: $('#idAccount').val(),
+                            status: 'done',
+                            _csrf: $('#_csrf').val()
+                        },
+                        success: function(res){
+                            iziToast.success({
+                                title: 'Hoàn thành',
+                                overlay: true,
+                                position: 'center',
+                                message: res,
+                            })
+                            setTimeout(function(){ window.location.reload() }, 3000);
+                        },
+                        error: function(error){
+                            iziToast.error({
+                                title: 'Có lỗi',
+                                overlay: true,
+                                position: 'center',
+                                message: error.responseText,
+                            })
+                            setAllowPointer(button, true);
+                            $(button).prop('disabled', false);
+                        }
+                    })
+         
+                }],
+                ['<button><i class="far fa-times-circle"></i>  Huỷ</button>', function (instance, toast) {
+         
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'discard');
+         
+                }],
+            ],
+            onClosing: function(instance, toast, closedBy){
+                if(closedBy != 'confirm'){
+                    setAllowPointer(button, true);
+                    $(button).prop('disabled', false);
+                }
+            }
+        });
+    })
+
+    $('#btnRemove').click(function(e){
+        const button = this;
+        setAllowPointer(button, false);
+        $(button).prop('disabled', true);
+
+        iziToast.show({
+            timeout: false,
+            progressBar: false,
+            close: false,
+            backgroundColor: ' rgb(179, 11, 11)',
+            messageColor: 'rgb(75, 224, 107)',
+            titleColor: 'rgb(75, 224, 107)',
+            icon: 'fas fa-exclamation-triangle',
+            overlay: true,
+            title: 'Xác nhận',
+            message: 'Bạn muốn xoá tài khoản này?',
+            position: 'center',
+            buttons: [
+                ['<button><i class="fas fa-trash"></i>  Xoá</button>', function (instance, toast) {
+         
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'confirm');
+                    $.ajax({
+                        url: '/account/remove-account',
+                        type: 'DELETE',
+                        data: {
+                            id: $('#idAccount').val(),
+                            _csrf: $('#_csrf').val()
+                        },
+                        success: function(res){
+                            iziToast.success({
+                                title: 'Hoàn thành',
+                                overlay: true,
+                                position: 'center',
+                                message: res,
+                            })
+                            setTimeout(function(){ window.location.href = '/' }, 3000);
+                        },
+                        error: function(error){
+                            iziToast.error({
+                                title: 'Có lỗi',
+                                overlay: true,
+                                position: 'center',
+                                message: error.responseText,
+                            })
+                            setAllowPointer(button, true);
+                            $(button).prop('disabled', false);
+                        }
+                    })
+         
+                }],
+                ['<button><i class="far fa-times-circle"></i>  Huỷ</button>', function (instance, toast) {
+         
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'discard');
+         
+                }],
+            ],
+            onClosing: function(instance, toast, closedBy){
+                if(closedBy != 'confirm'){
+                    setAllowPointer(button, true);
+                    $(button).prop('disabled', false);
+                }
+            }
+        });
+    })
 })
 
