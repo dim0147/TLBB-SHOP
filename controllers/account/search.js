@@ -33,7 +33,8 @@ exports.checkFields = async function(req, res, next){
 
     // Field allow to search
     const allowField = [
-            'c_name', 
+            'c_name',
+            'userId', 
             'min', 
             'max', 
             'phai', 
@@ -146,6 +147,14 @@ function filterSpecialSort(req){
                     option.sort = {price: 1}
                 else if (req.query[field] == 'most-view')
                     option.sort = {totalView: -1}
+                else if (req.query[field] == 'most-rate')
+                    option.sort = {totalRate: -1}
+            }
+
+            // Elevate userId
+            if(field === 'userId'){
+                if(!mongoose.Types.ObjectId.isValid(originQuery.userId)) return {OK: false, message: "Lỗi object Id"}
+                condition.userId = mongoose.Types.ObjectId(originQuery.userId);
             }
         }
 
@@ -312,8 +321,6 @@ function saveSearchRs(req){
     }
     Promise.all(listPromises)
     .then(result => {   // Save list of search result to db
-        console.log('rs');
-        console.log(result);
         if(result.length > 0){
             let payload = [];
             // Loop through result
@@ -326,7 +333,6 @@ function saveSearchRs(req){
                     })
                 });
             });
-            console.log(payload);
             searchResultModel.insertMany(payload, err => {
                 if(err) return console.log(err);
             });

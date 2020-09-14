@@ -1,8 +1,6 @@
 const dateFormat = require('dateformat');
-const waterfall = require('async-waterfall');
 
 const cache = require('../cache/cache');
-const config = require('../config/config');
 const helper = require('../help/helper');
 
 dateFormat.i18n = {
@@ -24,9 +22,8 @@ dateFormat.i18n = {
 // Set user session and convert image, user created day
 exports.setUserSession = function(req, res, next) {
     if(req.isAuthenticated()){
-        if(typeof req.user.created_at === 'object')
-            req.user.created_at = dateFormat(new Date(req.user.created_at), "d mmmm, yyyy")
-      }
+        req.user.created_at = dateFormat(new Date(req.user.created_at), "d mmmm, yyyy");
+    }
       res.locals.userSS = req.user;
       next()
 }
@@ -48,7 +45,7 @@ exports.loadMenuView = function(req, res, next){
         next();
     })
     .catch(function(err){
-        res.status(400).send(err);
+        next(err);
     });
    
 }

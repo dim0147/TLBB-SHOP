@@ -53,7 +53,7 @@ function isLogin(req, res, next){
   }
   
   req.session.oldUrl = '/account' + req.url;
-  res.redirect('/user/login');
+  return res.redirect('/user/login');
 }
 
 

@@ -28,8 +28,11 @@
                             <!-- User Name -->
                             <h5 class="text-center"><%= user.name %></h5>
                             <div class="text-center">
+                                <p>Tham gia vào ngày <%= user.created_at %></p>
                                 <% if(user.type == "google"){ %>
-                                        <i style="color:red!important"  class="fab fa-google"></i>
+                                        <i title="Xác thực với Google" style="color:red!important"  class="fab fa-google"></i>
+                                <% }else if(user.type == "facebook"){ %>
+                                        <i title="Xác thực với Facebook" style="color: blue" class="fab fa-facebook-f"></i>
                                 <% } %>
                             </div>
                         </div>

@@ -274,7 +274,7 @@
 						<img class="rounded-circle img-fluid mb-5 px-5" src="<%= account.userId.urlImage %>" alt="">
 						<h4><a href=""><%= account.userId.name %></a></h4>
 						<p class="member-time">Thành viên kể từ <%= account.userId.created_at %></p>
-						<a href="" style="color: green">Xem tất cả các tài khoản được đăng bởi <%= account.userId.name %></a>
+						<a href="/user/<%= account.userId._id %>/accounts" style="color: green"><i class="fas fa-cart-plus"></i>  Xem tất cả các tài khoản được đăng bởi <%= account.userId.name %></a>
 						<ul class="list-inline mt-20">
 							<% if(!account.isOwner){ %>
 								<li class="list-inline-item"><a href="<%= account.contactFB %>" target="_blank" class="btn btn-contact d-inline-block  btn-success px-lg-5 my-1 px-md-3"><i class="fas fa-sms"></i>  Liên Hệ</a></li>

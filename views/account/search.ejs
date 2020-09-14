@@ -66,6 +66,7 @@
                         <form action="" method="GET">
                             <div class="form-row">
                                 <h2 style="color:rgb(227, 252, 0)">Tìm Kiếm Tên Nhân Vật</h2>
+                                
                                 <div class="form-group col-md-10">
                                     <input name="c_name" type="text" class="form-control my-2 my-lg-0" id="ipSearchName" placeholder="Nhập tên nhân vật ít nhất 3 ký tự">
                                 </div>
@@ -114,6 +115,11 @@
             <input id="c_nameIpFilter" type="text" name="c_name" class="form-control my-2 my-lg-0" placeholder="Nhập tên nhân vật">
         </div>
 
+        <div class="widget filter">
+            <h4 class="widget-header">ID người đăng</h4>
+            <input id="ipUserId" type="text" name="userId" class="form-control my-2 my-lg-0" placeholder="Nhập ID người đăng">
+        </div>
+
     <% if(typeof menuView.phais !== 'undefined' && menuView.phais.length > 0){ %>
         <div class="widget filter">
             <h4 class="widget-header">Phái</h4>
@@ -160,6 +166,7 @@
             <option value="price-high">Giá cao nhất</option>
             <option value="price-low">Giá thấp nhất</option>
             <option value="most-view">Nhiều lượt xem</option>
+            <option value="most-rate">Đánh giá cao</option>
         </select>
     </div>
 
@@ -239,7 +246,7 @@
                             <% if(typeof accounts !== 'undefined' && accounts.length > 0){ %>
                                 <% accounts.forEach(account => { %>
                                     <% if(account.totalRate == null) 
-                                        account.totalRate = 5
+                                        account.totalRate = 0
                                        if(account.transaction_type == 'trade')
                                         account.price = 0
                                     %>
@@ -287,6 +294,7 @@
                                     </ul>
                                     
                                     <p style="height: 75px; font-size: 12px; color: rgb(43, 177, 177);" class="card-text">
+                                    - Đăng bởi: <a style="color:#9999ff" href="/user/<%= account.user._id %>/accounts"><%= account.user.name %></a> <br>
                                     - Server: <%= account.server.name %> (<%= account.sub_server.name %>)<br>
                                     - Tên nhân vật: <%= account.c_name %> <br>
                                     - Ngọc: <%= account.ngoc.name %> <br>

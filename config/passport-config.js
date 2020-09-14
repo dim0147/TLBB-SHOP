@@ -17,7 +17,7 @@ passport.deserializeUser(function(user, done){
     userModel.findById(user._id, function(err, user){
         if(err) return done(err);
         if(user == null) return done('Không thấy user');
-        done(null, user);
+        done(null, user.toObject());
     });
 });
 

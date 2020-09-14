@@ -206,6 +206,15 @@ $('document').ready(function(){
                 }
               }).appendTo($('.accountAreaRow'));
         }
+        else if(sort == 'most-rate'){ // Phổ biến
+            $('.accountDiv').sort(function(a, b) {
+                if (Number($(a).attr('data-rate')) > Number($(b).attr('data-rate'))) {
+                  return -1;
+                } else {
+                  return 1;
+                }
+              }).appendTo($('.accountAreaRow'));
+        } 
         else{
             $('.accountDiv').sort(function(a, b) {
                 if ($(a).attr('data-date') > $(b).attr('data-date')) {

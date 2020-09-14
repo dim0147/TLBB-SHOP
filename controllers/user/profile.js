@@ -232,6 +232,7 @@ exports.renderProfileAccount = function(req, res){
         }
     ], (err, result) => {
         if(err) return cb(err);
+
         res.render('user/profile-account', {
             title: 'Những tài khoản đã đăng', 
             user: req.user, 

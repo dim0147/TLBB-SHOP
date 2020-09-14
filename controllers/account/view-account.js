@@ -56,7 +56,6 @@ exports.renderPage = (req, res) => {
                 account.userId.created_at = dateFormat(new Date(account.userId.created_at), 'd mmmm, yyyy')
                 if(req.isAuthenticated() && account.userId._id.toString() == req.user._id){
                     account.isOwner = true;
-                    console.log('ok');
                 }
 
                 cb(null, account);

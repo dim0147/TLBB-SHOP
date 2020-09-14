@@ -15,11 +15,14 @@ const registerAC = require('../controllers/user/register');
 const loginAC = require('../controllers/user/login');
 const profileAC = require('../controllers/user/profile');
 const logoutAC = require('../controllers/user/logout');
+const viewUserAC = require('../controllers/user/view-user')
 
 
 function redirectOldUrl(req, res, next){ // redirect when user login or register finish
     if(req.session.oldUrl){
-        res.send(req.session.oldUrl)
+        console.log('rediirect old url ' + req.session.oldUrl);
+        const url = req.session.oldUrl;
+        res.redirect(url)
         req.session.oldUrl = null;
     }
     else
@@ -39,7 +42,9 @@ function checkNoLogin(req, res, next){ // check if no login, if login already re
         return next();
     else{
         if(req.session.oldUrl){
-            res.redirect(req.session.oldUrl)
+            console.log('CheckNoLogin rediirect old url ' + req.session.oldUrl);
+            const url = req.session.oldUrl;
+            res.redirect(url)
             req.session.oldUrl = null;
         }
         else
@@ -71,7 +76,7 @@ router.get('/login/google', checkNoLogin, passport.authenticate('google', {scope
 
 router.get('/login/google/callback', passport.authenticate('google'), loginAC.callbackAuthenticate);
 
-/* Profile User . */
+/* User Profile . */
 router.get('/profile', isLogin, profileAC.renderPage);
 
 router.patch('/profile/update-profile', isLogin, profileAC.checkBodyUpdateProfile, profileAC.updateProfile);
@@ -79,10 +84,16 @@ router.patch('/profile/update-profile', isLogin, profileAC.checkBodyUpdateProfil
 router.patch('/profile/update-password', isLogin, profileAC.checkBodyUpdatePassWord, profileAC.updatePassword);
 
 
-/* Profile Account . */
+/* User Profile Account . */
 router.get('/profile/accounts', isLogin, profileAC.renderProfileAccount);
 
 router.get('/profile/get-accounts', isLogin, profileAC.getAccount);
+
+/* View User Profile Account . */
+router.get('/:id/accounts', viewUserAC.checkParams, viewUserAC.renderPage);
+
+/* View User Profile Account . */
+router.get('/:id/get-accounts', viewUserAC.checkParamGetUserAccounts, viewUserAC.getUserAccounts);
 
 
 
