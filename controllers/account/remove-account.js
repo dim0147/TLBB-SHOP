@@ -13,6 +13,7 @@ const accountLinkAddfieldsModel = require('../../models/account-link-addfield');
 const commentModel = require('../../models/comment');
 const likeModel = require('../../models/like');
 const lockReasonModel = require('../../models/lock-reason');
+const collectionModel = require('../../models/collection');
 
 exports.checkBody = [
     body('id', 'Id không hợp lệ').isMongoId(),
@@ -65,6 +66,12 @@ exports.removeAccount = async (req, res) => {
             },
             (cb) => { // dell reason
                 lockReasonModel.deleteMany({account: account._id}, {session: session}, err => {
+                    if(err) return cb(err);
+                    cb(null);
+                });
+            },
+            (cb) => { // dell collection
+                collectionModel.deleteMany({account: account._id}, {session: session}, err => {
                     if(err) return cb(err);
                     cb(null);
                 });
@@ -122,6 +129,12 @@ exports.removeAccount = async (req, res) => {
             if(result.listUrlImage.length > 0)
                 helper.deleteManyFiles(result.listUrlImage);
 
+            // Save activity
+            helper.createActivity({
+                type: 'remove-account',
+                account: account._id,
+                owner: req.user._id
+            });
             res.send('Xoá tài khoản '+account.c_name+' thành công!');
         })
     

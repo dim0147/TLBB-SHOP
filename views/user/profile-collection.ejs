@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <% include ../partials/head %>
+
+  <link rel="stylesheet" href="/plugins/iziToast/iziToast.min.css">
+  <style>
+      
+      .trade{
+          background: red!important;
+      }
+
+      .allPGL{
+          background: rgb(241, 6, 241)!important;
+      }
+
+      .itemInSearch{
+          margin: 10px;
+          border-bottom: 4px solid rgb(70, 75, 70);
+      }
+
+      .itemInSearch:hover{
+          background:#353233
+      }
+      .scrollbar::-webkit-scrollbar-track
+      {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+            border-radius: 10px;
+            background-color: #F5F5F5;
+      }
+
+        .scrollbar::-webkit-scrollbar
+        {
+            width: 12px;
+            background-color: #F5F5F5;
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb
+        {
+            border-radius: 10px;
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+            background-color: #555;
+        }
+
+        .scrollbar
+        {
+            margin-left: 30px;
+            float: left;
+            height: 300px;
+            width: 65px;
+            background: #F5F5F5;
+            overflow-y: scroll;
+            margin-bottom: 25px;
+        }
+        .unsavedBtn{
+        padding: .25rem .5rem;
+        font-size: .875rem;
+        line-height: 1.5;
+        border-radius: .2rem;
+        left: 90%;
+        position: absolute;
+        display: inline-block;
+        }
+  </style>
+
+  </style>
+</head>
+
+<body class="body-wrapper">
+
+  <% include ../partials/menu %>
+  <% if(typeof csrfToken !== "undefined"){ %>
+    <input type="hidden" id="_csrf" value="<%= csrfToken %>">
+  <% } %>
+  <section class="user-profile section">
+	<div class="container">
+		<div class="row">
+            <% if(typeof error !== 'undefined'){ %>
+                <h1><%= error %></h1>
+            <% } %>
+
+            <% if(typeof user !== 'undefined'){ %>
+                <div class="col-md-10 offset-md-1 col-lg-3 offset-lg-0">
+                    <div class="sidebar">
+                        <!-- User Widget -->
+                        <div class="widget user">
+                            <!-- User Image -->
+                            <div class="image d-flex justify-content-center">
+                                <img src="<%= user.urlImage %>" alt="" class="">
+                            </div>
+                            <!-- User Name -->
+                            <h5 class="text-center"><%= user.name %></h5>
+                            <div class="text-center">
+                                <p>Tham gia vào ngày <%= user.created_at %></p>
+                                <% if(user.type == "google"){ %>
+                                        <i title="Xác thực với Google" style="color:red!important"  class="fab fa-google"></i>
+                                <% }else if(user.type == "facebook"){ %>
+                                        <i title="Xác thực với Facebook" style="color: blue" class="fab fa-facebook-f"></i>
+                                <% } %>
+                            </div>
+                        </div>
+                        <!-- Dashboard Links -->
+                        <div class="widget dashboard-links">
+                            <ul>
+                                <li><a  class="my-1 d-inline-block" href="/user/profile"><i class="fas fa-user-circle"></i>  Thông tin cá nhân</a></li>
+                                <li><a class="my-1 d-inline-block" href="/user/profile/accounts"><i class="fas fa-cart-plus"></i>   Tài khoản đã đăng</a></li>
+                                <li><a style="color: green" class="my-1 d-inline-block" href="/user/profile/collections"><i class="fas fa-bookmark"></i>   Bộ sưu tập</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>    
+
+            <% } %>
+                <% if(typeof collections !== 'undefined' && collections.length === 0){ %>
+                    <h1>Bạn chưa lưu tài khoản nào</h1>
+                <% } %>
+                <% if(typeof collections !== 'undefined' && collections.length > 0) { %>
+                <div class="col-md-10 offset-md-1 col-lg-9 offset-lg-0">
+                    <div class="product-grid-list">
+                        <div class="row mt-30">
+                            <% collections.forEach(function(collection){ %>
+                                <div class="col-sm-12 col-lg-4 col-md-6 accountDiv" data-view="<%= collection.account.totalView %>" data-date="<%= collection.account.createdAt %>" data-rate="<%= collection.account.totalRate %>" data-price="<%= collection.account.price %>">
+                                <!-- product card -->
+                <div class="product-item bg-light">
+                    <div class="card">
+                        <div class="thumb-content">
+                            <button data-account="<%= collection.account._id %>" title="Huỷ khỏi bộ sưu tập" type="button" class="unsavedBtn btn btn-danger btn-sm"><i class="fas fa-times"></i></button>
+                            <% if(collection.account.transaction_type === 'sell'){ %>
+                                <div class="price"><%= collection.account.price.toLocaleString('en-US', {style : 'currency', currency : 'VND'}); %></div>
+                            <% }else if(collection.account.transaction_type === 'trade'){ %>
+                                <div class="price trade">Giao lưu <%= collection.account.phaigiaoluu.name %></div>
+                            <% }else{ %>
+                                <div class="price allPGL">- Giao lưu <%= collection.account.phaigiaoluu.name %> <br> hoặc <br>- Bán: <%= collection.account.price.toLocaleString('en-US', {style : 'currency', currency : 'VND'}); %></div>
+                            <% } %>
+                            <a href="/account/view-account/<%= collection.account._id %>">
+                                <img class="card-img-top" src="/images/data/<%= collection.account.image %>" alt="Card image cap" height="180px">
+                            </a>
+
+                        </div>
+                        <div class="card-body">
+                            <% if(collection.account.status === 'done'){ %>
+                                <h6 style="color:rgb(73, 218, 6)"><i class="fas fa-check" aria-hidden="true"></i>   Tài khoản đã hoàn tất giao dịch</h4>
+                            <% }else if (collection.account.status === 'lock'){ %>
+                                <h6 style="color:rgb(255, 153, 0)"><i class="fas fa-lock" aria-hidden="true"></i>   Tài khoản bị khoá</h4>
+                            <% } %>
+                            <h4 style="height: 20px;" class="card-title"><a style="color:rgb(189, 121, 38)" href="/account/view-account/<%= collection.account._id %>"><%= collection.account.title %></a></h4>
+                            <div class="product-ratings">
+                                <ul class="list-inline">
+                                    <% if(collection.account.totalRate == null) collection.account.totalRate = 0%>
+                                    <% for (let index = 0; index < Math.round(collection.account.totalRate); index++){ %>
+                                        <li class="list-inline-item selected"><i class="fa fa-star"></i></li>
+                                    <% } %>
+                                    <% for(let index =  Math.round(collection.account.totalRate); index < 5; index++){ %>
+                                    <li class="list-inline-item"><i class="fa fa-star"></i></li>
+                                    <% } %>
+                                </ul>
+                            </div>
+                            <ul style="margin-bottom: 3px;" class="list-inline product-meta">
+                                <li class="list-inline-item">
+                                    <a style="color: red" href="/account/search?phai=<%= collection.account.phai._id %>"><i class="fa fa-folder-open-o"></i><%= collection.account.phai.name %></a>
+                                    <p style="padding: 0px; margin: 0px; display:inline-block; margin-left: 10px;font-size: 10px;"><i class="fas fa-eye"></i>  <%= collection.account.totalView %></p>
+                                </li><br>
+                                <li class="list-inline-item">
+                                    <a style="color: green" href=""><i class="fa fa-calendar"></i><%= collection.account.createdAt %></a>
+                                </li>
+                            </ul>
+                            
+                            <p style="font-size: 12px; color: rgb(43, 177, 177);" class="card-text">
+                            - Đăng bởi: <a style="color:#9999ff" href="/user/<%= collection.account.userId._id %>/accounts"><%= collection.account.userId.name %></a> <br>
+                            - Server: <%= collection.account.server.name %> (<%= collection.account.sub_server.name %>)<br>
+                            - Tên nhân vật: <%= collection.account.c_name %> <br>
+                            - Ngọc: <%= collection.account.ngoc.name %> <br>
+                            - Điêu Văn: <%= collection.account.dieuvan.name %> <br>
+                            - Võ Hồn: <%= collection.account.vohon.name %>
+                            </p>
+
+                        </div>
+                    </div>
+                </div>
+                
+                
+                
+                            </div>
+                            <% }) %>
+                        </div>
+		            </div>
+                </div>
+                <% } %>
+</section>
+
+
+
+<!--============================
+=            Footer            =
+=============================-->
+
+<% include ../partials/footer %>
+
+
+<script src="/plugins/iziToast/iziToast.min.js"></script>
+
+
+<script src="/js/user/profile-collection.js"></script>
+
+</body>
+
+</html>

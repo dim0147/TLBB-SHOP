@@ -8,8 +8,10 @@ const imageModel = require('../../models/image');
 const acLinkAddFieldModel = require('../../models/account-link-addfield');
 const rateModel = require('../../models/rate')
 const viewModel = require('../../models/view');
+const collectionModel = require('../../models/collection');
 
 const config = require('../../config/config');
+const helper = require('../../help/helper');
 
 
 dateFormat.i18n = {
@@ -78,15 +80,28 @@ exports.renderPage = (req, res) => {
                 cb(null, account, addFields, rate)
             });
         },
-        // Get images
+        // Check if current user is logged in and have save this account already
         (account, addFields, rate, cb) => {
+            if(!req.isAuthenticated()) return cb(null, account, addFields, rate, null);
+            collectionModel.findOne({account: req.params.id, user: req.user._id}, (err, collection) => {
+                if(err){
+                    console.log('Error in clt/account/view-account.js -> renderPage 01 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                if(collection) return cb(null, account, addFields, rate, collection);
+                else return cb(null, account, addFields, rate, null);
+            })
+        },
+        // Get images
+        (account, addFields, rate, collection, cb) => {
             imageModel.find({account: account._id}).exec((err, images) => {
                 if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau');
                 const result = {
                     account: account,
                     addFields: addFields,
                     images: images,
-                    rate: rate
+                    rate: rate,
+                    collection: collection
                 };
                 cb(null, result);
             })
@@ -142,7 +157,15 @@ exports.renderPage = (req, res) => {
         }
     ], function(err, result){
         if(err) return res.render('account/view-account', {title: 'Có lỗi xảy ra!',  error: err });
-        res.render('account/view-account', {title: result.account.title, account: result.account, addFields: result.addFields, images: result.images, rate: result.rate, csrfToken: req.csrfToken()});
+        // Save activity
+        if(req.isAuthenticated() && req.user.role === 'user'){
+                helper.createActivity({
+                    type: 'view-account-detail',
+                    account: req.params.id,
+                    owner: req.user._id
+                });
+        }
+        res.render('account/view-account', {title: result.account.title, account: result.account, addFields: result.addFields, images: result.images, rate: result.rate, collection: result.collection, csrfToken: req.csrfToken()});
     });
 }
 

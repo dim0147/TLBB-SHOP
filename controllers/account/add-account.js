@@ -7,10 +7,9 @@ const config = require('../../config/config');
 const accountModel = require('../../models/account');
 const phaiModel = require('../../models/phai');
 const itemModel = require('../../models/item');
-const itemPropertyModel = require('../../models/item_property');
 const addFieldModel = require('../../models/add_field');
 const accountLinkAddFieldModel = require('../../models/account-link-addfield');
-const imageModel = require('../../models/image')
+const imageModel = require('../../models/image');
 
 const helper = require('../../help/helper');
 const imgur = require('imgur');
@@ -276,6 +275,12 @@ exports.addNewAccount = async (req, res) => {
                 if (err){
                     return cb('Có lỗi xảy ra, vui lòng thử lại sau');
                 }
+                // Create activity
+                helper.createActivity({
+                    type: 'add-new-account',
+                    account: newAccount._id,
+                    owner: req.user._id
+                });
                 cb(null, "Tạo bài đăng thành công !!!");
             });
         }

@@ -1,7 +1,9 @@
 const rateModel = require('../../models/rate');
 const accountModel = require('../../models/account')
 const waterfall = require('async-waterfall');
-const { body, validationResult } = require('express-validator')
+const { body, validationResult } = require('express-validator');
+
+const helper = require('../../help/helper');
 
 exports.validateBody = [
     body('rate', 'Thiếu trường').isInt({min:1, max: 5}),
@@ -38,6 +40,12 @@ exports.createRating = function(req, res){
             if(rate === false) return cb(null, false)
             rateModel.findOneAndUpdate({_id: rate._id}, {rate: req.body.rate}, err => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
+                // Save activity
+                helper.createActivity({
+                    type: 'update-rate-account',
+                    account: req.body.accountId,
+                    owner: req.user._id
+                });
                 cb(null, true);
             });
         },
@@ -46,7 +54,13 @@ exports.createRating = function(req, res){
             if(isExist) return cb(null, "Cập nhật đánh giá thành công!!!")
             rateModel.create({account: req.body.accountId, user: req.user._id, rate: req.body.rate}, err => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
-                cb(null, "Đánh giá tài khoản thành công!!!")
+                // Save activity
+                helper.createActivity({
+                    type: 'rate-account',
+                    account: req.body.accountId,
+                    owner: req.user._id
+                });
+                cb(null, "Đánh giá tài khoản thành công!!!");
             })
         }
     ], function (err, result){

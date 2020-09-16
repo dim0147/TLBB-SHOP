@@ -3,10 +3,12 @@ const waterfall = require('async-waterfall');
 const dateFormat = require('dateformat');
 const mongoose = require('mongoose');
 
+const helper = require('../../help/helper');
+
 const commentModel = require('../../models/comment');
 const accountModel = require('../../models/account');
 const rateModel = require('../../models/rate');
-const comment = require('../../models/comment');
+
 
 dateFormat.i18n = {
     dayNames: [
@@ -59,9 +61,8 @@ exports.createComment = function (req, res){
                 cb(null)
             });
         },
-        //  Check if parent comment is existing
+        //  Check if have parent comment go to check if it existing in DB
         cb => {
-            console.log(typeof req.body.parent);
             if(req.body.parent === null || typeof req.body.parent !== 'string' || req.body.parent == '') return cb(null)
             if(!mongoose.Types.ObjectId.isValid(req.body.parent)) return cb("Parent comment không hợp lệ");
             commentModel.findById(req.body.parent, (err, comment) => {
@@ -86,6 +87,17 @@ exports.createComment = function (req, res){
                 comment.avatar = req.user.urlImage;
                 let date = new Date(comment.createdAt);
                 comment.createdAt = dateFormat(date, "d mmmm, yyyy");
+                // Create activity
+                let payload = { owner: req.user._id };
+                if(comment.parent){
+                    payload.type = 'add-reply-comment';
+                    payload.comment = comment.parent;
+                }
+                else{
+                    payload.type = 'add-comment';
+                    payload.account = comment.account;
+                }
+                helper.createActivity(payload);
                 
                 cb(null, comment)
             });

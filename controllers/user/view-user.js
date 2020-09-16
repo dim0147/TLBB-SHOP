@@ -18,6 +18,7 @@ dateFormat.i18n = {
 
 const cache = require('../../cache/cache');
 const config = require('../../config/config');
+const helper = require('../../help/helper');
 
 const userModel = require('../../models/user');
 const accountModel = require('../../models/account');
@@ -63,6 +64,15 @@ exports.renderPage = function(req, res){
         }
     ], function(err, result){
         if (err) return res.render('user/view-profile-account', { title: 'Xem tài khoản', error: err});
+        
+        // Save activity
+        if(req.isAuthenticated() && req.user.role === 'user' && req.user._id.toString() != req.params.id){
+            helper.createActivity({
+                type: 'view-user-profile',
+                user: req.params.id,
+                owner: req.user._id
+            });
+        }
         res.render('user/view-profile-account', { title: 'Xem tài khoản được đăng bởi ' + result.user.name, accounts: [], user: result.user, servers: result.servers, csrfToken: req.csrfToken()});
     })
     
@@ -131,11 +141,6 @@ exports.getUserAccounts = function(req, res){
 
     if(typeof req.query.status !== 'undefined' && typeof req.query.status === 'string' && (req.query.status == 'pending' || req.query.status == 'done'))
         condition.status = req.query.status;
-
-    console.log('condition');
-    console.log(condition);
-    console.log('option');
-    console.log(option);
 
     accountModel.aggregate([
         {

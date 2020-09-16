@@ -3,16 +3,14 @@ const { param, body, validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 
 const config = require('../../config/config');
+const helper = require('../../help/helper');
 
 const accountModel = require('../../models/account');
 const phaiModel = require('../../models/phai');
 const itemModel = require('../../models/item');
-const itemPropertyModel = require('../../models/item_property');
 const addFieldModel = require('../../models/add_field');
 const accountLinkAddFieldModel = require('../../models/account-link-addfield');
-const imageModel = require('../../models/image')
-
-const helper = require('../../help/helper');
+const imageModel = require('../../models/image');
 
 exports.checkParamRenderPage = [
     param('id', 'Id không hợp lệ').notEmpty().isMongoId(),
@@ -458,6 +456,14 @@ exports.updateAccount =  async (req, res) => {
 
             // Commit transaction
             await session.commitTransaction(); 
+
+            // Save activity
+            helper.createActivity({
+                type: 'update-account',
+                account: idAccount,
+                owner: req.user._id
+            });
+
             res.send('Chỉnh sửa tài khoản thành công, vui lòng tải lại trang để xem thay đổi'); 
         }
         catch(err){

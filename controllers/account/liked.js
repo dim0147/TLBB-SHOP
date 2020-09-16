@@ -3,6 +3,8 @@ const likeModel = require('../../models/like');
 const commentModel = require('../../models/comment');
 const {body, validationResult} = require('express-validator');
 
+const helper = require('../../help/helper');
+
 exports.validationBody = [
     body('commentId', 'Thiếu trường').notEmpty().isMongoId(),
     body('liked', 'Thiếu trường').isBoolean(),
@@ -38,11 +40,23 @@ exports.likeHandler = function (req, res){
             if(like !== null){
                 likeModel.deleteOne({user: req.user._id, comment: req.body.commentId}, err => {
                     if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
+                    // Save activity
+                    helper.createActivity({
+                        type: 'unlike-comment',
+                        comment: req.body.commentId,
+                        owner: req.user._id
+                    });
                     cb(null, "Unlike thành công")
                 })         
             }else{  //  Like
                 likeModel.create({comment: req.body.commentId, user: req.user._id, status: 'like'}, err => {
-                    if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
+                    if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
+                    // Save activity
+                    helper.createActivity({
+                        type: 'like-comment',
+                        comment: req.body.commentId,
+                        owner: req.user._id
+                    });
                     cb(null, 'Like thành công');
                 });
             }

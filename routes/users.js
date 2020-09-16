@@ -15,7 +15,8 @@ const registerAC = require('../controllers/user/register');
 const loginAC = require('../controllers/user/login');
 const profileAC = require('../controllers/user/profile');
 const logoutAC = require('../controllers/user/logout');
-const viewUserAC = require('../controllers/user/view-user')
+const viewUserAC = require('../controllers/user/view-user');
+const collectionC = require('../controllers/user/collection');
 
 
 function redirectOldUrl(req, res, next){ // redirect when user login or register finish
@@ -76,6 +77,7 @@ router.get('/login/google', checkNoLogin, passport.authenticate('google', {scope
 
 router.get('/login/google/callback', passport.authenticate('google'), loginAC.callbackAuthenticate);
 
+// ---------------------------------------- PROFILE -----------------------------------------
 /* User Profile . */
 router.get('/profile', isLogin, profileAC.renderPage);
 
@@ -84,16 +86,32 @@ router.patch('/profile/update-profile', isLogin, profileAC.checkBodyUpdateProfil
 router.patch('/profile/update-password', isLogin, profileAC.checkBodyUpdatePassWord, profileAC.updatePassword);
 
 
-/* User Profile Account . */
+/* Account User Profile  . */
 router.get('/profile/accounts', isLogin, profileAC.renderProfileAccount);
 
 router.get('/profile/get-accounts', isLogin, profileAC.getAccount);
 
-/* View User Profile Account . */
+/* Collection User Profile . */
+router.get('/profile/collections', isLogin, profileAC.renderCollection);
+
+// ---------------------------------------- END PROFILE -----------------------------------------
+
+
+// ---------------------------------------- Other User's PROFILE -----------------------------------------
+
+/* Account From User Profile  . */
 router.get('/:id/accounts', viewUserAC.checkParams, viewUserAC.renderPage);
 
-/* View User Profile Account . */
+/* API Get Account From User Profile . */
 router.get('/:id/get-accounts', viewUserAC.checkParamGetUserAccounts, viewUserAC.getUserAccounts);
+
+// ---------------------------------------- END Other User's PROFILE -----------------------------------------
+
+/* Create collection from user . */
+router.post('/create-collection', isLogin, collectionC.checkBody, collectionC.createCollection);
+
+/* Remove collection from user . */
+router.delete('/delete-collection', isLogin, collectionC.checkBody, collectionC.deleteCollection);
 
 
 

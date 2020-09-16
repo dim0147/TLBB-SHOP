@@ -668,5 +668,96 @@ $("document").ready(function() {
             }
         });
     })
+
+    $('#btnSave').click(function(e){
+        const button = this;
+        setAllowPointer(button, false);
+        $(button).prop('disabled', true);
+        let option = {};
+        const isSaved = $(button).attr('is-saved');
+        if(isSaved === 'true'){
+            option.url = '/user/delete-collection';
+            option.method = 'DELETE';
+            option.message = 'Bạn có muốn bỏ lưu tài khoản này khỏi bộ sưu tập?';
+            option.icon = 'fas fa-trash';
+            option.text = 'Bỏ lưu';
+        }
+        else{
+            option.url = '/user/create-collection';
+            option.method = 'POST';
+            option.message = 'Bạn muốn lưu tài khoản này vào bộ sưu tập?';
+            option.icon = 'fas fa-save';
+            option.text = ' Lưu';
+        }
+        iziToast.show({
+            timeout: false,
+            progressBar: false,
+            close: false,
+            backgroundColor: 'rgb(64, 68, 156)',
+            messageColor: 'rgb(237, 228, 230)',
+            titleColor: 'rgb(245, 0, 122)',
+            icon: 'fa fa-question',
+            overlay: true,
+            title: 'Lưu',
+            message: option.message,
+            position: 'center',
+            buttons: [
+                ['<button><i class="'+option.icon+'"></i>'+'  '+option.text+'</button>', function (instance, toast) {
+         
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'confirm');
+
+                    $.ajax({
+                        url: option.url,
+                        type: option.method,
+                        data: {
+                            account: $('#idAccount').val(),
+                            _csrf: $('#_csrf').val()
+                        },
+                        success: function(res){
+                            iziToast.success({
+                                title: 'Hoàn thành',
+                                overlay: true,
+                                position: 'center',
+                                message: res,
+                            })
+                            setAllowPointer(button, true);
+                            $(button).prop('disabled', false);
+                            if(isSaved === 'true'){
+                                $(button).html('<i class="fas fa-vote-yea"></i> Lưu vào bộ sưu tập')
+                                $(button).attr('is-saved', 'false');
+                            }
+                            else{
+                                $(button).html('<i class="fas fa-close"></i> Bỏ lưu');
+                                $(button).attr('is-saved', 'true');
+                            }
+                               
+                        },
+                        error: function(error){
+                            iziToast.error({
+                                title: 'Có lỗi',
+                                overlay: true,
+                                position: 'center',
+                                message: error.responseText,
+                            })
+                            setAllowPointer(button, true);
+                            $(button).prop('disabled', false);
+                        }
+                    })
+         
+                }],
+                ['<button><i class="far fa-times-circle"></i>  Huỷ</button>', function (instance, toast) {
+         
+                    instance.hide({ transitionOut: 'fadeOut' }, toast, 'discard');
+         
+                }],
+            ],
+            onClosing: function(instance, toast, closedBy){
+                if(closedBy != 'confirm'){
+                    setAllowPointer(button, true);
+                    $(button).prop('disabled', false);
+                }
+            }
+        });
+    })
 })
 

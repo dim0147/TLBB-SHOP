@@ -79,6 +79,14 @@
 						<button type="button" id="btnRemove" class="btn btn-danger btn-sm btnOwner"><i class="fas fa-trash"></i>  Xoá</button>
 					<% } %>
 
+					<% if(typeof account !== 'undefined' && typeof collection !== 'undefined' && typeof userSS !== 'undefined') { %>
+						<% if(!collection){ %>
+							<button is-saved='false' type="button" id="btnSave" class="btn btn-info btn-sm btnOwner"><i class="fas fa-vote-yea"></i>  Lưu vào bộ sưu tập</button>
+						<% }else{ %>
+							<button is-saved='true' type="button" id="btnSave" class="btn btn-info btn-sm btnOwner"><i class="fas fa-close"></i>  Bỏ lưu</button>
+						<% } %>
+					<% } %>
+
 					<% if(typeof images !== 'undefined' && images.length > 0) { %>
 					<!-- product slider -->
 					<div class="product-slider">

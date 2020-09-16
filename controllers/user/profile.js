@@ -21,12 +21,11 @@ const config = require('../../config/config');
 
 const userModel = require('../../models/user');
 const accountModel = require('../../models/account');
+const collectionModel = require('../../models/collection');
 
 // -------------------------------- Profile User ------------------------------------------------
 
 exports.renderPage = function(req, res){
-    if(!req.isAuthenticated())
-        return res.render('user/profile', {title: "Trang cá nhân", error: "Bạn chưa đăng nhập"})
     return res.render('user/profile', {title: 'Trang cá nhân', user: req.user, csrfToken: req.csrfToken()});
 }
 
@@ -41,16 +40,39 @@ exports.updateProfile = function(req, res){
     if(!req.isAuthenticated())
         return res.status(401).send("Unauthorized");
 
-    // Update user
-    const payload = {
-        name: req.body.name,
-        email: req.body.email
-    }
+    waterfall([
+        (cb) => { // Check if email is exist
+            userModel.findOne({email: req.body.email}, (err, user) => {
+                if(err){
+                    console.log('Err in CLS/user/profile->updateProfile 01' + err);
+                    return cb('Có lỗi xảy ra, vui lòng thử lại sau');
+                }
+                if(!user) return cb(null);
+                if(user._id.toString() !== req.user._id.toString() && user.email == req.body.email)
+                    return cb("Email đã tồn tại");
+                cb(null);
+            });
+        },
+        (cb) => {   // Update user
+            const payload = {
+                name: req.body.name,
+                email: req.body.email
+            }
 
-    userModel.updateOne({_id: req.user._id}, payload, {runValidators: true}, err => {
-        if(err) return res.status(500).send("Có lỗi xảy ra, vui lòng thử lại sau");
-        res.send("Cập nhật thành công!");
+            userModel.updateOne({_id: req.user._id}, payload, {runValidators: true}, err => {
+                if(err) {
+                    console.log('Err in CLS/user/profile->updateProfile 02' + err);
+                    return cb('Có lỗi xảy ra, vui lòng thử lại sau');
+                }
+                return cb(null, "Cập nhật thành công!");
+            });
+        }
+    ], function(err, result){
+        if(err) return res.status(400).send(err);
+        res.send(result);
     });
+
+    
 }
 
 exports.checkBodyUpdatePassWord = [
@@ -576,4 +598,157 @@ exports.getAccount = function(req, res){
         }
         res.send(returnData);
     })
+}
+
+
+// -------------------------------- Profile collection ------------------------------------------------
+
+exports.renderCollection = (req, res) => {
+    waterfall([
+        (cb) => { // Get collection
+            collectionModel.aggregate([
+                {
+                    $match: { // Match user id
+                        user: mongoose.Types.ObjectId(req.user._id)
+                    }
+                },
+                {
+                    $lookup: { // Query account
+                        from: 'accounts',
+                        let: { accountId: '$account'},
+                        pipeline: [
+                            {
+                                $match: { 
+                                    $expr: {
+                                        $eq: ['$_id', '$$accountId']
+                                    }
+                                }
+                            },
+                            {
+                                $lookup: { // Query view
+                                    from: 'views',
+                                    localField: '_id',
+                                    foreignField: 'account',
+                                    as: 'views'
+                                }
+                            },
+                            {
+                                $addFields: { // Calculate total view
+                                    totalView: {$size: '$views'}
+                                }
+                            },
+                            {
+                                $lookup: { // Query image
+                                    from: 'images',
+                                    localField: '_id',
+                                    foreignField: 'account',
+                                    as: 'images'
+                                }
+                            },
+                            {
+                                $addFields: { // Check image exist if have get first element otherwise return df image
+                                    image: {
+                                        $cond: [
+                                            { $anyElementTrue: ['$images'] },
+                                            { $arrayElemAt: ['$images.url', 0]},
+                                            'no-image.png'
+                                        ]
+                                    }
+                                }
+                            },
+                            {
+                                $lookup: { // Query rate
+                                    from: 'rates',
+                                    localField: '_id',
+                                    foreignField: 'account',
+                                    as: 'rates'
+                                }
+                            },
+                            {
+                                $unwind: { // Extract rate to calculate rate
+                                    path: '$rates',
+                                    preserveNullAndEmptyArrays: true
+                                }
+                            },
+                            {
+                                $group: { // Group account after extract
+                                    _id: '$_id',
+                                    userId: {$first: '$userId'},
+                                    title: {$first: '$title'},
+                                    c_name: {$first: '$c_name'},
+                                    phai: {$first: '$phai'},
+                                    server: {$first: '$server'},
+                                    sub_server: {$first: '$sub_server'},
+                                    ngoc: {$first: '$ngoc'},
+                                    dieuvan: {$first: '$dieuvan'},
+                                    vohon: {$first: '$vohon'},
+                                    transaction_type: {$first: '$transaction_type'},
+                                    price: {$first: '$price'},
+                                    phaigiaoluu: {$first: '$phaigiaoluu'},
+                                    status: {$first: '$status'},
+                                    image: {$first: '$image'},
+                                    totalView: {$first: '$totalView'},
+                                    totalRate: {$avg: '$rates.rate'},
+                                    createdAt: {$first: '$createdAt'}
+                                }
+                            }
+                        ],
+                        as: 'account'
+                    }
+                },
+                {
+                    $addFields: {
+                        account: {
+                            $cond: [
+                                { $anyElementTrue: ['$account'] },
+                                { $arrayElemAt: ['$account', 0]},
+                                null
+                            ]
+                        }
+                    }
+                }
+            ], function(err, collections){
+                if(err){
+                    console.log('Error in ctl/user/profile.js -> renderCollection 01 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                // Check if collections equal zero
+                if(collections.length === 0) return cb(null, {collections: []});
+                cb(null, {collections: collections})
+            })
+        },
+        (result, cb) => { // Populate account field in collections
+            if(result.collections.length === 0) return cb(null, result);
+
+             // Add account to populate field
+             let popAcFields = config.account.popAcFields.map(field => {
+                let payload = Object.assign({}, field);
+                payload.path = 'account.' + payload.path;
+                return payload;
+            });
+
+            // Add userId field
+            popAcFields.push({
+                path: 'account.userId',
+                model: 'users'
+            });
+           
+            // Populate account
+            collectionModel.populate(result.collections, popAcFields, (err, collections) => {
+                if(err){
+                    console.log('Error in ctl/user/profile.js -> renderCollection 02 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                collections.forEach(collection => {
+                    if(collection.account)
+                        collection.account.createdAt = dateFormat(new Date(collection.account.createdAt), "d mmmm, yyyy")
+                });
+                cb(null, {collections: collections})
+            })
+        },
+    ], function(err, result){
+        if(err) return res.render('user/profile-collection', {title: 'Trang cá nhân', user: req.user, error: err, csrfToken: req.csrfToken()});
+        res.render('user/profile-collection', {title: 'Trang cá nhân', user: req.user, collections: result.collections, csrfToken: req.csrfToken()});
+    });
+    
 }

@@ -4,6 +4,7 @@ const fs = require('fs');
 const phaiModel = require('../models/phai');
 const itemModel = require('../models/item');
 const bosungField = require('../models/add_field')
+const activityModel = require('../models/activity');
 
 exports.checkEmptyRequest = function(req, arrayProperty, arrayNoCheckNull = []){
     for (var i = 0; i < arrayProperty.length; i++){
@@ -122,5 +123,13 @@ exports.isEmptyObject = obj => {
         return false;    
     }
     return true
+}
+
+exports.createActivity = function(payload){
+    const activity = new activityModel(payload);
+    activity.save(err => {
+        if(err)
+            console.log('Có lỗi khi tạo activity to DB ->  ' + err);
+    })
 }
 
