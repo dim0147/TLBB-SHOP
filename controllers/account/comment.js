@@ -91,11 +91,12 @@ exports.createComment = function (req, res){
                 let payload = { owner: req.user._id };
                 if(comment.parent){
                     payload.type = 'add-reply-comment';
-                    payload.comment = comment.parent;
+                    payload.comment = comment._id;
                 }
                 else{
                     payload.type = 'add-comment';
                     payload.account = comment.account;
+                    payload.comment = comment._id;
                 }
                 helper.createActivity(payload);
                 

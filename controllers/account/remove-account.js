@@ -76,27 +76,27 @@ exports.removeAccount = async (req, res) => {
                     cb(null);
                 });
             },
-            (cb) => { // query comment
-                commentModel.find({account: account._id}, '_id', {session: session}, (err, comments) => {
-                    if(err) return cb(err);
-                    cb(null, {comments: comments})
-                });
-            },
-            (result, cb) => { // delete like comment
-                if(result.comments.length === 0) return cb(null, {listIdComment: []});
-                const listIdComment = result.comments.map(comment => comment._id);
-                likeModel.deleteMany({comment: {$in: listIdComment}}, {session: session}, (err) => {
-                    if(err) return cb(err);
-                    cb(null, {listIdComment: listIdComment})
-                });
-            },
-            (result, cb) => { // Delete comment
-                if(result.listIdComment.length === 0) return cb(null);
-                commentModel.deleteMany({_id: {$in: result.listIdComment}}, {session: session}, (err) => {
-                    if(err) return cb(err);
-                    cb(null);
-                })
-            },
+            // (cb) => { // query comment
+            //     commentModel.find({account: account._id}, '_id', {session: session}, (err, comments) => {
+            //         if(err) return cb(err);
+            //         cb(null, {comments: comments})
+            //     });
+            // },
+            // (result, cb) => { // delete like comment
+            //     if(result.comments.length === 0) return cb(null, {listIdComment: []});
+            //     const listIdComment = result.comments.map(comment => comment._id);
+            //     likeModel.deleteMany({comment: {$in: listIdComment}}, {session: session}, (err) => {
+            //         if(err) return cb(err);
+            //         cb(null, {listIdComment: listIdComment})
+            //     });
+            // },
+            // (result, cb) => { // Delete comment
+            //     if(result.listIdComment.length === 0) return cb(null);
+            //     commentModel.deleteMany({_id: {$in: result.listIdComment}}, {session: session}, (err) => {
+            //         if(err) return cb(err);
+            //         cb(null);
+            //     })
+            // },
             (cb) => { // get images
                 imageModel.find({account: account._id}, {}, {session: session}, (err, images) => {
                     if(err) return cb(err);

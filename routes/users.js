@@ -80,19 +80,21 @@ router.get('/login/google/callback', passport.authenticate('google'), loginAC.ca
 // ---------------------------------------- PROFILE -----------------------------------------
 /* User Profile . */
 router.get('/profile', isLogin, profileAC.renderPage);
-
 router.patch('/profile/update-profile', isLogin, profileAC.checkBodyUpdateProfile, profileAC.updateProfile);
-
 router.patch('/profile/update-password', isLogin, profileAC.checkBodyUpdatePassWord, profileAC.updatePassword);
 
 
 /* Account User Profile  . */
 router.get('/profile/accounts', isLogin, profileAC.renderProfileAccount);
-
 router.get('/profile/get-accounts', isLogin, profileAC.getAccount);
 
 /* Collection User Profile . */
 router.get('/profile/collections', isLogin, profileAC.renderCollection);
+
+
+/* Activity User Profile . */
+router.get('/profile/activities', isLogin, profileAC.renderActivity);
+router.get('/profile/get-activities', isLogin, profileAC.getActivities);
 
 // ---------------------------------------- END PROFILE -----------------------------------------
 

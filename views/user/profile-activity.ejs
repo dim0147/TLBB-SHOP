@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <% include ../partials/head %>
+  <link rel="stylesheet" href="/plugins/iziToast/iziToast.min.css">
+</head>
+
+<body class="body-wrapper">
+  <% include ../partials/menu %>
+  <% if(typeof csrfToken !== "undefined"){ %>
+    <input type="hidden" id="_csrf" value="<%= csrfToken %>">
+  <% } %>
+  <section class="user-profile section">
+	<div class="container">
+		<div class="row">
+            <% if(typeof error !== 'undefined'){ %>
+                <h1><%= error %></h1>
+            <% } %>
+
+            <% if(typeof user !== 'undefined'){ %>
+                <div class="col-md-10 offset-md-1 col-lg-3 offset-lg-0">
+                    <div class="sidebar">
+                        <!-- User Widget -->
+                        <div class="widget user">
+                            <!-- User Image -->
+                            <div class="image d-flex justify-content-center">
+                                <img src="<%= user.urlImage %>" alt="" class="">
+                            </div>
+                            <!-- User Name -->
+                            <h5 class="text-center"><%= user.name %></h5>
+                            <div class="text-center">
+                                <p>Tham gia vào ngày <%= user.created_at %></p>
+                                <% if(user.type == "google"){ %>
+                                        <i title="Xác thực với Google" style="color:red!important"  class="fab fa-google"></i>
+                                <% }else if(user.type == "facebook"){ %>
+                                        <i title="Xác thực với Facebook" style="color: blue" class="fab fa-facebook-f"></i>
+                                <% } %>
+                            </div>
+                        </div>
+                        <!-- Dashboard Links -->
+                        <div class="widget dashboard-links">
+                            <ul>
+                                <li><a class="my-1 d-inline-block" href="/user/profile"><i class="fas fa-user-circle"></i>  Thông tin cá nhân</a></li>
+                                <li><a class="my-1 d-inline-block" href="/user/profile/accounts"><i class="fas fa-cart-plus"></i>   Tài khoản đã đăng</a></li>
+                                <li><a class="my-1 d-inline-block" href="/user/profile/collections"><i class="fas fa-bookmark"></i>   Bộ sưu tập</a></li>
+                                <li><a style="color: green" class="my-1 d-inline-block" href="/user/profile/activities"><i class="far fa-clock"></i>   Hoạt động gần đây</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-10 offset-md-1 col-lg-9 offset-lg-0">
+                    <!-- Edit Profile Welcome Text -->
+                    <div class="widget welcome-message activitiesDiv">
+                        <h2><i class="far fa-clock"></i>   Hoạt động gần đây</h2>
+                        <p>Hoạt động gần đây của bạn bao gồm những bình luận, lượt thích, bài đăng, chỉnh sủa,... được lưu ở đây</p>
+
+                        <div style="margin:10px" class="col-md-6">
+							<strong>Sắp xếp theo</strong>
+							<select id="filter">
+                                <option value="all">Tất cả</option>
+                                <option value="add-new-account">Tài khoản đã đăng</option>
+								<option value="update-account">Chỉnh sửa tài khoản</option>
+								<option value="remove-account">Xoá tài khoản</option>
+								<option value="add-collection">Lưu vào bộ sưu tập</option>
+								<option value="remove-collection">Huỷ khỏi bộ sưu tập</option>
+								<option value="add-comment">Bình luận</option>
+								<option value="add-reply-comment">Phản hồi bình luận</option>
+								<option value="like-comment">Lượt thích bình luận</option>
+								<option value="unlike-comment">Huỷ thích bình luận</option>
+								<option value="rate-account">Đánh giá tài khoản</option>
+								<option value="update-rate-account">Cập nhật đánh giá</option>
+								<option value="view-account-detail">Xem tài khoản</option>
+								<option value="view-user-profile">Xem trang cá nhân người khác</option>
+							</select>
+                        </div>
+
+                        <p id="filterText"></p>
+                        
+                        <!-- Activity add comment div -->
+                        <!-- <div class="row">
+                            <div class="col-md-12">
+                                <div class="search-result bg-gray">
+                                    <h5 style="color: green"><i class="fas fa-comment"></i>  Bạn đã bình luận ở một <a style="color:blue;text-decoration:underline;" href="">tài khoản</a></h5>
+                                    <div style="margin: 5px;">
+                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="/images/data/HZ9PGucu0.jpg" alt="Card image cap">
+                                        <div style="display: inline-block;" >
+                                            <span style="display: inline;color:purple">
+                                                - Cái bang full 67 
+                                                <br>
+                                                + Server: wd 
+                                                <br> 
+                                                + Ten nhan van: wdw
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <span>M điên hay j</span>
+                                    <p>12 tháng 7, 2017</p>
+                                </div>
+                            </div>
+                        </div> -->
+
+                        <!-- Activity comment reply add div -->
+                        <!-- <div class="row">
+                            <div class="col-md-12">
+                                <div class="search-result bg-gray">
+                                    <h5 style="color:rgb(154, 202, 157)"><i class="fas fa-reply-all"></i>  Bạn đã phản hồi một <a style="color:blue;text-decoration:underline;" href="">bình luận</a></h5>
+                                    <div style="background: white;width: max-content">
+                                        <span style="color:rgb(116, 145, 151)">vcc</span>
+                                    </div>
+                                    <span>M điên hay j</span>
+                                    <p>12 tháng 7, 2017</p>
+                                </div>
+                            </div>
+                        </div>                            -->
+
+                        <!-- Activity add account div -->
+                        <!-- <div class="row">
+                            <div class="col-md-12">
+                                <div class="search-result bg-gray">
+                                    <h5 style="color: orange"><i class="fas fa-upload"></i>  Bạn đã đăng lên một <a style="color:blue;text-decoration:underline;" href="">tài khoản</a></h5>
+                                    <div style="margin: 5px;">
+                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="/images/data/HZ9PGucu0.jpg" alt="Card image cap">
+                                        <div style="display: inline-block;" >
+                                            <span style="display: inline;color:purple">
+                                                - Cái bang full 67 
+                                                <br>
+                                                + Server: wd 
+                                                <br> 
+                                                + Ten nhan van: wdw
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <p>12 tháng 7, 2017</p>
+                                </div>
+                            </div>
+                        </div>     -->
+                        
+                        <!-- Activity edit account div -->
+                        <!-- <div class="row">
+                            <div class="col-md-12">
+                                <div class="search-result bg-gray">
+                                    <h5 style="color: rgb(0, 204, 255)"><i class="fas fa-edit"></i>  Bạn đã chỉnh sửa một <a style="color:blue;text-decoration:underline;" href="">tài khoản</a></h5>
+                                    <div style="margin: 5px;">
+                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="/images/data/HZ9PGucu0.jpg" alt="Card image cap">
+                                        <div style="display: inline-block;" >
+                                            <span style="display: inline;color:purple">
+                                                - Cái bang full 67 
+                                                <br>
+                                                + Server: wd 
+                                                <br> 
+                                                + Ten nhan van: wdw
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <p>12 tháng 7, 2017</p>
+                                </div>
+                            </div>
+                        </div>    -->
+
+                         <!-- Activity remove account div -->
+                         <!-- <div class="row">
+                            <div class="col-md-12">
+                                <div class="search-result bg-gray">
+                                    <h5 style="color: rgb(158, 105, 105)"><i class="fas fa-trash-alt"></i> Bạn đã xoá một tài khoản <button data-id-account="">Hiện Id tài khoản</button></h5>
+                                    <p>12 tháng 7, 2017</p>
+                                </div>
+                            </div>
+                        </div>    -->
+
+                        <!-- Activity collection add div -->
+                        <!-- <div class="row">
+                            <div class="col-md-12">
+                                <div class="search-result bg-gray">
+                                    <h5 style="color:yellowgreen"><i class="fas fa-bookmark" aria-hidden="true"></i>  Bạn đã lưu một <a style="color:blue;text-decoration:underline;" href="">tài khoản</a> vào hộ sưu tập</h5>
+                                    <div style="margin: 5px;">
+                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="/images/data/HZ9PGucu0.jpg" alt="Card image cap">
+                                        <div style="display: inline-block;" >
+                                            <span style="display: inline;color:purple">
+                                                - Cái bang full 67 
+                                                <br>
+                                                + Server: wd 
+                                                <br> 
+                                                + Ten nhan van: wdw
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <p>12 tháng 7, 2017</p>
+                                </div>
+                            </div>
+                        </div>    -->
+
+                        <!-- Activity collection remove div -->
+                        <!-- <div class="row">
+                            <div class="col-md-12">
+                                <div class="search-result bg-gray">
+                                    <h5 style="color:rgb(173, 223, 175)"><i class="fas fa-toilet-paper-slash"></i>  Bạn đã huỷ một <a style="color:blue;text-decoration:underline;" href="">tài khoản</a> khỏi hộ sưu tập</h5>
+                                    <div style="margin: 5px;">
+                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="/images/data/HZ9PGucu0.jpg" alt="Card image cap">
+                                        <div style="display: inline-block;" >
+                                            <span style="display: inline;color:purple">
+                                                - Cái bang full 67 
+                                                <br>
+                                                + Server: wd 
+                                                <br> 
+                                                + Ten nhan van: wdw
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <p>12 tháng 7, 2017</p>
+                                </div>
+                            </div>
+                        </div>    -->
+
+                        <!-- Activity like comment add div -->
+                        <!-- <div class="row">
+                            <div class="col-md-12">
+                                <div class="search-result bg-gray">
+                                    <h5 style="color:rgb(201, 58, 194)"><i class="fas fa-heart"></i>  Bạn đã thích một <a style="color:blue;text-decoration:underline;" href="">bình luận</a></h5>
+                                    <span>Nick ngon thế</span>
+                                    <p>12 tháng 7, 2017</p>
+                                </div>
+                            </div>
+                        </div>    
+                         -->
+
+                        <!-- Activity unLike comment add div -->
+                        <!-- <div class="row">
+                            <div class="col-md-12">
+                                <div class="search-result bg-gray">
+                                    <h5 style="color:rgb(224, 180, 222)"><i class="fas fa-heartbeat"></i>  Bạn đã huỷ thích một <a style="color:blue;text-decoration:underline;" href="">bình luận</a></h5>
+                                    <span>Nick ngon thế</span>
+                                    <p>12 tháng 7, 2017</p>
+                                </div>
+                            </div>
+                        </div>     -->
+
+                        <!-- Activity rate account div -->
+                        <!-- <div class="row">
+                            <div class="col-md-12">
+                                <div class="search-result bg-gray">
+                                    <h5 style="color: rgb(240, 112, 8)"><i class="fas fa-smile"></i>  Bạn đã đánh giá ở một <a style="color:blue;text-decoration:underline;" href="">tài khoản</a></h5>
+                                    <div style="margin: 5px;">
+                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="/images/data/HZ9PGucu0.jpg" alt="Card image cap">
+                                        <div style="display: inline-block;" >
+                                            <span style="display: inline;color:purple">
+                                                - Cái bang full 67 
+                                                <br>
+                                                + Server: wd 
+                                                <br> 
+                                                + Ten nhan van: wdw
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span style="color: rgb(224, 226, 86)"><i class="fas fa-star" aria-hidden="true"></i></span>
+                                        <span style="color: rgb(224, 226, 86)"><i class="fas fa-star" aria-hidden="true"></i></span>
+                                        <span style="color: rgb(224, 226, 86)"><i class="fas fa-star" aria-hidden="true"></i></span>
+                                        <span style="color: rgb(224, 226, 86)"><i class="fas fa-star" aria-hidden="true"></i></span>
+                                        <span style="color: rgb(224, 226, 86)"><i class="fas fa-star" aria-hidden="true"></i></span>
+                                    </div>
+                                    <p>12 tháng 7, 2017</p>
+                                </div>
+                            </div>
+                        </div> -->
+
+                        <!-- Activity update rate account div -->
+                        <!-- <div class="row">
+                            <div class="col-md-12">
+                                <div class="search-result bg-gray">
+                                    <h5 style="color: rgb(199, 100, 20)"><i class="fas fa-smile"></i>  Bạn đã cập nhật đánh giá ở một <a style="color:blue;text-decoration:underline;" href="">tài khoản</a></h5>
+                                    <div style="margin: 5px;">
+                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="/images/data/HZ9PGucu0.jpg" alt="Card image cap">
+                                        <div style="display: inline-block;" >
+                                            <span style="display: inline;color:purple">
+                                                - Cái bang full 67 
+                                                <br>
+                                                + Server: wd 
+                                                <br> 
+                                                + Ten nhan van: wdw
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span style="color: rgb(224, 226, 86)"><i class="fas fa-star" aria-hidden="true"></i></span>
+                                        <span style="color: rgb(224, 226, 86)"><i class="fas fa-star" aria-hidden="true"></i></span>
+                                        <span style="color: rgb(224, 226, 86)"><i class="fas fa-star" aria-hidden="true"></i></span>
+                                        <span style="color: rgb(224, 226, 86)"><i class="fas fa-star" aria-hidden="true"></i></span>
+                                        <span style="color: rgb(224, 226, 86)"><i class="fas fa-star" aria-hidden="true"></i></span>
+                                    </div>
+                                    <p>12 tháng 7, 2017</p>
+                                </div>
+                            </div>
+                        </div> -->
+
+                        <!-- Activity see account detail div -->
+                        <!-- <div class="row">
+                            <div class="col-md-12">
+                                <div class="search-result bg-gray">
+                                    <h5 style="color: rgb(199, 20, 160)"><i class="fab fa-twitch"></i>  Bạn đã xem một <a style="color:blue;text-decoration:underline;" href="">tài khoản</a></h5>
+                                    <div style="margin: 5px;">
+                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="/images/data/HZ9PGucu0.jpg" alt="Card image cap">
+                                        <div style="display: inline-block;" >
+                                            <span style="display: inline;color:purple">
+                                                - Cái bang full 67 
+                                                <br>
+                                                + Server: wd 
+                                                <br> 
+                                                + Ten nhan van: wdw
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <p>12 tháng 7, 2017</p>
+                                </div>
+                            </div>
+                        </div>                         -->
+                        
+                        <!-- Activity see other user profile div -->
+                        <!-- <div class="row">
+                            <div class="col-md-12">
+                                <div class="search-result bg-gray">
+                                    <h5 style="color: rgb(20, 199, 20)"><i class="fas fa-glasses"></i>  Bạn đã ghé thăm trang cá nhân của <a style="color:blue;text-decoration:underline;" href="">Ham Tru Van</a></h5>
+                                    <p>12 tháng 7, 2017</p>
+                                </div>
+                            </div>
+                        </div>                                -->
+
+                   
+                        
+
+
+                    </div>
+
+
+                </div>
+            <% } %>
+		</div>
+	</div>
+</section>
+
+
+
+<!--============================
+=            Footer            =
+=============================-->
+
+<% include ../partials/footer %>
+<script src="/plugins/iziToast/iziToast.min.js"></script>
+<script src="/js/user/profile-activity.js"></script>
+
+</body>
+
+</html>

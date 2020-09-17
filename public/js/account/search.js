@@ -373,6 +373,9 @@ $('document').ready(function(){
         if($('#c_nameIpFilter').val() == ''){
             $('#c_nameIpFilter').remove();
         } 
+        if($('#ipUserId').val() == ''){
+            $('#ipUserId').remove();
+        } 
 
         if($('#transaction_type').val() == 'sell'){
             let price = $('.range-track').data('slider').getValue(); 

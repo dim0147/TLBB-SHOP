@@ -22,6 +22,7 @@ const config = require('../../config/config');
 const userModel = require('../../models/user');
 const accountModel = require('../../models/account');
 const collectionModel = require('../../models/collection');
+const activityModel = require('../../models/activity');
 
 // -------------------------------- Profile User ------------------------------------------------
 
@@ -751,4 +752,165 @@ exports.renderCollection = (req, res) => {
         res.render('user/profile-collection', {title: 'Trang cá nhân', user: req.user, collections: result.collections, csrfToken: req.csrfToken()});
     });
     
+}
+
+// -------------------------------- Profile activity ------------------------------------------------
+
+exports.renderActivity = (req, res) => {
+    res.render('user/profile-activity', {title: 'Hoạt động của bạn', user: req.user, csrfToken: req.csrfToken()});
+}
+
+exports.getActivities = (req, res) => {
+    let condition = {
+        owner: mongoose.Types.ObjectId(req.user._id)
+    };
+
+    if(typeof req.query.filter === 'string')
+        condition.type = req.query.filter;
+    
+    if(typeof req.query.continueId === 'string' &&  mongoose.Types.ObjectId.isValid(req.query.continueId))
+        condition._id = { $lt: mongoose.Types.ObjectId(req.query.continueId)}
+
+    waterfall([
+        (cb) => { // Get activities
+            activityModel.aggregate([
+                {
+                    $match: condition
+                },
+                {
+                    $lookup: {
+                        from: 'accounts',
+                        localField: 'account',
+                        foreignField: '_id',
+                        as: 'accounts'
+                    }
+                },
+                {
+                    $addFields: {
+                        account: {
+                            $cond: [
+                                { $anyElementTrue: ['$accounts'] },
+                                { $arrayElemAt: ['$accounts', 0] },
+                                {_id: '$account', status: 'deleted'}
+                            ]
+                        }
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'images',
+                        localField: 'account._id',
+                        foreignField: 'account',
+                        as: 'images'
+                    }
+                },
+                {
+                    $addFields: {
+                        image: {
+                            $cond: [
+                                { $anyElementTrue: ['$images'] },
+                                { $arrayElemAt: ['$images.url', 0] },
+                                'no-image.png'
+                            ]
+                        }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        type: 1,
+                        account: {
+                            $cond: [
+                                {$or: [ // Check if account status is lock or account is delete(not found)
+                                    {$eq: ['$account.status', 'lock']},
+                                    {$eq: ['$account.status', 'deleted']}
+                                ]},
+                                {
+                                    _id: "$account._id", 
+                                    status: "$account.status"
+                                },
+                                {                            
+                                    _id: "$account._id",
+                                    title: "$account.title",
+                                    c_name: "$account.c_name",
+                                    server: "$account.server",
+                                    sub_server: "$account.sub_server",
+                                    status: "$account.status",
+                                    image: "$image"
+                                }
+                            ]
+                        },
+                        comment: 1,
+                        user: 1,
+                        rate: 1,
+                        createdAt: 1
+                    }
+                },
+                {
+                    $sort: { createdAt: -1 }
+                },
+                {
+                    $limit: 5
+                }
+            ], function(err, result){
+                if(err){
+                    console.log('Error in ctl/user/profile.js -> getActivities 01 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                cb(null, result);
+            });            
+        },
+        (activities, cb) => { // Populate field
+            if(activities.length === 0) return cb(null, []);
+            const popFields = [
+                {
+                    path: 'account.server',
+                    model: 'item-properties',
+                    select: 'name'
+                },
+                {
+                    path: 'account.sub_server',
+                    model: 'item-properties',
+                    select: 'name'
+                },
+                {
+                    path: 'comment',
+                    model: 'comments',
+                    select: 'comment parent',
+                    populate: {
+                            path: 'parent',
+                            model: 'comments',
+                            select: 'comment'
+                    }
+                },
+                {
+                    path: 'user',
+                    model: 'users',
+                    select: '_id name'
+                }
+            ];
+            activityModel.populate(activities, popFields, (err, activities) => {
+                if(err){
+                    console.log('Error in ctl/user/profile.js -> getActivities 02 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                cb(null, activities)
+            });
+        },
+        (activities, cb) => {
+            if(activities.length === 0) return cb(null, {activities: [], totalLeft: 0});
+            const lastId = activities[activities.length - 1]._id;
+            condition._id = { $lt: mongoose.Types.ObjectId(lastId)}
+            activityModel.countDocuments(condition, (err, count) => {
+                if(err){
+                    console.log('Error in ctl/user/profile.js -> getActivities 03 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                return cb(null, {activities: activities, totalLeft: count});
+            });
+        }
+    ], function(err, result){
+        if(err) return res.status(400).send(err);
+        res.send(result);
+    })
 }

@@ -43,6 +43,7 @@ exports.createRating = function(req, res){
                 // Save activity
                 helper.createActivity({
                     type: 'update-rate-account',
+                    rate: req.body.rate,
                     account: req.body.accountId,
                     owner: req.user._id
                 });
@@ -58,6 +59,7 @@ exports.createRating = function(req, res){
                 helper.createActivity({
                     type: 'rate-account',
                     account: req.body.accountId,
+                    rate: req.body.rate,
                     owner: req.user._id
                 });
                 cb(null, "Đánh giá tài khoản thành công!!!");
