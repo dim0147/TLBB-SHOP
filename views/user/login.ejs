@@ -18,6 +18,9 @@
             <div class="col-lg-5 col-md-8 align-item-center">
                 <div class="border">
                     <h3 class="bg-gray p-4">Đăng Nhập</h3>
+                        <% if(oldUrl){ %>
+                        <p>Đăng nhập để tiếp tục tới: <%= oldUrl %></p>
+                        <% } %>
                         <fieldset class="p-4">
                             <input id="username" type="text" placeholder="Username" class="border p-3 w-100 my-2">
                             <input id="password" type="password" placeholder="Mật Khẩu" class="border p-3 w-100 my-2">

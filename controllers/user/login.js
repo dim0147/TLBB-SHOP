@@ -1,13 +1,11 @@
 const passport = require('passport');
-var tokenGenerate = require('rand-token');
 const config = require('../../config/config')
 
 const { body, validationResult } = require('express-validator');
 
 exports.renderPage = (req, res) => {
-    if(req.isAuthenticated())
-        return res.send("Dang nhap roi");
-    res.render('user/login', {title: 'Đăng Nhập', csrfToken: req.csrfToken()});
+    const oldUrl = req.session.oldUrl ? config.urlWebsite + req.session.oldUrl : null;
+    res.render('user/login', {title: 'Đăng Nhập', oldUrl: oldUrl, csrfToken: req.csrfToken()});
 }
 
 exports.validateUser = [
@@ -42,6 +40,40 @@ exports.rememberMeTokenCheck = (req, res, next) => {
     return next();
 }
 
-exports.callbackAuthenticate = function(req, res){
-    res.render('user/login-success');
+exports.callbackAuthenticateFB = function(req, res, next){
+  passport.authenticate('facebook', function(err, user, message) {
+    if(err){
+      console.log('Error in controller/user/login.js -> callbackAuthenticateFB 01 ' + err);
+      return res.status(400).send('Có lỗi xảy ra vui lòng thử lại sau')
+    }
+    if (!user) {
+      return res.status(400).send(message)
+    }
+    req.logIn(user, function(err) {
+      if (err) {
+        console.log('Error in controller/user/login.js -> callbackAuthenticateFB 02 ' + err);
+        return res.status(400).send('Có lỗi xảy ra vui lòng thử lại sau') 
+      }
+      res.render('user/login-success');
+    });
+  })(req, res, next);
+}
+
+exports.callbackAuthenticateGG = function(req, res, next){
+  passport.authenticate('google', function(err, user, message) {
+    if(err){
+      console.log('Error in controller/user/login.js -> callbackAuthenticateGG 01 ' + err);
+      return res.status(400).send('Có lỗi xảy ra vui lòng thử lại sau')
+    }
+    if (!user) {
+      return res.status(400).send(message)
+    }
+    req.logIn(user, function(err) {
+      if (err) {
+        console.log('Error in controller/user/login.js -> callbackAuthenticateGG 02 ' + err);
+        return res.status(400).send('Có lỗi xảy ra vui lòng thử lại sau') 
+      }
+      res.render('user/login-success');
+    });
+  })(req, res, next);
 }

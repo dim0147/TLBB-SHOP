@@ -42,6 +42,7 @@ exports.renderPage = function(req, res){
                     return cb('Có lỗi xảy ra, vui lòng thử lại sau');
                 }
                 if(!user) return cb('Không tìm thấy người dùng');
+                if(user.status != 'normal') return cb('Người dùng không còn hợp lệ');
                 user.created_at = dateFormat(new Date(user.created_at), "d mmmm, yyyy");
                 cb(null, {user: user});
             });
@@ -89,7 +90,26 @@ exports.checkParamGetUserAccounts = [
     }
 ]
 
-exports.getUserAccounts = function(req, res){
+exports.getUserAccounts = async function(req, res){
+
+    // Check if user is normal
+    const callback = await new Promise((resolve, reject) => {
+        userModel.findById(req.params.id, (err, user) => {
+            if(err){
+                console.log('Error in controller/user/view-user.js -> getUserAccounts 01 ' + err);
+                return reject('Có lỗi xảy ra vui lòng thử lại sau')
+            }   
+            if(!user) return reject('Không tìm thấy người dùng');
+            if(user.status != 'normal') return reject('Người dùng không còn hợp lệ')
+            resolve(true);
+        });
+    }).catch(err => {
+        return {error: err};
+    })
+
+    if(callback.error)
+        return res.status(400).send(callback.error);
+
     const itemPerPage = 7;
     let option = {
         limit: itemPerPage,
@@ -257,7 +277,7 @@ exports.getUserAccounts = function(req, res){
 
         // Populate fields
         if(returnData.accounts.length > 0){
-            returnData.accounts = await accountModel.populate(returnData.accounts, config.account.popAcFields)
+            returnData.accounts = await accountModel.populate(returnData.accounts, config.account.popAcFields.concat(helper.getItemPopACField()))
                                         .catch(err => {
                                             console.log('Err in  CTL/user/view-user->getUserAccounts - 02');
                                         });

@@ -3,6 +3,8 @@
 <head>
   <% include ../partials/head %>
   <link rel="stylesheet" href="/plugins/iziToast/iziToast.min.css">
+  <link rel="stylesheet" href="/plugins/Trumbowyg/trumbowyg.min.css">
+  <link rel="stylesheet" href="/plugins/Trumbowyg/plugins/emoji/trumbowyg.emoji.min.css">
   <style>
 .divCurrentImage {
   display: inline;
@@ -53,15 +55,15 @@
                             </div>
                             <div class="col-lg-6">
                                 <h6 class="font-weight-bold pt-4 pb-1">Tiêu Đề:</h6>
-                                <h6 style="font-size: 14px;letter-spacing: 0;color: #848484;">Không được quá 40 ký tự</h6>
-                                <input id="title" type="text" name="title" class="border w-100 p-2 bg-white text-capitalize" placeholder="Nick Full 6 + 7, tu cao,... Chú ý: Không được quá 20 kí tự." value="<%= account.title %>" required>
+                                <h6 style="font-size: 14px;letter-spacing: 0;color: #848484;">Không được quá 80 ký tự và ít hơn 5 kí tự</h6>
+                                <input id="title" type="text" name="title" class="border w-100 p-2 bg-white" placeholder="Nick Full 6 + 7, tu cao,... Chú ý: Không được quá 80 kí tự." value="<%= account.title %>" required>
                                 
                                 <h6 class="font-weight-bold pt-4 pb-1">Tên Nhân Vật:</h6>
-                                <h6 style="font-size: 14px;letter-spacing: 0;color: #848484;">Không được quá 20 ký tự</h6>
-                                <input id="nameCharacter" type="text" name="c_name" class="border w-100 p-2 bg-white text-capitalize" placeholder="" value="<%= account.c_name %>" required>
+                                <h6 style="font-size: 14px;letter-spacing: 0;color: #848484;">Không được quá 20 ký tự và ít hơn 2 ký tự</h6>
+                                <input id="nameCharacter" type="text" name="c_name" class="border w-100 p-2 bg-white" placeholder="" value="<%= account.c_name %>" required>
                                 
                                 <h6 class="font-weight-bold pt-4 pb-1">Cấp:</h6>
-                                <input id="level" type="number" name="level" class="border w-100 p-2 bg-white text-capitalize" placeholder="" min="1" max="119" value="<%= Number(account.level) %>" required>
+                                <input id="level" type="number" name="level" class="border w-100 p-2 bg-white" placeholder="" min="1" max="119" value="<%= Number(account.level) %>" required>
                                 
                                 <h6 class="font-weight-bold pt-4 pb-1">Phái:</h6>
                                 <% if(typeof phais !== 'undefined'){ %>
@@ -228,7 +230,7 @@
                                     </div>
 
                                     <h6 class="font-weight-bold pt-4 pb-1">Mô tả:</h6>
-                                    <textarea name="loinhan" id="" class="border p-3 w-100" rows="7" placeholder="Viết thêm mô tả cho tài khoản này e.g: Thần khí hoả độc" value="<%= account.loinhan %>"><%= account.loinhan %></textarea>
+                                    <textarea name="loinhan" id="loinhanArea" class="border p-3 w-100" rows="7" placeholder="Viết thêm mô tả cho tài khoản này e.g: Thần khí hoả độc" value="<%= account.loinhan %>"><%= account.loinhan %></textarea>
                                 </div>
 
                                 <h6 class="font-weight-bold pt-4 pb-1">Tải ảnh lên:</h6>
@@ -311,7 +313,16 @@
 =============================-->
 
 <% include ../partials/footer %>
+<script src="/plugins/jquery-resizable/jquery-resizable.min.js"></script>
 <script src="/plugins/iziToast/iziToast.min.js"></script>
+<script src="/plugins/Trumbowyg/trumbowyg.min.js"></script>
+<script src="/plugins/Trumbowyg/plugins/emoji/trumbowyg.emoji.min.js"></script>
+<script src="/plugins/Trumbowyg/plugins/noembed/trumbowyg.noembed.min.js"></script>
+<script src="/plugins/Trumbowyg/plugins/pasteembed/trumbowyg.pasteembed.min.js"></script>
+<script src="/plugins/Trumbowyg/plugins/upload/trumbowyg.upload.min.js"></script>
+<script src="/plugins/Trumbowyg/plugins/pasteimage/trumbowyg.pasteimage.js"></script>
+<script src="/plugins/Trumbowyg/plugins/resizimg/trumbowyg.resizimg.min.js"></script>
+
 <script src="/js/account/edit-account.js"></script>
 </body>
 

@@ -69,6 +69,16 @@
                                         <label for="comunity-name">Email</label>
                                         <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>">
                                     </div>
+                                    <!-- Phone  -->
+                                    <div class="form-group">
+                                        <label for="phone">Số điện thoại</label>
+                                        <input type="tel" class="form-control" id="phone" name="phone" value="<%= user.phone ? user.phone : null %>">
+                                    </div>
+                                     <!-- Link FB  -->
+                                     <div class="form-group">
+                                        <label for="phone">Link Facebook</label>
+                                        <input type="text" class="form-control" id="linkFB" name="linkFB" value="<%= user.linkFB ? user.linkFB : null %>">
+                                    </div>
                                     <div id="alert" class="alert alert-danger d-none" role="alert">
                                         This is a danger alert—check it out!
                                     </div>

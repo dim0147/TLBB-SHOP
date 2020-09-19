@@ -25,6 +25,7 @@ exports.createCollection = function(req, res) {
                     return cb('Có lỗi xảy ra, vui lòng thử lại sau')
                 }
                 if(!account) return cb("Không tìm thấy tài khoản")
+                if(account.status !== 'pending' && account.status !== 'done') return cb("Không thể thêm tài khoản này");
                 cb(null, {account: account})
             });
         },

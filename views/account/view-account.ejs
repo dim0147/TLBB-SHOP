@@ -124,7 +124,7 @@
 									<% if(account.loinhan == ''){ %>
 										<p>Không có lời nhắn</p>
 									<% }else{ %>
-										<p><%= account.loinhan %></p>
+										<div><%- account.loinhan %></div>
 									<% } %>
 								</div>
 							<% } %>
@@ -159,38 +159,19 @@
 												<td>Server</td>
 												<td><%= account.server.name %> - <%= account.sub_server.name %></td>
 											</tr>
-											<tr>
-												<td>Ngọc</td>
-												<td><%= account.ngoc.name %></td>
-											</tr>
-											<tr>
-												<td>Võ Hồn</td>
-												<td><%= account.vohon.name %></td>
-											</tr>
-											<tr>
-												<td>Ám Khí</td>
-												<td><%= account.amkhi.name %></td>
-											</tr>
-											<tr>
-												<td>Thần Khí</td>
-												<td><%= account.thankhi.name %></td>
-											</tr>
-											<tr>
-												<td>Tu Luyện</td>
-												<td><%= account.tuluyen.name %></td>
-											</tr>
-											<tr>
-												<td>Đồ</td>
-												<td><%= account.doche.name %></td>
-											</tr>
-											<tr>
-												<td>Điêu Văn</td>
-												<td><%= account.dieuvan.name %></td>
-											</tr>
-											<tr>
-												<td>Long Văn</td>
-												<td><%= account.longvan.name %></td>
-											</tr>
+
+											<% if(typeof listItems !== 'undefined' && listItems.length > 0){ %>
+												<% listItems.forEach(item =>{ %>
+													<tr>
+														<td><%= item.name %></td>
+														<% if(account[item.slug]){ %>
+															<td><%= account[item.slug].name %></td>
+														<% }else{ %>
+															<td>Chưa có</td>
+														<% } %>
+													</tr>
+												<% }) %>
+											<% } %>
 											
 										</tbody>
 									</table>
@@ -291,7 +272,7 @@
 								<li class="list-inline-item"><a href="" class="btn btn-offer d-inline-block btn-warning ml-n1 my-1 px-lg-4 px-md-3"><i class="fab fa-accusoft"></i>    Đưa Ra 
 									Đề Nghị</a></li>
 							<% } %>
-							<% if(typeof account.phone !== "undefined" && account.phone != null){ %>
+							<% if(typeof account.phone !== "undefined" && account.phone != null && !account.isOwner){ %>
 								<li><a href="tel:<%= account.phone %>"><h6 style="font-size: 14px;letter-spacing: 0;color: #848484;"><i class="fa fa-phone" aria-hidden="true"></i> Gọi   <%= account.phone %></h6></a></li>
 							<% } %>
 							</ul>

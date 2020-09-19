@@ -210,10 +210,6 @@ $(document).ready(function(){
             return showAlert('Hình thức không hợp lệ');
         }
 
-        for(var pair of formData.entries()){
-            console.log(pair[0], pair[1]);
-        }
-
             
         $('#submit').prop("disabled",true);
         setAllowPointer($("#submit"), false);    
@@ -318,5 +314,29 @@ $(document).ready(function(){
             }
         });
     })
+
+    $('#loinhanArea').trumbowyg({
+        svgPath: '/plugins/Trumbowyg/icons.svg',
+        btns: [
+            ['emoji'],
+            ['upload'],
+            ['noembed'],
+            ['link'],
+            ['strong', 'em'],
+            ['horizontalRule'],
+            ['justifyLeft', 'justifyCenter', 'justifyRight'],
+            ['removeformat'],
+            ['undo', 'redo'],
+            ['fullscreen']
+        ],
+        plugins: {
+            upload: {
+                serverPath: '/image/upload/description?_csrf='+ $('#_csrf').val(),
+                urlPropertyName: 'file',
+                imageWidthModalEdit: true
+            }
+        },
+        minimalLinks: true
+    });
 
 });

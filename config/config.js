@@ -5,6 +5,7 @@ const config = {
     },
 
     pathStoreImageUpload: 'public/images/data',
+    pathStoreImageUploadDescription: 'public/images/description',
 
     urlWebsite: 'https://localhost:3000',
 
@@ -18,16 +19,6 @@ const config = {
             'level', 
 
             'phai',
-
-            'vohon', 
-            'amkhi', 
-            'dieuvan', 
-            'ngoc', 
-            'thankhi', 
-            'tuluyen', 
-            'doche', 
-            'longvan', 
-            'server',
 
             'sub_server', // parent field
 
@@ -43,51 +34,6 @@ const config = {
             {
                 path: 'phai',
                 model: 'phais',
-                select: '_id name'
-            },
-            {
-                path: 'server',
-                model: 'item-properties',
-                select: '_id name'
-            },
-            {
-                path: 'vohon',
-                model: 'item-properties',
-                select: '_id name'
-            },
-            {
-                path: 'amkhi',
-                model: 'item-properties',
-                select: '_id name'
-            },
-            {
-                path: 'thankhi',
-                model: 'item-properties',
-                select: '_id name'
-            },
-            {
-                path: 'tuluyen',
-                model: 'item-properties',
-                select: '_id name'
-            },
-            {
-                path: 'ngoc',
-                model: 'item-properties',
-                select: '_id name'
-            },
-            {
-                path: 'doche',
-                model: 'item-properties',
-                select: '_id name'
-            },
-            {
-                path: 'dieuvan',
-                model: 'item-properties',
-                select: '_id name'
-            },
-            {
-                path: 'longvan',
-                model: 'item-properties',
                 select: '_id name'
             },
             {

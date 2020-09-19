@@ -150,10 +150,6 @@ $(document).ready(function(){
             return showAlert('Hình thức không hợp lệ');
         }
 
-        for(var pair of formData.entries()){
-            console.log(pair[0], pair[1]);
-        }
-
         $('#submit').prop("disabled",true);
         setAllowPointer($("#submit"), false);    
         showAlert("Đang tạo bài đăng...", 3);

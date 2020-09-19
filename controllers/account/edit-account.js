@@ -134,7 +134,8 @@ exports.renderPage = (req, res) => {
 function filterAllowField(bodyRequest){
         //  Setup field update
         const speField = ['idAccount', 'bosung', 'listImgDel', 'listBosungAdd', 'listBosungDel', 'listImgDel'];
-        const allowField = config.account.allowField.concat(speField);
+        const slugItem = helper.getSlugItem();
+        const allowField = config.account.allowField.concat(speField, slugItem);
 
         //  Remove non-field
         for(let field in bodyRequest){

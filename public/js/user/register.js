@@ -54,6 +54,8 @@ $(document).ready(function(){
             return;
         }
 
+        let phone = $("#phone").val();
+
         if(password != cfPassword){
             showAlert("Xác nhận mất khẩu không chính xác", 2);
             return;
@@ -76,6 +78,7 @@ $(document).ready(function(){
                 cfPassword: cfPassword,
                 name: name,
                 email: email,
+                phone: phone,
                 _csrf: $('#_csrf').val()
             },
             success: res => {

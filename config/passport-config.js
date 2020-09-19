@@ -51,8 +51,8 @@ passport.use('local.register', new LocalStrategy({passReqToCallback: true}, (req
                 password: passwordCrypt,
                 name: req.body.name,
                 email: req.body.email,
+                phone: isNaN(req.body.phone) ? null : req.body.phone,
                 urlImage: '/images/member.png',
-                idFacebook: null,
                 type: 'web'
             }, (err, user) => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
@@ -72,6 +72,8 @@ passport.use('local.login', new LocalStrategy({passReqToCallback: true}, (req, u
         if(!user) return done(null, false, "Sai tên đăng nhập hoặc mật khẩu")
         if(!passwordHash.verify(password, user.password))
             return done(null, false, "Sai tên đăng nhập hoặc mật khẩu")
+        if(user.status != 'normal')
+            return done(null, false, "Tài khoản không còn hợp lệ, vui lòng liên hệ hỗ trợ để biết thêm thông tin")
         done(null, user);
     });
 }));
@@ -97,6 +99,7 @@ passport.use(new FacebookStrategy({
         cb => {
             userModel.findOne({idFacebook: profile.id}, (err, user) => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
+                if(user && user.status != 'normal') return cb('Tài khoản không còn hợp lệ, vui lòng liên hệ hỗ trợ để biết thêm thông tin')
                 if(user) return cb(null, user)
                 cb(null, false)
             });
@@ -124,7 +127,12 @@ passport.use(new FacebookStrategy({
             
         }
     ], function(err, user){
-        if(err) return done(null, false, err);
+        if(err){
+            if(typeof err === 'string') // Our error
+                return done(null, false, err);
+            else // System error
+                return done(err);
+        }
         user.urlImage = 'http://graph.facebook.com/' + profile.id +'/picture?type=square';
         user.name = profile.displayName;
         done(null, user);
@@ -155,6 +163,7 @@ passport.use(new GoogleStrategy({
         cb => {
             userModel.findOne({idGoogle: profile.id}, (err, user) => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
+                if(user && user.status != 'normal') return cb("Tài khoản không còn hợp lệ, vui lòng liên hệ hỗ trợ để biết thêm thông tin")
                 if(user) return cb(null, user)
                 cb(null, false)
             });
@@ -182,7 +191,12 @@ passport.use(new GoogleStrategy({
             });
         }
     ],function(err, user){
-        if(err) return done(err);
+        if(err){
+            if(typeof err === 'string') // Our error
+                return done(null, false, err);
+            else // System error
+                return done(err);
+        }
         user.urlImage = profile.photo;
         user.name = profile.displayName;
         done(null, user);

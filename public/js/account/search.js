@@ -33,7 +33,6 @@ $('document').ready(function(){
             let idProperty = pair[1];
 
             $('.itemProperty').each(function(){
-                // console.log($(this).attr('item') + ' property' + $(this).attr('idProperty'));
                 let itemSlugCB = $(this).attr('item');
                 let propertyIdCB = $(this).attr('idProperty');
                 if(itemSlugCB == itemSlug && idProperty == propertyIdCB)
@@ -43,11 +42,9 @@ $('document').ready(function(){
     }
 
     function calculatePage(){
-        // alert('total ' + $(".totalAccount").attr('total') + ' item per ' + $('.itemPerPage').val());
         let totalItems = Number($(".totalAccount").attr('total'));
         let itemPerPage = Number($('.itemPerPage').val());
         let totalPages = Math.ceil(totalItems / itemPerPage);
-        // let totalPages = 100;
 
         let currentPage = getParameterByName('page');
         if(currentPage == null || currentPage.length == 0)
@@ -306,7 +303,6 @@ $('document').ready(function(){
                     dataOnly: true
                 },
                 success: function(data){
-                    console.log(data);
                     $('.divResult').removeClass('d-none');  
                     if(typeof data.accounts === 'undefined' || typeof data.totalCount === 'undefined' || data.accounts.length === 0 || data.totalCount.length === 0){
                         $('.divResult').html('<p> Không có kết quả nào cho '+"'" + textSearch +"'"+' </p>')
@@ -338,7 +334,6 @@ $('document').ready(function(){
                     }
                 },
                 error: function(err){
-                    console.log(err);
                     $('.divResult').html('<p> Có lổi xảy ra: vui lòng thử lại sau</p>')
                 }
             });

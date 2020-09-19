@@ -323,7 +323,6 @@ $(document).ready(function(){
         $(button).html('<i class="fas fa-spinner fa-pulse"></i>');
 
         const idAccount = $(button).attr('data-id-account');
-        const c_name = $(button).attr('data-name-account');
 
         $.ajax({
             url: '/account/get-lock-reason',
@@ -364,27 +363,16 @@ $(document).ready(function(){
                 });
             },
             error: function(err){
-                console.log(err);
+                iziToast.error({
+                    title: 'Có lỗi',
+                    message: err.responseText
+                });
+                setAllowPointer(button, true);
+                $(button).prop('disabled', false);
+                $(button).html('<i class="fas fa-question-circle" aria-hidden="true"></i>')
             }
         })
 
-        // iziToast.error({
-        //     title: 'Có lỗi xảy ra',
-        //     message: 'Bạn không có quyền xem',
-        //     overlay: true,
-        //     timeout: false,
-        //     position: 'center', 
-        //     layout: 2,
-        //     onClosing: function(instance, toast, closedBy){
-        //             setAllowPointer(button, true);
-        //             $(button).prop('disabled', false);
-        //             $(button).html('<i class="fas fa-question-circle" aria-hidden="true"></i>')
-        //     }
-        // });
-
-        
-
-        
     });
 
 })

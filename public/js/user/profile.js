@@ -27,12 +27,26 @@ $(document).ready(function(){
     }
 
     $("#btnProfileSubmit").click(function(){
+        let payload = {};
         const name = $('#name').val();
         if(name.length === 0)
             return showAlert('Xin hãy nhập tên', 2);
+        payload.name = name;
+        
         const email = $('#email').val();
         if(email.length === 0)
             return showAlert('Xin hãy nhập email', 2);
+        payload.email = email;
+        
+        const phone = $('#phone').val();
+        if(phone.length !== 0)
+            payload.phone = phone;
+
+        const linkFB = $('#linkFB').val();
+        if(linkFB.length !== 0)
+            payload.linkFB = linkFB;
+
+        payload._csrf = $('#_csrf').val();
 
         const button = this;
         $(this).prop('disabled', true);
@@ -42,11 +56,7 @@ $(document).ready(function(){
         $.ajax({
             url: '/user/profile/update-profile',
             method: 'PATCH',
-            data: {
-                name: name,
-                email: email,
-                _csrf: $('#_csrf').val()
-            },
+            data: payload,
             success: function(res){
                 $(button).prop('disabled', false);
                 setAllowPointer(button, true);

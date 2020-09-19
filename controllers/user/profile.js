@@ -18,6 +18,7 @@ dateFormat.i18n = {
 };
 
 const config = require('../../config/config');
+const helper = require('../../help/helper');
 
 const userModel = require('../../models/user');
 const accountModel = require('../../models/account');
@@ -32,15 +33,18 @@ exports.renderPage = function(req, res){
 
 exports.checkBodyUpdateProfile = [
     body('name', 'Tên phải daì ít nhất 3 kí tự và ít hơn 20 kí tự').isString().isLength({min: 3, max: 20}),
-    body('email', 'Email không hợp lệ').isString().isLength({min: 3, max: 20})
+    body('email', 'Email không hợp lệ').isEmail(),
+    body('phone', 'Phone không hợp lệ').optional().isMobilePhone(),
+    body('linkFB', 'Link Facebook không hợp lệ').optional().isURL(),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if(!errors.isEmpty())
+            return res.status(400).send(errors.array()[0].msg);
+        next();
+    }
 ]
 
 exports.updateProfile = function(req, res){
-
-    // Check if login
-    if(!req.isAuthenticated())
-        return res.status(401).send("Unauthorized");
-
     waterfall([
         (cb) => { // Check if email is exist
             userModel.findOne({email: req.body.email}, (err, user) => {
@@ -57,7 +61,9 @@ exports.updateProfile = function(req, res){
         (cb) => {   // Update user
             const payload = {
                 name: req.body.name,
-                email: req.body.email
+                email: req.body.email,
+                phone: isNaN(req.body.phone) ? null : req.body.phone,
+                linkFB: req.body.linkFB ? req.body.linkFB : null
             }
 
             userModel.updateOne({_id: req.user._id}, payload, {runValidators: true}, err => {
@@ -247,7 +253,7 @@ exports.renderProfileAccount = function(req, res){
         },
         (result, cb) => {
             if(result.accounts.length === 0) return cb(null, result);
-            accountModel.populate(result.accounts, config.account.popAcFields, (err, accounts) => {
+            accountModel.populate(result.accounts, config.account.popAcFields.concat(helper.getItemPopACField()), (err, accounts) => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
                 result.accounts = accounts;
                 cb(null, result);
@@ -307,7 +313,6 @@ exports.getAccount = function(req, res){
         default:
             sortCondition.createdAt = -1;
     }
-    console.log(sortCondition);
     let condition = [];
     if(textSearch !==  ''){
         condition.push({title: {$regex: textSearch, $options: 'i'}});
@@ -722,7 +727,7 @@ exports.renderCollection = (req, res) => {
             if(result.collections.length === 0) return cb(null, result);
 
              // Add account to populate field
-             let popAcFields = config.account.popAcFields.map(field => {
+             let popAcFields = config.account.popAcFields.concat(helper.getItemPopACField()).map(field => {
                 let payload = Object.assign({}, field);
                 payload.path = 'account.' + payload.path;
                 return payload;
@@ -780,18 +785,50 @@ exports.getActivities = (req, res) => {
                 {
                     $lookup: {
                         from: 'accounts',
-                        localField: 'account',
-                        foreignField: '_id',
+                        let: { idAccount: '$account' },
+                        pipeline: [
+                            {
+                                $match: {$expr: {$eq: ['$_id', '$$idAccount']}}
+                            },
+                            {
+                                $lookup:{
+                                    from: 'users',
+                                    localField: 'userId',
+                                    foreignField: '_id',
+                                    as: 'user'
+                                }
+                            },
+                            {
+                                $addFields:{
+                                    user: {$cond: [
+                                        { $anyElementTrue: ['$user'] },
+                                        { $arrayElemAt: ['$user.status', 0] },
+                                        null
+                                    ]}
+                                }
+                            },
+                        ],
                         as: 'accounts'
                     }
                 },
                 {
-                    $addFields: {
+                    $addFields: { // Check account if delete
                         account: {
                             $cond: [
                                 { $anyElementTrue: ['$accounts'] },
                                 { $arrayElemAt: ['$accounts', 0] },
                                 {_id: '$account', status: 'deleted'}
+                            ]
+                        }
+                    }
+                },
+                {
+                    $addFields: { // Check if account not delete but user is not normal
+                        'account.status': {
+                            $cond: [
+                                { $and: [ { $ne:['$account.user', 'normal'] } , { $ne: ['$account.status', 'deleted'] }] },
+                                'lock',
+                                '$account.status'
                             ]
                         }
                     }

@@ -33,6 +33,7 @@ exports.removeAccount = async (req, res) => {
             accountModel.findById(req.body.id, (err, account) => {
                 if(err) return reject(new Error("Có lỗi xảy ra, vui lòng thử lại sau"))
                 if(account === null) reject(new Error("Không tìm thấy account"))
+                if(account != 'pending' && account != 'done') reject(new Error("Tài khoản không thể xoá"))
                 resolve(account);
             });
         });

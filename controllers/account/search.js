@@ -349,7 +349,7 @@ function formatDate(accounts){
     accounts.forEach(function(account){
         account.originCreatedAt = account.createdAt;
         account.createdAt = dateFormat(new Date(account.createdAt), "d mmmm, yyyy")
-        account.user.createdAt = dateFormat(new Date(account.user.createdAt), "d mmmm, yyyy")
+        account.user.created_at = dateFormat(new Date(account.user.created_at), "d mmmm, yyyy")
     });
 
     return accounts;
@@ -407,6 +407,20 @@ exports.renderPage = async function(req, res){
                     localField: 'userId',
                     foreignField: '_id',
                     as: 'user'
+                }
+            },
+            {
+                $addFields:{
+                    user: {$cond: [
+                        { $anyElementTrue: ['$user'] },
+                        { $arrayElemAt: ['$user', 0] },
+                        null
+                    ]}
+                }
+            },
+            {
+                $match: {
+                    'user.status': 'normal'
                 }
             },
             {
@@ -513,16 +527,7 @@ exports.renderPage = async function(req, res){
                     bosung: {$push: '$bosung'},    
                     totalRate: { $avg: "$rate.rate" },
                     totalView: {$first: "$totalView"},
-                    user: {
-                        $first: 
-                        {
-                            _id: {$first: '$user._id'}, 
-                            role: {$first:'$user.role'}, 
-                            name: {$first:'$user.name'}, 
-                            urlImage: {$first:'$user.urlImage'}, 
-                            createdAt: {$first:'$user.created_at'}
-                        }
-                    },
+                    user: {$first: "$user"},
                 }
             }
         ];
@@ -557,14 +562,13 @@ exports.renderPage = async function(req, res){
             cb => {
                 accountModel.aggregate(pipelineAg, function(err, accounts){
                   if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
-                //   cb(null, accounts[0].data);
                   cb(null, accounts);
                 });
             },
             (accounts, cb) => {
                 if(accounts[0].data.length === 0) return cb(null, accounts[0].data);
 
-                accountModel.populate(accounts[0].data, config.account.popAcFields, (err, acs) => {
+                accountModel.populate(accounts[0].data, config.account.popAcFields.concat(helper.getItemPopACField()), (err, acs) => {
                     if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
                     // Format date 
                     acs = formatDate(acs);

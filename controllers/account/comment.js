@@ -54,10 +54,11 @@ exports.createComment = function (req, res){
     waterfall([
         //  Check if account is exist
         cb => {
-            accountModel.findById(req.body.accountId).exec((err, account) => {
+            accountModel.findById(req.body.accountId, {}, {populate: 'userId'}).exec((err, account) => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau" + err)
                 if(account === null) return cb('Không tìm thấy account')
                 if(account.status.toString() == 'lock') return cb('Tài khoản này không thể bình luận')
+                if(account.userId.status != 'normal') return cb('Tài khoản thuộc người đăng không hợp lệ')
                 cb(null)
             });
         },
@@ -408,7 +409,6 @@ exports.getComments = async function (req, res){
                 }
             ]).exec(function (err, comments){
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau" + err);
-                // console.log(comments);
                 cb(null, comments);
             });
         },
@@ -467,7 +467,6 @@ exports.getComments = async function (req, res){
         }
     ], function(err, result){
         if(err) return res.status.send(err);
-        // console.log(result);
         return res.send(result)
     });
 }

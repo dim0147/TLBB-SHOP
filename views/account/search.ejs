@@ -270,8 +270,8 @@
                                         <img class="card-img-top" src="/images/data/<%= account.image[0].url %>" alt="Card image cap" height="180px">
                                     </a>
                                 </div>
-                                <div class="card-body" style="height: 232px;">
-                                    <h4 style="height: 20px;" class="card-title"><a style="color:rgb(189, 121, 38)" href="/account/view-account/<%= account._id %>"><%= account.title %></a></h4>
+                                <div class="card-body">
+                                    <h4 class="card-title"><a style="color:rgb(189, 121, 38)" href="/account/view-account/<%= account._id %>"><%= account.title %></a></h4>
                                     <div class="product-ratings">
                                         <ul class="list-inline">
                                             <% if(account.totalRate == null) account.totalRate = 5%>
@@ -293,7 +293,7 @@
                                         </li>
                                     </ul>
                                     
-                                    <p style="height: 75px; font-size: 12px; color: rgb(43, 177, 177);" class="card-text">
+                                    <p style="font-size: 12px; color: rgb(43, 177, 177);" class="card-text">
                                     - Đăng bởi: <a style="color:#9999ff" href="/user/<%= account.user._id %>/accounts"><%= account.user.name %></a> <br>
                                     - Server: <%= account.server.name %> (<%= account.sub_server.name %>)<br>
                                     - Tên nhân vật: <%= account.c_name %> <br>

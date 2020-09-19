@@ -6,6 +6,8 @@ const itemModel = require('../models/item');
 const bosungField = require('../models/add_field')
 const activityModel = require('../models/activity');
 
+const cache = require('../cache/cache')
+
 exports.checkEmptyRequest = function(req, arrayProperty, arrayNoCheckNull = []){
     for (var i = 0; i < arrayProperty.length; i++){
         let property = arrayProperty[i];
@@ -131,5 +133,30 @@ exports.createActivity = function(payload){
         if(err)
             console.log('Có lỗi khi tạo activity to DB ->  ' + err);
     })
+}
+
+exports.getSlugItem = function(menuView = cache.getKey('menuView')){
+    const arraySlugItem = [];
+    if(menuView.items && menuView.items.length > 0){
+        menuView.items.forEach(item  => {
+            arraySlugItem.push(item.slug);
+        });
+    }
+    return arraySlugItem;
+}
+
+exports.getItemPopACField = function(menuView = cache.getKey('menuView')){
+    const arraySlugItem = [];
+    if(menuView.items && menuView.items.length > 0){
+        menuView.items.forEach(item  => {
+            const payload = {
+                path: item.slug,
+                model: 'item-properties',
+                select: '_id name'
+            }
+            arraySlugItem.push(payload);
+        });
+    }
+    return arraySlugItem;
 }
 

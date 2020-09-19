@@ -1,10 +1,11 @@
 const passport = require('passport');
 const { body, validationResult } = require('express-validator');
 
+const config = require('../../config/config');
+
 exports.renderPage = (req, res) => {
-    if(req.isAuthenticated())
-      return res.send("You login already");
-    res.render('user/register', {title: 'Đăng Kí Tài Khoản', csrfToken: req.csrfToken()});
+    const oldUrl = req.session.oldUrl ? config.urlWebsite + req.session.oldUrl : null;
+    res.render('user/register', {title: 'Đăng Kí Tài Khoản', oldUrl: oldUrl, csrfToken: req.csrfToken()});
 }
 
 exports.validateUser = [
@@ -19,6 +20,7 @@ exports.validateUser = [
     }),
     body('name', 'Tên phải có ít nhất 3 kí tự').isLength({min: 3}),
     body('email', 'Email không chính xác').isEmail(),
+    body('phone', 'Số điện thoại không hợp lệ').exists(),
     (req, res, next) => {
         const errors = validationResult(req);
         

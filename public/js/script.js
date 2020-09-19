@@ -240,7 +240,6 @@ $(document).ready(function () {
         location.replace($(this).attr('href'))
         return false;
       }
-      console.log('WTF Dude???');
       $(this).parent("li").toggleClass('open');
   
       if (!$parent.parent().hasClass('navbar-nav')) {
@@ -252,11 +251,8 @@ $(document).ready(function () {
               $parent.parent().find('.show').removeClass('show');
               $parent.addClass('show');
               $el.next().addClass('show');
-              
-              console.log('Inner still run');
               $el.next().css({"top": $el[0].offsetTop, "left": $parent.outerWidth() - 4});
           }
-          console.log('running');
           e.preventDefault();
           e.stopPropagation();
       }

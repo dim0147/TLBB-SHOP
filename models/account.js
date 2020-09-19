@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const waterfall = require('async-waterfall');
 
 const config = require('../config/config');
+const cache = require('../cache/cache');
+const helper = require('../help/helper');
 
 const itemModel = require('../models/item');
 const itemPropertyModel = require('../models/item_property');
@@ -9,10 +11,11 @@ const phaiModel = require('../models/phai');
 
 
 const accountSchema = mongoose.Schema({
-    title: {type: String, required: true, minlength: 5, maxlength: 40},
+    title: {type: String, required: true, minlength: 5, maxlength: 80},
     c_name: {type: String, required: true, minlength: 2, maxlength: 20},
     phai: {type: mongoose.Schema.Types.ObjectId, ref: 'phais', required: true},
     level: {type: Number, required: true, min: 1, max: 119},
+
     server: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties', required: true},
     sub_server: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties', required: true},
     vohon: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
@@ -23,6 +26,9 @@ const accountSchema = mongoose.Schema({
     doche: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
     dieuvan: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
     longvan: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
+    channguyen: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties', required: true},
+    thanmocvuongdinh: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties', required: true},
+
     transaction_type: {type: String, required: true, enum: config.account.transaction_type},
     price: {type: Number},
     phaigiaoluu: {type: mongoose.Schema.Types.ObjectId, ref: 'phais'},
@@ -33,9 +39,9 @@ const accountSchema = mongoose.Schema({
     userId: {type: mongoose.Schema.Types.ObjectId, ref:'users', required: true}
 },{ timestamps: { createdAt: 'createdAt' , updatedAt: 'updatedAt'} } );
 
-accountSchema.pre('save', function(next) {
+accountSchema.pre('save', async function(next) {
     // Initialize the list of field to check
-    const fields = ['server', 'vohon', 'amkhi', 'thankhi', 'tuluyen','ngoc','doche','dieuvan','longvan'];
+    const fields = helper.getSlugItem();
     
     // Initialize list promise
     const listPromise = [];
@@ -139,7 +145,7 @@ accountSchema.pre('updateOne', function(next) {
   const doc = this.getUpdate();
 
   // Initialize the list of field to check
-  const fields = ['server', 'vohon', 'amkhi', 'thankhi', 'tuluyen','ngoc','doche','dieuvan','longvan'];
+  const fields = helper.getSlugItem();
   
   // Initialize list promise
   const listPromise = [];

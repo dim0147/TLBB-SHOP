@@ -10,6 +10,7 @@ const searchResultModel = require('../models/search-result');
 const cache = require('../cache/cache');
 const item = require('../models/item');
 const config = require('../config/config');
+const helper = require('../help/helper');
 
 dateFormat.i18n = {
     dayNames: [
@@ -109,8 +110,26 @@ exports.indexPage = (req, res) =>{
                     }
                 },
                 {
+                    $lookup:{
+                        from: 'users',
+                        localField: 'userId',
+                        foreignField: '_id',
+                        as: 'user'
+                    }
+                },
+                {
+                    $addFields:{
+                        user: {$cond: [
+                            { $anyElementTrue: ['$user'] },
+                            { $arrayElemAt: ['$user', 0] },
+                            null
+                        ]}
+                    }
+                },
+                {
                     $match:{
-                        status: 'pending'
+                        status: 'pending',
+                        'user.status': 'normal'
                     }
                 },
                 {
@@ -136,6 +155,7 @@ exports.indexPage = (req, res) =>{
                         price: {$first: '$price'},
                         phaigiaoluu: {$first: '$phaigiaoluu'},
                         createdAt: {$first: '$createdAt'},
+                        user: {$first: '$user'}
                     }
                 },
                 {
@@ -150,6 +170,7 @@ exports.indexPage = (req, res) =>{
                     $project: {
                         _id: 1,
                         title: 1,
+                        user: 1,
                         c_name: 1,
                         server: 1,
                         sub_server: 1,
@@ -161,6 +182,7 @@ exports.indexPage = (req, res) =>{
                         price: 1,
                         phaigiaoluu: 1,
                         rate: 1,
+                        user: 1,
                         totalView: { $size: "$view" },
                         image: {
                             $cond: [
@@ -192,7 +214,7 @@ exports.indexPage = (req, res) =>{
                     result.mostViewAccount = accounts;
                     return cb(null, result);
                 } 
-                accountModel.populate(accounts, config.account.popAcFields, (err, accounts) => { // Populate fields
+                accountModel.populate(accounts, config.account.popAcFields.concat(helper.getItemPopACField()), (err, accounts) => { // Populate fields
                     if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
                     accounts.forEach(account =>{
                         account.createdAt = dateFormat(new Date(account.createdAt), "d mmmm, yyyy")
@@ -230,8 +252,26 @@ exports.indexPage = (req, res) =>{
                     }
                 },
                 {
+                    $lookup:{
+                        from: 'users',
+                        localField: 'userId',
+                        foreignField: '_id',
+                        as: 'user'
+                    }
+                },
+                {
+                    $addFields:{
+                        user: {$cond: [
+                            { $anyElementTrue: ['$user'] },
+                            { $arrayElemAt: ['$user', 0] },
+                            null
+                        ]}
+                    }
+                },
+                {
                     $match:{
-                        status: 'pending'
+                        status: 'pending',
+                        'user.status': 'normal'
                     }
                 },
                 {
@@ -257,6 +297,7 @@ exports.indexPage = (req, res) =>{
                         price: {$first: '$price'},
                         phaigiaoluu: {$first: '$phaigiaoluu'},
                         createdAt: {$first: '$createdAt'},
+                        user: {$first: '$user'},
                     }
                 },
                 {
@@ -273,6 +314,7 @@ exports.indexPage = (req, res) =>{
                         title: 1,
                         c_name: 1,
                         server: 1,
+                        user: 1,
                         sub_server: 1,
                         phai: 1,
                         ngoc: 1,
@@ -308,7 +350,7 @@ exports.indexPage = (req, res) =>{
                     result.recentAccount = accounts;
                     return cb(null, result);
                 } 
-                accountModel.populate(accounts, config.account.popAcFields, (err, accounts) => { // Populate fields
+                accountModel.populate(accounts, config.account.popAcFields.concat(helper.getItemPopACField()), (err, accounts) => { // Populate fields
                     if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
                     accounts.forEach(account =>{
                         account.createdAt = dateFormat(new Date(account.createdAt), "d mmmm, yyyy")
@@ -325,6 +367,15 @@ exports.indexPage = (req, res) =>{
             if(typeof items !== 'undefined'){
                 result.items = items;
                 return cb(null, result);
+            }
+
+            const menuView = cache.getKey('menuView');
+            const conditionMatch = [];
+            if(menuView.items){
+                menuView.items.forEach((item) => {
+                    const condition = { $expr:{ $eq: ['$' + item.slug, '$$idProperty']} }
+                    conditionMatch.push(condition);
+                });
             }
 
             itemModel.aggregate([
@@ -349,35 +400,7 @@ exports.indexPage = (req, res) =>{
                                         {
                                             $match:{
                                                 status: 'pending',
-                                                $or: [
-                                                    {
-                                                        $expr:{ $eq: ['$vohon', '$$idProperty']}
-                                                    },
-                                                    {
-                                                        $expr:{ $eq: ['$amkhi', '$$idProperty']}
-                                                    },
-                                                    {
-                                                        $expr:{ $eq: ['$thankhi', '$$idProperty']}
-                                                    },
-                                                    {
-                                                        $expr:{ $eq: ['$tuluyen', '$$idProperty']}
-                                                    },
-                                                    {
-                                                        $expr:{ $eq: ['$ngoc', '$$idProperty']}
-                                                    },
-                                                    {
-                                                        $expr:{ $eq: ['$doche', '$$idProperty']}
-                                                    },
-                                                    {
-                                                        $expr:{ $eq: ['$dieuvan', '$$idProperty']}
-                                                    },
-                                                    {
-                                                        $expr:{ $eq: ['$longvan', '$$idProperty']}
-                                                    },
-                                                    {
-                                                        $expr:{ $eq: ['$server', '$$idProperty']}
-                                                    }
-                                                ]
+                                                $or: conditionMatch
                                             }
                                         }
                                     ],
@@ -502,7 +525,24 @@ exports.indexPage = (req, res) =>{
                         // Query account for specific server
                         accountModel.aggregate([
                             {
-                                $match: {server: server._id, status: 'pending'}
+                                $lookup:{
+                                    from: 'users',
+                                    localField: 'userId',
+                                    foreignField: '_id',
+                                    as: 'user'
+                                }
+                            },
+                            {
+                                $addFields:{
+                                    user: {$cond: [
+                                        { $anyElementTrue: ['$user'] },
+                                        { $arrayElemAt: ['$user', 0] },
+                                        null
+                                    ]}
+                                }
+                            },
+                            {
+                                $match: {server: server._id, status: 'pending', 'user.status': 'normal'}
                             },
                             {
                                 $lookup:{
@@ -544,6 +584,7 @@ exports.indexPage = (req, res) =>{
                                     price: {$first: '$price'},
                                     phaigiaoluu: {$first: '$phaigiaoluu'},
                                     createdAt: {$first: '$createdAt'},
+                                    user: {$first: '$user'},
                                 }
                             },
                             {
@@ -560,6 +601,7 @@ exports.indexPage = (req, res) =>{
                                     title: 1,
                                     c_name: 1,
                                     server: 1,
+                                    user:1 ,
                                     sub_server: 1,
                                     phai: 1,
                                     ngoc: 1,
@@ -592,7 +634,7 @@ exports.indexPage = (req, res) =>{
                             // Check if have account, populate fields and format date
                             if(accounts.length > 0){
 
-                                accountModel.populate(accounts, config.account.popAcFields, (err, accounts) => {
+                                accountModel.populate(accounts, config.account.popAcFields.concat(helper.getItemPopACField()), (err, accounts) => {
                                     if(err) return reject(err);
                                     accounts.forEach(account =>{
                                         account.createdAt = dateFormat(new Date(account.createdAt), "d mmmm, yyyy")

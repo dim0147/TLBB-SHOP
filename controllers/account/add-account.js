@@ -1,8 +1,11 @@
 const waterfall = require('async-waterfall');
 const mongoose = require('mongoose');
 const { body, validationResult } = require('express-validator');
+const imgur = require('imgur');
 
 const config = require('../../config/config');
+const helper = require('../../help/helper');
+const cache = require('../../cache/cache');
 
 const accountModel = require('../../models/account');
 const phaiModel = require('../../models/phai');
@@ -11,12 +14,10 @@ const addFieldModel = require('../../models/add_field');
 const accountLinkAddFieldModel = require('../../models/account-link-addfield');
 const imageModel = require('../../models/image');
 
-const helper = require('../../help/helper');
-const imgur = require('imgur');
-
 // Setup Imgur API
 imgur.setAPIUrl(config.imgurDEV.API_URL);
 imgur.setCredentials(config.imgurDEV.username, config.imgurDEV.password, config.imgurDEV.clientID);
+
 
 exports.renderAddAccount = (req, res) => {
     waterfall([
@@ -86,8 +87,8 @@ exports.renderAddAccount = (req, res) => {
 }
 
 exports.checkBody = [
-    body('title', 'Tiêu đề không được ít hơn 5 kí tự và nhiều hơn 20 kí tự').isLength({min: 5, max: 40}),
-    body('c_name', 'Tên nhân vật không được ít hơn 5 kí tự và nhiều hơn 15 kí tự').isLength({min: 1, max: 15}),
+    body('title', 'Tiêu đề không được ít hơn 5 kí tự và nhiều hơn 80 kí tự').isLength({min: 5, max: 80}),
+    body('c_name', 'Tên nhân vật không được ít hơn 5 kí tự và nhiều hơn 20 kí tự').isLength({min: 1, max: 20}),
     body('level', 'Level không hợp lệ').isInt({min: 1, max: 119}),
     body('phai', 'Phái không hợp lệ!!!').isMongoId(),
     body('vohon', 'Võ hồn không hợp lệ').isMongoId(),
@@ -121,7 +122,8 @@ exports.checkBody = [
 function filterAllowField(bodyRequest){
     //  Setup field update
     const speField = ['bosung'];
-    const allowField = config.account.allowField.concat(speField);
+    const slugItem = helper.getSlugItem(cache.getKey('menuView'));
+    const allowField = config.account.allowField.concat(speField, slugItem);
 
     //  Remove non-field
     for(let field in bodyRequest){

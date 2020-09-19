@@ -21,48 +21,10 @@ $("document").ready(function() {
                 
             },
             error: function(err){
-                console.log(err);
+                
             }
         })
     }
-
-//     {   
-//         account: 1,
-//         comment: 1,
-//         createdAt: 1,
-//         updatedAt: 1,
-//         replies: {
-//             account: 1,
-//             comment: 1,
-//             createdAt: 1,
-//             updatedAt: 1,
-//             parent: 1,
-//             userReply: {
-//                 _id: 1,
-//                 name: 1,
-//                 urlImage: 1,
-//                 role: 1,
-//                 createdAt: 1,
-//                 rate: {
-//                     rate: 1,
-//                     createdAt: 1
-//                 }
-//             }
-//         },
-//         userDetail: {
-//             _id: 1,
-//             name: 1,
-//             urlImage: 1,
-//             role: 1,
-//             createdAt: 1,
-//             rate: {
-//                 rate: 1,
-//                 createdAt: 1
-//             }
-//         },
-//         totalReply: { $size: '$replies' }
-//     }
-// }
 
     function displayComment(comments){
         /*
@@ -310,10 +272,16 @@ $("document").ready(function() {
                 _csrf: $('#_csrf').val()
             },
             success : res => {
-                console.log(res)
+                iziToast.success({
+                    title: 'Thành công',
+                    message: res,
+                })
             },
             err: err  => {
-                console.log(err);
+                iziToast.error({
+                    title: 'Có lỗi',
+                    message: err.responseText,
+                })
             }
         })          
     });
@@ -334,7 +302,6 @@ $("document").ready(function() {
                 _csrf: $("#_csrf").val()
             },
             success: function(res){
-                console.log(res);
                 createComment({_id: res.comment._id, name: res.comment.name, avatar: res.comment.avatar, comment: res.comment.comment, parent: res.comment.parent, rate: res.rate, time: res.comment.createdAt}, $('.replyTextarea').prev());
                 $('.replyTextarea').remove();
             },
@@ -363,18 +330,19 @@ $("document").ready(function() {
                 continueId: $(this).attr('continueId'),
                 parentId: false
             },
-            success: function(res){
-                console.log(res);
+            success: function(res){;
                 $(button).remove();
                 displayComment(res);
                 
             },
             error: function(err){
-                alert('Có lỗi xảy ra, vui lòng thử lại sau')
+                iziToast.error({
+                    title: 'Có lỗi',
+                    message: err.responseText,
+                })
                 setAllowPointer(button, true);
                 $(button).prop('disabled', false);
                 $(button).text("Hiển thị thêm bình luận")
-                console.log(err);
             }
         })
 
@@ -399,18 +367,18 @@ $("document").ready(function() {
                 parentId: $(this).attr('parentId')
             },
             success: function(res){
-                console.log(res);
                 displayReplyComment(res, element);
                 $(element).remove();
-                // displayComment(res);
                 
             },
             error: function(err){
-                alert('Có lỗi xảy ra, vui lòng thử lại sau')
+                iziToast.error({
+                    title: 'Có lỗi',
+                    message: err.responseText,
+                })
                 setAllowPointer(button, true);
                 $(button).prop('disabled', false);
                 $(button).text("Hiển thị thêm bình luận")
-                console.log(err);
             }
         })
 

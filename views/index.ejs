@@ -129,7 +129,7 @@
 					<% if(typeof mostViewAccount !== 'undefined' && mostViewAccount.length > 0){ %>
 						<% mostViewAccount.forEach(function(account){ %>
 							
-							<div class="col-sm-12 col-lg-4" style="width:370px; height: 500px;">
+							<div class="col-sm-12 col-lg-4" style="width:370px;">
 								 <div class="product-item bg-light">
 								   <div class="card">
 									  <div class="thumb-content"> 
@@ -159,6 +159,7 @@
 											 </li>
 										 </ul>
 										 <p class="card-text">
+											 Đăng bởi: <a style="color:blue" href="/user/<%= account.user._id %>/accounts"><%= account.user.name %></a><br>
 											 Server: <%= account.server.name %> (<%= account.sub_server.name %>)<br>
 											 Tên nhân vật: <%= account.c_name %><br>
 											 Ngọc: <%= account.ngoc.name %><br>
@@ -216,7 +217,7 @@
 					<% if(typeof recentAccount !== 'undefined' && recentAccount.length > 0){ %>
 						<% recentAccount.forEach(function(account){ %>
 							
-							<div style="width:370px; height: 500px;" class="col-sm-12 col-lg-4">
+							<div style="width:370px;" class="col-sm-12 col-lg-4">
 								 <div class="product-item bg-light">
 								   <div class="card">
 									  <div class="thumb-content"> 
@@ -246,6 +247,7 @@
 											 </li>
 										 </ul>
 										 <p class="card-text">
+											 Đăng bởi: <a style="color:blue" href="/user/<%= account.user._id %>/accounts"><%= account.user.name %></a><br>
 											 Server: <%= account.server.name %> (<%= account.sub_server.name %>) <br>
 											 Tên nhân vật: <%= account.c_name %><br>
 											 Ngọc: <%= account.ngoc.name %><br>
@@ -305,7 +307,7 @@
 							<% if(typeof server.accounts !== 'undefined' && server.accounts.length > 0){ %>
 								<% server.accounts.forEach(function(account){ %>
 									
-									<div style="width:370px; height: 500px;" class="col-sm-12 col-lg-4">
+									<div style="width:370px;" class="col-sm-12 col-lg-4">
 										<div class="product-item bg-light">
 										<div class="card">
 											<div class="thumb-content"> 
@@ -335,6 +337,7 @@
 													</li>
 												</ul>
 												<p class="card-text">
+													Đăng bởi: <a style="color:blue" href="/user/<%= account.user._id %>/accounts"><%= account.user.name %></a><br>
 													Server: <%= account.sub_server.name %><br>
 													Tên nhân vật: <%= account.c_name %><br>
 													Ngọc: <%= account.ngoc.name %><br>

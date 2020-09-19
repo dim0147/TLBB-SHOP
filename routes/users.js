@@ -21,7 +21,6 @@ const collectionC = require('../controllers/user/collection');
 
 function redirectOldUrl(req, res, next){ // redirect when user login or register finish
     if(req.session.oldUrl){
-        console.log('rediirect old url ' + req.session.oldUrl);
         const url = req.session.oldUrl;
         res.redirect(url)
         req.session.oldUrl = null;
@@ -43,7 +42,6 @@ function checkNoLogin(req, res, next){ // check if no login, if login already re
         return next();
     else{
         if(req.session.oldUrl){
-            console.log('CheckNoLogin rediirect old url ' + req.session.oldUrl);
             const url = req.session.oldUrl;
             res.redirect(url)
             req.session.oldUrl = null;
@@ -54,7 +52,21 @@ function checkNoLogin(req, res, next){ // check if no login, if login already re
         
 }
 
+function isNormalUser(req, res, next){
+    if(req.isAuthenticated() && req.user.status == 'normal' ){
+      return next();
+    }
 
+    return res.redirect('/user/logout')
+}
+
+function isNormalUserAjax(req, res, next){
+    if(req.isAuthenticated() && req.user.status == 'normal' ){
+      return next();
+    }
+  
+    return res.status(401).send("Tài khoản không hợp lệ, xin vui lòng logout")
+}
 
 /* Create user . */
 router.get('/register', checkNoLogin, registerAC.renderPage);
@@ -70,31 +82,36 @@ router.post('/login', checkNoLogin, loginAC.validateUser, loginAC.addNewAccount,
 /* Login With Facebook . */
 router.get('/login/facebook', checkNoLogin, passport.authenticate('facebook', {scope: ['email', 'public_profile']}));
 
-router.get('/login/facebook/callback', passport.authenticate('facebook'), loginAC.callbackAuthenticate);
+router.get('/login/facebook/callback', loginAC.callbackAuthenticateFB);
 
 /* Login With Google . */
 router.get('/login/google', checkNoLogin, passport.authenticate('google', {scope: ['profile', 'email']}));
 
-router.get('/login/google/callback', passport.authenticate('google'), loginAC.callbackAuthenticate);
+router.get('/login/google/callback', loginAC.callbackAuthenticateGG);
 
 // ---------------------------------------- PROFILE -----------------------------------------
 /* User Profile . */
-router.get('/profile', isLogin, profileAC.renderPage);
-router.patch('/profile/update-profile', isLogin, profileAC.checkBodyUpdateProfile, profileAC.updateProfile);
-router.patch('/profile/update-password', isLogin, profileAC.checkBodyUpdatePassWord, profileAC.updatePassword);
+router.get('/profile', isLogin, isNormalUser, profileAC.renderPage);
+router.patch('/profile/update-profile', isLogin, isNormalUserAjax, profileAC.checkBodyUpdateProfile, profileAC.updateProfile);
+router.patch('/profile/update-password', isLogin, isNormalUserAjax, profileAC.checkBodyUpdatePassWord, profileAC.updatePassword);
 
 
 /* Account User Profile  . */
-router.get('/profile/accounts', isLogin, profileAC.renderProfileAccount);
-router.get('/profile/get-accounts', isLogin, profileAC.getAccount);
+router.get('/profile/accounts', isLogin, isNormalUser, profileAC.renderProfileAccount);
+router.get('/profile/get-accounts', isLogin, isNormalUserAjax, profileAC.getAccount);
 
 /* Collection User Profile . */
-router.get('/profile/collections', isLogin, profileAC.renderCollection);
+router.get('/profile/collections', isLogin, isNormalUser, profileAC.renderCollection);
+/* Create collection from user . */
+router.post('/create-collection', isLogin, isNormalUserAjax, collectionC.checkBody, collectionC.createCollection);
+/* Remove collection from user . */
+router.delete('/delete-collection', isLogin, isNormalUserAjax, collectionC.checkBody, collectionC.deleteCollection);
 
 
 /* Activity User Profile . */
-router.get('/profile/activities', isLogin, profileAC.renderActivity);
-router.get('/profile/get-activities', isLogin, profileAC.getActivities);
+router.get('/profile/activities', isLogin, isNormalUser, profileAC.renderActivity);
+router.get('/profile/get-activities', isLogin, isNormalUserAjax, profileAC.getActivities);
+
 
 // ---------------------------------------- END PROFILE -----------------------------------------
 
@@ -108,14 +125,6 @@ router.get('/:id/accounts', viewUserAC.checkParams, viewUserAC.renderPage);
 router.get('/:id/get-accounts', viewUserAC.checkParamGetUserAccounts, viewUserAC.getUserAccounts);
 
 // ---------------------------------------- END Other User's PROFILE -----------------------------------------
-
-/* Create collection from user . */
-router.post('/create-collection', isLogin, collectionC.checkBody, collectionC.createCollection);
-
-/* Remove collection from user . */
-router.delete('/delete-collection', isLogin, collectionC.checkBody, collectionC.deleteCollection);
-
-
 
 /* Logout . */
 router.get('/logout', logoutAC.logout);

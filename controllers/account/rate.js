@@ -20,10 +20,11 @@ exports.createRating = function(req, res){
     waterfall([
         //  Check if account is exist
         cb => {
-            accountModel.findOne({_id: req.body.accountId}, (err, account) => {
+            accountModel.findOne({_id: req.body.accountId}, {}, {populate: 'userId'}, (err, account) => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
                 if(account === null) return cb("Không tìm thấy tài khoản")
                 if(account.status.toString() != 'pending') return cb("Không thể đánh giá tài khoản này")
+                if(account.userId && account.userId.status != 'normal') return cb("Tài khoản thuộc người đăng không hợp lệ")
                 cb(null);
             });
         },

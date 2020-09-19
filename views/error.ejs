@@ -1,3 +1,37 @@
-<h1><%= message %></h1>
-<h2><%= error.status %></h2>
-<pre><%= error.stack %></pre>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <% include partials/head %>
+</head>
+
+<body class="body-wrapper">
+    <% include partials/menu %>
+
+<section class="section bg-gray">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 text-center mx-auto">
+                <div class="404-img">
+                    <img src="/images/error/error.png" class="img-fluid" alt="">
+                </div>
+                <div class="404-content">
+                    <p class="px-3 pb-2 text-dark">Đã xảy ra lỗi, nhưng đây không phải lỗi của bạn đừng lo lắng<br> Bạn có thể vui lòng báo cáo lại cho chúng tôi để chúng tôi có thể sửa nhanh hơn? Rất cám ơn</p>
+                    <a href="/" class="btn btn-info">Về trang chủ</a>
+                    <a href="/" class="btn btn-warning"><i class="fas fa-pen-alt"></i>  Báo cáo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!--============================
+=            Footer            =
+=============================-->
+
+<% include partials/footer %>
+<script src="/js/script.js"></script>
+
+</body>
+
+</html>

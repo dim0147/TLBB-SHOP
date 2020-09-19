@@ -12,6 +12,7 @@ const collectionModel = require('../../models/collection');
 
 const config = require('../../config/config');
 const helper = require('../../help/helper');
+const cache = require('../../cache/cache');
 
 
 dateFormat.i18n = {
@@ -40,7 +41,7 @@ exports.checkBody = [
 ]
 
 exports.renderPage = (req, res) => {
-    let popAcFields = config.account.popAcFields;
+    let popAcFields = config.account.popAcFields.concat(helper.getItemPopACField());
     popAcFields.push({
         path: 'userId',
         model: 'users'
@@ -53,7 +54,8 @@ exports.renderPage = (req, res) => {
             accountModel.findById(req.params.id).populate(popAcFields).exec((err, account) => {
                 if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau');
                 if(account === null) return cb('Không tìm thấy tài khoản này!')
-                if(account.status.toString() == 'lock') return cb('Tài khoản bị khoá')
+                if(account.status != 'pending' && account.status != 'done') return cb('Tài khoản không thể xem')
+                if(account.userId && account.userId.status != 'normal') return cb('Tài khoản thuộc người đăng không hợp lệ')
                 account = account.toObject();
                 account.userId.created_at = dateFormat(new Date(account.userId.created_at), 'd mmmm, yyyy')
                 if(req.isAuthenticated() && account.userId._id.toString() == req.user._id){
@@ -154,6 +156,12 @@ exports.renderPage = (req, res) => {
                 result.account.totalView = totalView
                 cb(null, result);
             })
+        },
+        (result, cb) => { // Get item exclude server
+            const menuView = cache.getKey('menuView');
+            const listItems = menuView.items.filter(item => item.slug != 'server');
+            result.listItems = listItems;
+            cb(null, result); 
         }
     ], function(err, result){
         if(err) return res.render('account/view-account', {title: 'Có lỗi xảy ra!',  error: err });
@@ -165,7 +173,16 @@ exports.renderPage = (req, res) => {
                     owner: req.user._id
                 });
         }
-        res.render('account/view-account', {title: result.account.title, account: result.account, addFields: result.addFields, images: result.images, rate: result.rate, collection: result.collection, csrfToken: req.csrfToken()});
+        res.render('account/view-account', {
+                                            title: result.account.title, 
+                                            account: result.account, 
+                                            addFields: result.addFields, 
+                                            images: result.images, 
+                                            rate: result.rate,
+                                            collection: result.collection,
+                                            listItems: result.listItems,
+                                            csrfToken: req.csrfToken()
+                                        });
     });
 }
 

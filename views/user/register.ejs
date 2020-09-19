@@ -17,20 +17,25 @@
                 <div class="col-lg-5 col-md-8 align-item-center">
                     <div class="border border">
                         <h3 class="bg-gray p-4">Đăng Kí</h3>
+                        <% if(oldUrl){ %>
+                          <p>Đăng kí để tiếp tục tới: <%= oldUrl %></p>
+                        <% } %>
                             <fieldset class="p-4">
                                 <input id="username" type="username" placeholder="Username" class="border p-3 w-100 my-2">
                                 <input id="password" type="password" placeholder="Mật Khẩu" class="border p-3 w-100 my-2">
                                 <input id="confirm-password" type="password" placeholder="Xác Nhận Mật Khẩu" class="border p-3 w-100 my-2">
                                 <input id="name" type="name" placeholder="Tên Hiển Thị" class="border p-3 w-100 my-2">
                                 <input id="email" type="email" placeholder="Email*" class="border p-3 w-100 my-2">
+                                <input id="phone" type="phone" placeholder="Số điện thoại(Giúp đăng bài giúp nhanh hơn)*" class="border p-3 w-100 my-2">
                                 <div class="loggedin-forgot d-inline-flex my-3">
                                         <input id="term" type="checkbox" id="registering" class="mt-1">
-                                        <label for="registering" class="px-2">Bằng cách đăng ký, bạn chấp nhận các Điều khoản & Điều kiện của chúng tôi <a class="text-primary font-weight-bold" href="terms-condition.html">Terms & Conditions</a></label>
+                                        <label for="registering" class="px-2">Bằng cách đăng ký, bạn chấp nhận các Điều khoản & Điều kiện của chúng tôi <a class="text-primary font-weight-bold" href="terms-condition.html">Điều khoản & Điều kiện</a></label>
                                 </div>
                                 <div id="alert" class="alert alert-danger d-none" role="alert">
                                   This is a danger alert—check it out!
                                 </div>
                                 <button id="submit" type="submit" class="d-block py-3 px-4 bg-primary text-white border-0 rounded font-weight-bold">Đăng Ký Ngay Bây Giờ</button>
+                                <a class="mt-3 d-inline-block text-primary" href="/user/login">Đã có tài khoản? Đăng nhập ngay bây giờ</a>
                             </fieldset>
                     </div>
                 </div>

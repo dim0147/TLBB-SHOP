@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<% include ../partials/head %>
+	<link rel="stylesheet" href="/plugins/iziToast/iziToast.min.css">
+	<style> 
+		.more-replies { 
+				text-align: right;
+			} 
+		.more-replies:hover { 
+			color:rgb(120, 199, 120); 
+			cursor: pointer;
+			text-align: right;
+		} 
+		.btnOwner {
+			padding: .25rem .5rem;
+			font-size: .875rem;
+			line-height: 1.5;
+			border-radius: .2rem;
+		}
+	</style> 
+</head>
+
+<body class="body-wrapper">
+	<% if(typeof csrfToken !== "undefined"){ %>
+		<input type="hidden" id="_csrf" value="<%= csrfToken %>">
+	<% } %>
+	<% if(typeof account != "undefined" && account){ %>
+		<input id="idAccount" type="hidden" value="<%= account._id %>">
+	<% } %>
+	<% if(typeof userSS !== "undefined"){ %>
+		<input id="urlImage" type="hidden" value= "<%= userSS.urlImage %>">
+    <% } %>
+    <% if(typeof idComment !== "undefined"){ %>
+        <input id="idComment" type="hidden" value= "<%= idComment %>">
+    <% } %>
+    <% include ../partials/menu %>
+    
+<!--===================================
+=            Store Section            =
+====================================-->
+<section style="padding-top: 0px;" class="section bg-gray">
+	<!-- Container Start -->
+	<div class="container">
+		<div class="row">
+            <% if(typeof account !== 'undefined' && account){ %>
+                <div style="margin-top: 10px;" class="text-center col-md-12">
+                    <div style="margin:0 auto;" class="col-md-4">
+
+                        <div class="product-item bg-light">
+                           
+                            <div class="card">
+                                <% if(account.status == 'lock'){ %>
+                                    <p><i class="fas fa-lock"></i>  Tài khoản này đã bị khoá</p>
+                                <% } %>
+                                <% if(account.status == 'pending' || account.status == 'done'){ %>
+                                <div class="thumb-content">
+                                    <a href="/account/view-account/<%= account._id %>">
+                                        <img class="card-img-top" src="/images/data/<%= account.image %>" alt="Card image cap" height="180px">
+                                    </a>
+                                </div>
+                                <div class="card-body">
+                                    <h4 class="card-title"><a style="color:rgb(189, 121, 38)" href="/account/view-account/<%= account._id %>"><%= account.title %></a></h4>
+                                    
+                                    <p style="font-size: 12px; color: rgb(43, 177, 177);" class="card-text">
+                                    - Đăng bởi: <a style="color:#9999ff" href="/user/<%= account.user._id %>/accounts"><%= account.user.name %></a> <br>
+                                    - Server: <%= account.server %> (<%= account.sub_server %>)<br>
+                                    - Tên nhân vật: <%= account.c_name %> <br>
+                                    </p>
+                                    <a href="/account/view-account/<%= account._id %>"><button class="btn btn-primary">Xem tài khoản này</button></a>
+                                </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+
+			<!-- Left sidebar -->
+			<div class="col-md-12">
+				<div class="product-details">
+					<% if(typeof error !== 'undefined'){ %>
+						<h1><%= error %></h1>
+					<% } %>
+                    
+                    <% if(typeof idComment !== 'undefined'){ %>
+                        <!-- Comment -->
+                        <div style="margin:0px; padding:0px; " class="content mt-5 pt-5">
+                            <div class="tab-content" id="pills-tabContent">
+                                
+                                <div class="tab-pane fade show active" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
+                                    <h3 class="tab-title">Bình Luận</h3>
+                                    <div class="product-review">
+                                    <div id="comment-section">
+
+                                        
+                                        
+                                    </div>	
+
+                                        <% if(typeof userSS === 'undefined'){ %>
+                                        <div class="text-center">
+                                            <p>Bạn chưa đăng nhập, vui lòng đăng nhập để có thể bình luận</p>
+                                            <button id="loginFB" type="button" class="btn btn-info"><i class="fab fa-facebook-f"></i>  Đăng Nhập Với Facebook</button>
+                                            <button id="loginGG" type="button" class="btn btn-danger"><i class="fa fa-google" aria-hidden="true"></i>  Đăng Nhập Với Google</button>
+                                        </div>
+                                        <% }else{ %>
+                                        <div class="review-submission">
+                                            <h3 class="tab-title">Đăng Bình Luận</h3>
+        
+                                            <div class="rate">
+                                                <img class="rounded-circle" width="60" height="60" src="<%= userSS.urlImage %>" alt="avater">
+                                                <span><%= userSS.name %></span>
+                                                <br>
+                                            </div>
+                                            <div class="review-submit">
+                                                    <div class="col-12">
+                                                        <textarea name="comment" id="comment" rows="5" class="form-control" placeholder="Bình luận"></textarea>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div id="alert" class="alert alert-secondary d-none" role="alert">
+                                                            
+                                                        </div>
+                                                        <button id="submitBtn" type="button" class="btn btn-main">Đăng</button>
+                                                    </div>
+                                            </div>
+                                        </div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+				</div>
+			</div>
+
+
+		</div>
+	</div>
+	<!-- Container End -->
+</section>
+<!--============================
+=            Footer            =
+=============================-->
+
+<% include ../partials/footer %>
+<script src="/plugins/iziToast/iziToast.min.js"></script>
+<script src="/js/account/view-comment.js"></script>
+
+</body>
+
+</html>
