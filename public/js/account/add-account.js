@@ -160,7 +160,7 @@ $(document).ready(function(){
             processData: false,
             contentType: false,
             success: res => {
-                            showAlert(res, 1);
+                            showAlert(res +' <a href="/user/profile/accounts">Bấm vào đây để xem</a>', 1);
                             $('#submit').prop("disabled",false);
                             setAllowPointer($("#submit"), true);
                         },
@@ -172,6 +172,33 @@ $(document).ready(function(){
           } );
 
     });
+
+    $('#loinhanArea').trumbowyg({
+        svgPath: '/plugins/Trumbowyg/icons.svg',
+        lang: 'vi',
+        btns: [
+            ['emoji'],
+            ['upload'],
+            ['noembed'],
+            ['fontsize'],
+            ['link'],
+            ['strong', 'em'],
+            ['horizontalRule'],
+            ['justifyLeft', 'justifyCenter', 'justifyRight'],
+            ['removeformat'],
+            ['undo', 'redo'],
+            ['fullscreen']
+        ],
+        plugins: {
+            upload: {
+                serverPath: '/image/upload/description?_csrf='+ $('#_csrf').val(),
+                urlPropertyName: 'file',
+                imageWidthModalEdit: true
+            }
+        },
+        minimalLinks: true
+    });
+
 
 
 });

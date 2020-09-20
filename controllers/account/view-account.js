@@ -41,7 +41,7 @@ exports.checkBody = [
 ]
 
 exports.renderPage = (req, res) => {
-    let popAcFields = config.account.popAcFields.concat(helper.getItemPopACField());
+    const popAcFields = config.account.popAcFields.concat(helper.getItemPopACField());
     popAcFields.push({
         path: 'userId',
         model: 'users'
@@ -162,6 +162,128 @@ exports.renderPage = (req, res) => {
             const listItems = menuView.items.filter(item => item.slug != 'server');
             result.listItems = listItems;
             cb(null, result); 
+        },
+        (result, cb) => { // Get relevant account
+            accountModel.aggregate([
+                {
+                    $match: { // Query relevant account
+                        phai: mongoose.Types.ObjectId(result.account.phai._id),
+                        status: 'pending',
+                        $or: [
+                            {server: mongoose.Types.ObjectId(result.account.server._id)},
+                            {sub_server: mongoose.Types.ObjectId(result.account.sub_server._id)}
+                        ]
+                    },
+                },
+                {
+                    $lookup: { // query user to checking user is normal
+                        from: 'users',
+                        localField: 'userId',
+                        foreignField: '_id',
+                        as: 'user'
+                    }
+                },
+                {
+                    $addFields: {
+                        user: { $cond: [
+                            { $anyElementTrue: ['$user'] },
+                            { $arrayElemAt: ['$user', 0] },
+                            null
+                        ]}
+                    }
+                },
+                {
+                    $match: {
+                        'user.status': 'normal'
+                    }
+                },  
+                { // Query image
+                    $lookup: {
+                        from: 'images',
+                        localField: '_id',
+                        foreignField: 'account',
+                        as: 'images'
+                    }
+                },
+                {
+                    $addFields: {
+                        image: { $cond: [
+                            { $anyElementTrue: ['$images'] },
+                            { $arrayElemAt: ['$images.url', 0] },
+                            'no-image.png'
+                        ]}
+                    }
+                },
+                { // Query view
+                    $lookup: {
+                        from: 'views',
+                        localField: '_id',
+                        foreignField: 'account',
+                        as: 'views'
+                    }
+                },
+                {
+                    $addFields: {
+                        totalView: {$size: '$views'}
+                    }
+                },
+                { // Query rate
+                    $lookup: {
+                        from: 'rates',
+                        localField: '_id',
+                        foreignField: 'account',
+                        as: 'rates'
+                    }
+                },
+                {
+                    $unwind: {
+                        path: '$rates',
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        title: {$first: '$title'},
+                        c_name: {$first: '$c_name'},
+                        phai: {$first: '$phai'},
+                        server: {$first: '$server'},
+                        sub_server: {$first: '$sub_server'},
+                        ngoc: {$first: '$ngoc'},
+                        dieuvan: {$first: '$dieuvan'},
+                        vohon: {$first: '$vohon'},
+                        user: {$first: '$user'},
+                        transaction_type: {$first: '$transaction_type'},
+                        price: {$first: '$price'},
+                        phaigiaoluu: {$first: '$phaigiaoluu'},
+                        image: {$first: '$image'},
+                        totalView: {$first: '$totalView'},
+                        totalRate: {$avg: '$rates.rate'},
+                        createdAt: {$first: '$createdAt'}
+                    }
+                },
+                { $sample: { size: 6 } }
+            ], function(err, accounts){
+                if(err){
+                    console.log('Error in ctl/account/view-account.js -> render 07 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                if(accounts.length === 0){
+                    result.relevantAccount = [];
+                    return result;
+                }
+                accountModel.populate(accounts, popAcFields, (err, accounts) => { // Populate
+                    if(err){
+                        console.log('Error in ctl/account/view-account.js -> rnder 08 ' + err);
+                        return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                    }
+                    accounts.forEach(account => {   
+                        account.createdAt = dateFormat(new Date(account.createdAt), 'd mmmm, yyyy');
+                    });
+                    result.relevantAccount = accounts;
+                    cb(null, result);
+                });
+            })
         }
     ], function(err, result){
         if(err) return res.render('account/view-account', {title: 'Có lỗi xảy ra!',  error: err });
@@ -176,6 +298,7 @@ exports.renderPage = (req, res) => {
         res.render('account/view-account', {
                                             title: result.account.title, 
                                             account: result.account, 
+                                            relevantAccount: result.relevantAccount,
                                             addFields: result.addFields, 
                                             images: result.images, 
                                             rate: result.rate,

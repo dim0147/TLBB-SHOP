@@ -112,6 +112,8 @@ router.delete('/delete-collection', isLogin, isNormalUserAjax, collectionC.check
 router.get('/profile/activities', isLogin, isNormalUser, profileAC.renderActivity);
 router.get('/profile/get-activities', isLogin, isNormalUserAjax, profileAC.getActivities);
 
+/* Notification User Profile . */
+router.get('/profile/notifications', isLogin, isNormalUser, profileAC.renderNotification);
 
 // ---------------------------------------- END PROFILE -----------------------------------------
 

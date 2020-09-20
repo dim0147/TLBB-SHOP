@@ -78,6 +78,13 @@ const config = {
         API_URL: 'https://api.imgur.com/3/',
         username: 'provandam0369',
         password: '5371165okA'
+    },
+
+    notifyText: {
+        'comment-on-my-account': '${userAndOther} đã bình luận tài khoản của bạn: "${titleAccount}"',
+        'reply-my-comment': '${userAndOther} đã trả lồi bình luận của bạn: "${comment}"',
+        'like-my-comment': '${userAndOther} đã thích bình luận của bạn: "${comment}"',
+        'admin-block-account': 'Tài khoản ${account_c_name} đã bị khoá',
     }
 }
 

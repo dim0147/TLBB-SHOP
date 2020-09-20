@@ -18,6 +18,22 @@
 			line-height: 1.5;
 			border-radius: .2rem;
 		}
+		.trade{
+          background: red!important;
+      }
+
+      .allPGL{
+          background: rgb(241, 6, 241)!important;
+      }
+
+      .itemInSearch{
+          margin: 10px;
+          border-bottom: 4px solid rgb(70, 75, 70);
+      }
+
+      .itemInSearch:hover{
+          background:#353233
+      }
 	</style> 
 </head>
 
@@ -92,7 +108,7 @@
 					<div class="product-slider">
 						<% images.forEach(img => { %>
 							<div class="product-slider-item my-4 col-xs-3" data-image="/images/data/<%= img.url %>">
-								<img width="730px" height="547px" class="img-responsive" src="/images/data/<%= img.url %>" alt="product-img">
+								<img class="img-fluid w-100" src="/images/data/<%= img.url %>" alt="product-img">
 							</div>
 						<% }) %>
 					</div>
@@ -109,20 +125,25 @@
 
 							<li class="nav-item">
 								<a class="nav-link" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home"
-								 aria-selected="false">Lời nhắn</a>
+								 aria-selected="false">Mô tả</a>
 							</li>
 							<li class="nav-item">
 								<a class="nav-link" id="pills-contact-tab" data-toggle="pill" href="#pills-contact" role="tab" aria-controls="pills-contact"
 								 aria-selected="false">Bình luận</a>
+							</li>
+
+							<li class="nav-item">
+								<a class="nav-link" id="pills-contact-tab" data-toggle="pill" href="#pills-account" role="tab" aria-controls="pills-account"
+								 aria-selected="false">Tài Khoản Khác</a>
 							</li>
 						</ul>
 						<div class="tab-content" id="pills-tabContent">
 
 							<% if(typeof account !== 'undefined'){ %>
 								<div class="tab-pane fade " id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
-									<h3 class="tab-title">Lời nhắn từ chủ tài khoản</h3>
+									<h3 class="tab-title">Mô tả từ chủ tài khoản</h3>
 									<% if(account.loinhan == ''){ %>
-										<p>Không có lời nhắn</p>
+										<p>Không có mô tả</p>
 									<% }else{ %>
 										<div><%- account.loinhan %></div>
 									<% } %>
@@ -187,6 +208,7 @@
 										</table>
 								<% })} %>
 							</div>
+
 							<div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
 								<h3 class="tab-title">Bình Luận</h3>
 								<div class="product-review">
@@ -226,6 +248,73 @@
 									<% } %>
 								</div>
 							</div>
+
+							<div class="tab-pane fade" id="pills-account" role="tabpanel" aria-labelledby="pills-account-tab">
+								<h3 class="tab-title">Những Tài Khoản Tương Tự</h3>
+								<div class="product-grid-list">
+									<div class="row mt-30 accountAreaRow">
+										<% if(typeof relevantAccount  !== 'undefined' && relevantAccount.length > 0){ %>
+											<% relevantAccount.forEach(function(account){ %>
+										<div class="col-sm-12 col-lg-4 col-md-6 accountDiv" data-view="<%= account.totalView %>" data-rate="<%= account.totalRate %>" data-price="<%= account.price %>">
+											<!-- product card -->
+							<div class="product-item bg-light">
+								<div class="card">
+									<div class="thumb-content">
+										<% if(account.transaction_type === 'sell'){ %>
+											<div class="price"><%= account.price.toLocaleString('en-US', {style : 'currency', currency : 'VND'}); %></div>
+										<% }else if(account.transaction_type === 'trade'){ %>
+											<div class="price trade">Giao lưu <%= account.phaigiaoluu.name %></div>
+										<% }else{ %>
+											<div class="price allPGL">- Giao lưu <%= account.phaigiaoluu.name %> <br> hoặc <br>- Bán: <%= account.price.toLocaleString('en-US', {style : 'currency', currency : 'VND'}); %></div>
+										<% } %>
+										<a href="/account/view-account/<%= account._id %>">
+											<img class="card-img-top" src="/images/data/<%= account.image %>" alt="Card image cap" height="180px">
+										</a>
+									</div>
+									<div class="card-body">
+										<h4 class="card-title"><a style="color:rgb(189, 121, 38)" href="/account/view-account/<%= account._id %>"><%= account.title %></a></h4>
+										<div class="product-ratings">
+											<ul class="list-inline">
+												<% if(account.totalRate == null) account.totalRate = 0%>
+												<% for (let index = 0; index < Math.round(account.totalRate); index++){ %>
+													<li class="list-inline-item selected"><i class="fa fa-star"></i></li>
+												<% } %>
+												<% for(let index =  Math.round(account.totalRate); index < 5; index++){ %>
+												<li class="list-inline-item"><i class="fa fa-star"></i></li>
+												<% } %>
+											</ul>
+										</div>
+										<ul style="margin-bottom: 3px;" class="list-inline product-meta">
+											<li class="list-inline-item">
+												<a style="color: red" href="/account/search?phai=<%= account.phai._id %>"><i class="fa fa-folder-open-o"></i><%= account.phai.name %></a>
+												<p style="padding: 0px; margin: 0px; display:inline-block; margin-left: 10px;font-size: 10px;"><i class="fas fa-eye"></i>  <%= account.totalView %></p>
+											</li><br>
+											<li class="list-inline-item">
+												<a style="color: green" href=""><i class="fa fa-calendar"></i><%= account.createdAt %></a>
+											</li>
+										</ul>
+										
+										<p style="font-size: 12px; color: rgb(43, 177, 177);" class="card-text">
+										- Đăng bởi: <a style="color:#9999ff" href="/user/<%= account.user._id %>/accounts"><%= account.user.name %></a> <br>
+										- Server: <%= account.server.name %> (<%= account.sub_server.name %>)<br>
+										- Tên nhân vật: <%= account.c_name %> <br>
+										- Ngọc: <%= account.ngoc.name %> <br>
+										- Điêu Văn: <%= account.dieuvan.name %> <br>
+										- Võ Hồn: <%= account.vohon.name %>
+										</p>
+	
+									</div>
+								</div>
+							</div>
+										</div>
+											<% }) %>
+										<% } %>
+
+
+									</div>
+								</div>
+							</div>
+
 						</div>
 					</div>
 				</div>

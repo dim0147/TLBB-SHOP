@@ -42,9 +42,9 @@
                             <ul>
                                 <li><a class="my-1 d-inline-block" href="/user/profile"><i class="fas fa-user-circle"></i>  Thông tin cá nhân</a></li>
                                 <li><a class="my-1 d-inline-block" href="/user/profile/accounts"><i class="fas fa-cart-plus"></i>   Tài khoản đã đăng</a></li>
-                                <li><a class="my-1 d-inline-block" href="/user/profile/notifications"><i class="fas fa-bell" aria-hidden="true"></i>   Thông báo của bạn</a></li>
+                                <li><a style="color: green" class="my-1 d-inline-block" href="/user/profile/notifications"><i class="fas fa-bell" aria-hidden="true"></i>   Thông báo của bạn</a></li>
                                 <li><a class="my-1 d-inline-block" href="/user/profile/collections"><i class="fas fa-bookmark"></i>   Bộ sưu tập</a></li>
-                                <li><a style="color: green" class="my-1 d-inline-block" href="/user/profile/activities"><i class="far fa-clock"></i>   Hoạt động gần đây</a></li>
+                                <li><a class="my-1 d-inline-block" href="/user/profile/activities"><i class="far fa-clock"></i>   Hoạt động gần đây</a></li>
                             </ul>
                         </div>
                     </div>
@@ -52,26 +52,16 @@
                 <div class="col-md-10 offset-md-1 col-lg-9 offset-lg-0">
                     <!-- Edit Profile Welcome Text -->
                     <div class="widget welcome-message activitiesDiv">
-                        <h2><i class="far fa-clock"></i>   Hoạt động gần đây</h2>
-                        <p>Hoạt động gần đây của bạn bao gồm những bình luận, lượt thích, bài đăng, chỉnh sủa,... được lưu ở đây</p>
+                        <h2><i class="fas fa-bell" aria-hidden="true"></i>   Thông báo</h2>
 
                         <div style="margin:10px" class="col-md-6">
 							<strong>Sắp xếp theo</strong>
 							<select id="filter">
                                 <option value="all">Tất cả</option>
-                                <option value="add-new-account">Tài khoản đã đăng</option>
-								<option value="update-account">Chỉnh sửa tài khoản</option>
-								<option value="remove-account">Xoá tài khoản</option>
-								<option value="add-collection">Lưu vào bộ sưu tập</option>
-								<option value="remove-collection">Huỷ khỏi bộ sưu tập</option>
-								<option value="add-comment">Bình luận</option>
-								<option value="add-reply-comment">Phản hồi bình luận</option>
-								<option value="like-comment">Lượt thích bình luận</option>
-								<option value="unlike-comment">Huỷ thích bình luận</option>
-								<option value="rate-account">Đánh giá tài khoản</option>
-								<option value="update-rate-account">Cập nhật đánh giá</option>
-								<option value="view-account-detail">Tài khoản đã xem</option>
-								<option value="view-user-profile">Trang cá nhân đã xem</option>
+                                <option value="add-new-account">Bình luận tài khoản</option>
+								<option value="update-account">Trả lời bình luận</option>
+								<option value="remove-account">Lượt thích bình luận</option>
+								<option value="add-collection">Tài khoản bị khoá</option>
 							</select>
                         </div>
 
@@ -347,7 +337,7 @@
 
 <% include ../partials/footer %>
 <script src="/plugins/iziToast/iziToast.min.js"></script>
-<script src="/js/user/profile-activity.js"></script>
+<script src="/js/user/profile-notificartions.js"></script>
 
 </body>
 

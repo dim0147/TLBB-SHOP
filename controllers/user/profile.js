@@ -951,3 +951,9 @@ exports.getActivities = (req, res) => {
         res.send(result);
     })
 }
+
+// -------------------------------- Profile notification ------------------------------------------------
+
+exports.renderNotification = (req, res) => {
+    res.render('user/profile-notification', {title: 'Thông báo của bạn', user: req.user, csrfToken: req.csrfToken()})
+}

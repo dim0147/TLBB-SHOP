@@ -59,21 +59,21 @@ exports.createComment = function (req, res){
                 if(account === null) return cb('Không tìm thấy account')
                 if(account.status.toString() == 'lock') return cb('Tài khoản này không thể bình luận')
                 if(account.userId.status != 'normal') return cb('Tài khoản thuộc người đăng không hợp lệ')
-                cb(null)
+                cb(null, account);
             });
         },
         //  Check if have parent comment go to check if it existing in DB
-        cb => {
-            if(req.body.parent === null || typeof req.body.parent !== 'string' || req.body.parent == '') return cb(null)
+        (account, cb) => {
+            if(req.body.parent === null || typeof req.body.parent !== 'string' || req.body.parent == '') return cb(null, account)
             if(!mongoose.Types.ObjectId.isValid(req.body.parent)) return cb("Parent comment không hợp lệ");
             commentModel.findById(req.body.parent, (err, comment) => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
                 if(comment === null) return cb('Không tìm thấy id bình luận!')
-                cb(null);
+                cb(null, account);
             });
         },
         // Create comment, check if have parent comment and add author's comment name with user session 
-        cb => {
+        (account, cb) => {
             let commentObject = {
                     account: req.body.accountId, 
                     user: req.user._id, 
@@ -100,6 +100,12 @@ exports.createComment = function (req, res){
                     payload.comment = comment._id;
                 }
                 helper.createActivity(payload);
+                // Create notification
+                helper.createNotification({
+                    account: account._id,
+                    owner: account.userId._id,
+                    type: 'comment-on-my-account'
+                })
                 
                 cb(null, comment)
             });

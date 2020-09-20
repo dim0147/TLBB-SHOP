@@ -6,6 +6,16 @@ $(document).ready(function(){
             $(element).css('cursor', 'not-allowed');
     }
 
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+
     const table = $('#table_id').DataTable({
         language: {
             "decimal":        "",
@@ -170,7 +180,8 @@ $(document).ready(function(){
             error: function (error) {
                 iziToast.error({title: 'Có lỗi khi tải dữ liệu', message: error.responseText, timeout: false})
             }
-        }
+        },
+        "oSearch": {"sSearch": getParameterByName("id") ? getParameterByName("id") : null}
     })
 
     $(document).on('click', '.btnMarkAsDone',function(){

@@ -317,10 +317,12 @@ $(document).ready(function(){
 
     $('#loinhanArea').trumbowyg({
         svgPath: '/plugins/Trumbowyg/icons.svg',
+        lang: 'vi',
         btns: [
             ['emoji'],
             ['upload'],
             ['noembed'],
+            ['fontsize'],
             ['link'],
             ['strong', 'em'],
             ['horizontalRule'],

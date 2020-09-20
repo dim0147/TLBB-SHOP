@@ -1,10 +1,13 @@
 const waterfall = require('async-waterfall');
 const fs = require('fs');
+const mongoose = require('mongoose');
 
 const phaiModel = require('../models/phai');
 const itemModel = require('../models/item');
 const bosungField = require('../models/add_field')
 const activityModel = require('../models/activity');
+const commentModel = require('../models/comment');
+const notificationModel = require('../models/notification');
 
 const cache = require('../cache/cache')
 
@@ -160,3 +163,144 @@ exports.getItemPopACField = function(menuView = cache.getKey('menuView')){
     return arraySlugItem;
 }
 
+//----------------------- NOTIFICATION ------------------------
+// const notifySchema = new mongoose.Schema({
+//     comment: {type: mongoose.Schema.Types.ObjectId, ref: 'comments'},
+//     account: {type: mongoose.Schema.Types.ObjectId, ref: 'accounts'},
+//     values: {type: String},
+//     type: {type: String, enum: typeNotify, required: true},
+//     status: {type: String, enum: status, default: 'unseen', required: true},
+//     owner: {type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true}
+// })
+
+//---------"comment-on-my-account" TYPE ---------------------
+function getTwoRecentUserComment(idAccount){
+    return new Promise((resolve, reject) => {
+        commentModel.find({
+            account: mongoose.Types.ObjectId(idAccount),
+        })
+        .sort({createdAt: -1})
+        .limit(2)
+        .populate(
+            {
+                path: 'user',
+                select: 'name'
+            }
+        )
+        .exec((err, comments) => {
+            if(err){
+                console.log('Error in help/helper.js -> ntfCreateCmtOnMyAccount 02 ' + err);
+                return reject('Có lỗi xảy ra vui lòng thử lại sau')
+            }
+            switch(comments.length){
+                case 2:
+                    const twoUser = comments[0].user.name + ', ' + comments[0].user.name;
+                    resolve(twoUser);
+                    break;
+                case 1:
+                    const oneUser = comments[0].user.name;
+                    resolve(oneUser);
+                    break;
+                default:
+                    resolve('Không có ai');
+            }
+        });
+    });
+}
+
+function getTotalUserComment(idAccount){
+    return new Promise((resolve, reject) => {
+        commentModel.countDocuments({account: mongoose.Types.ObjectId(idAccount)}, (err, count) => {
+            if(err){
+                console.log('Error in help/helper.js -> ntfCreateCmtOnMyAccount 03 ' + err);
+                return reject('Có lỗi xảy ra vui lòng thử lại sau')
+            }
+            resolve(count);
+        });
+    });
+}
+
+function getTextNotifyUserCommentMyAC(idAccount){
+    return new Promise((res, rej) => {
+
+        Promise.all([getTwoRecentUserComment(idAccount), getTotalUserComment(idAccount)])
+        .then(values => {
+            const recentUserComment = values[0];
+            const totalUserComment = values[1];
+            let text = '';
+
+            if(totalUserComment === 0)
+                text = 'Không có ai bình luận';
+            else if (totalUserComment === 1 || totalUserComment === 2)
+                text = recentUserComment;
+            else
+                text = recentUserComment + ' và ' + (totalUserComment - 2) + ' người khác';
+            res(text)
+        })
+        .catch(err => {
+            rej(err);
+        })
+    });
+}
+
+function CreateNtfCmtOnMyAccount(data){
+    waterfall([
+        (cb) => { // Check if notification is exist
+            notificationModel.findOne(
+            {
+                owner: mongoose.Types.ObjectId(data.owner),
+                account: mongoose.Types.ObjectId(data.account),
+                type: 'comment-on-my-account'
+            })
+            .lean()
+            .exec(function(err, notification){
+                if(err){
+                    console.log('Error in help/helper.js -> ntfCreateCmtOnMyAccount 01 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                let result = { data: data, notification: notification };
+                return cb(null, result);
+            });
+        },
+        (result, cb) => { // Get text recent user comment and total comment
+            getTextNotifyUserCommentMyAC(result.data.account)
+            .then(text => {
+                result.data.values = JSON.stringify({userAndOther: text});
+                cb(null, result);
+            })
+            .catch(err => cb(err));
+        },
+        (result, cb) => { // Update if exist
+            if(!result.notification) return cb(null, result);
+            notificationModel.findByIdAndUpdate(result.notification._id, {values: result.data.values}, (err) => {
+                if(err){
+                    console.log('Error in help/helper.js -> ntfCreateCmtOnMyAccount 02 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                cb(null, 'Update success');
+            });
+        },
+        (result, cb) => { // Create if not exist
+            if(result.notification) return cb(null, result);
+            const newNotification = new notificationModel(result.data).save(err => {
+                if(err){
+                    console.log('Error in help/helper.js -> ntfCreateCmtOnMyAccount 03 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                cb(null, 'Create success');
+            });
+        }
+    ], function(err, result) {
+        if(!err)
+            console.log(result);
+    });
+} 
+//--------- END "comment-on-my-account" TYPE ---------------------
+
+exports.createNotification = function(data){
+    switch (data.type){
+        case 'comment-on-my-account':
+            CreateNtfCmtOnMyAccount(data)
+            break;
+    }
+}
