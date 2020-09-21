@@ -64,23 +64,23 @@ exports.createComment = function (req, res){
         },
         //  Check if have parent comment go to check if it existing in DB
         (account, cb) => {
-            if(req.body.parent === null || typeof req.body.parent !== 'string' || req.body.parent == '') return cb(null, account)
+            if(req.body.parent === null || typeof req.body.parent !== 'string' || req.body.parent == '') return cb(null, account, null)
             if(!mongoose.Types.ObjectId.isValid(req.body.parent)) return cb("Parent comment không hợp lệ");
             commentModel.findById(req.body.parent, (err, comment) => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
                 if(comment === null) return cb('Không tìm thấy id bình luận!')
-                cb(null, account);
+                cb(null, account, comment);
             });
         },
         // Create comment, check if have parent comment and add author's comment name with user session 
-        (account, cb) => {
+        (account, commentParent, cb) => {
             let commentObject = {
                     account: req.body.accountId, 
                     user: req.user._id, 
                     comment: req.body.comment
-                }
+            }
             if(req.body.parent != '' && mongoose.Types.ObjectId.isValid(req.body.parent))
-                commentObject.parent = req.body.parent
+                commentObject.parent = req.body.parent;
             commentModel.create(commentObject, (err, comment) => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau" + err)
                 comment = comment.toObject();
@@ -88,6 +88,7 @@ exports.createComment = function (req, res){
                 comment.avatar = req.user.urlImage;
                 let date = new Date(comment.createdAt);
                 comment.createdAt = dateFormat(date, "d mmmm, yyyy");
+
                 // Create activity
                 let payload = { owner: req.user._id };
                 if(comment.parent){
@@ -100,14 +101,25 @@ exports.createComment = function (req, res){
                     payload.comment = comment._id;
                 }
                 helper.createActivity(payload);
-                // Create notification
+
+                // Create notification add my comment
                 helper.createNotification({
                     account: account._id,
+                    commentOwner: comment.user, // For checking if is owner
                     owner: account.userId._id,
                     type: 'comment-on-my-account'
                 })
-                
-                cb(null, comment)
+
+                // Create notification reply my comment
+                if(comment.parent){
+                    helper.createNotification({
+                        comment: commentParent._id,
+                        childCommentOwner: comment.user, // For checking if is owner
+                        owner: commentParent.user,
+                        type: 'reply-my-comment'
+                    })
+                }
+                cb(null, comment);
             });
         },
         // Check if user is rate

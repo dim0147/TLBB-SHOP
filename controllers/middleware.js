@@ -20,9 +20,10 @@ dateFormat.i18n = {
 
 
 // Set user session and convert image, user created day
-exports.setUserSession = function(req, res, next) {
+exports.setUserSession = async function(req, res, next) {
     if(req.isAuthenticated()){
         req.user.created_at = dateFormat(new Date(req.user.created_at), "d mmmm, yyyy");
+        req.user.unReadNotifications = await helper.getUnreadNotifications(req.user._id).catch(err => console.log(err));
     }
       res.locals.userSS = req.user;
       next()

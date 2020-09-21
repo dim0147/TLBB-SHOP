@@ -2,6 +2,8 @@ const { param, body, validationResult } = require('express-validator');
 const waterfall = require('async-waterfall');
 const mongoose = require('mongoose');
 
+const helper = require('../../../help/helper');
+
 const accountModel = require('../../../models/account');
 const lockReasonModel = require('../../../models/lock-reason');
 
@@ -64,10 +66,15 @@ exports.addLockReason = async function (req, res){
                 cb(null, {account: account});
             });
         },
-        (result, cb) => { // Check if account is lock already or not
+        (result, cb) => { // Check if account is lock already or not, if not lock that account
             if(result.account.status === 'lock') return cb(null, result)
             accountModel.findByIdAndUpdate(result.account._id, {status: 'lock'}, {session: session}, err => {
                 if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau')
+                helper.createNotification({
+                    type: 'admin-lock-account',
+                    account: result.account._id,
+                    owner: result.account.userId
+                });
                 cb(null, result);
             });
         },

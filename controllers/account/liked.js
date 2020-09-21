@@ -24,18 +24,18 @@ exports.likeHandler = function (req, res){
             commentModel.findById(req.body.commentId).exec(function (err, comment) {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
                 if(comment === null) return cb('Không tìm thấy bình luận!')
-                cb(null)
+                cb(null, comment)
             })  
         },
         // Check if have like or not
-        cb => {
+        (comment, cb) => {
             likeModel.findOne({comment: req.body.commentId, user: req.user._id}, (err, like) => {
                 if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau');
-                cb(null, like);
+                cb(null, like, comment);
             });
         },
         // 
-        (like, cb) => { 
+        (like, comment, cb) => { 
             // Unlike
             if(like !== null){
                 likeModel.deleteOne({user: req.user._id, comment: req.body.commentId}, err => {
@@ -49,13 +49,20 @@ exports.likeHandler = function (req, res){
                     cb(null, "Unlike thành công")
                 })         
             }else{  //  Like
-                likeModel.create({comment: req.body.commentId, user: req.user._id, status: 'like'}, err => {
+                likeModel.create({comment: req.body.commentId, user: req.user._id, status: 'like'}, (err, newLike) => {
                     if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
                     // Save activity
                     helper.createActivity({
                         type: 'like-comment',
                         comment: req.body.commentId,
                         owner: req.user._id
+                    });
+                    // Create notification
+                    helper.createNotification({
+                        type: 'like-my-comment',
+                        comment: comment._id,
+                        likeOwner: newLike.user,
+                        owner: comment.user
                     });
                     cb(null, 'Like thành công');
                 });

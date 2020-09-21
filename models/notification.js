@@ -4,12 +4,13 @@ const typeNotify = [
     'comment-on-my-account',
     'reply-my-comment',
     'like-my-comment',
-    'admin-block-account'
+    'admin-lock-account'
 ]
 
 const status = [
     'unseen',
-    'seen'
+    'seen',
+    'read' // When user click into notification
 ]
 
 const notifySchema = new mongoose.Schema({

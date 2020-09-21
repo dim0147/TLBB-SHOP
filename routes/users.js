@@ -114,6 +114,8 @@ router.get('/profile/get-activities', isLogin, isNormalUserAjax, profileAC.getAc
 
 /* Notification User Profile . */
 router.get('/profile/notifications', isLogin, isNormalUser, profileAC.renderNotification);
+router.get('/profile/get-notifications', isLogin, isNormalUserAjax, profileAC.getNotifications);
+router.patch('/profile/update-notification', isLogin, isNormalUserAjax, profileAC.checkBodyUpdateNotification, profileAC.updateStatusNotifications);
 
 // ---------------------------------------- END PROFILE -----------------------------------------
 

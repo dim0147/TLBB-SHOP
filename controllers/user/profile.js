@@ -24,6 +24,7 @@ const userModel = require('../../models/user');
 const accountModel = require('../../models/account');
 const collectionModel = require('../../models/collection');
 const activityModel = require('../../models/activity');
+const notificationModel = require('../../models/notification');
 
 // -------------------------------- Profile User ------------------------------------------------
 
@@ -957,3 +958,242 @@ exports.getActivities = (req, res) => {
 exports.renderNotification = (req, res) => {
     res.render('user/profile-notification', {title: 'Thông báo của bạn', user: req.user, csrfToken: req.csrfToken()})
 }
+
+function setTextCmtOnMyAcNotify(notification){
+    // Check if value is parse success
+    if(notification.values && notification.values.userAndOther){
+        // Get title account
+        const titleAccount = notification.account ? notification.account.title : 'không tìm thấy';
+        // Get text user and other
+        const userAndOther = notification.values.userAndOther;
+        // Get format
+        const textFormat = config.notifyText[notification.type];
+        // Apply filter
+        notification.text = textFormat.replace('${userAndOther}', userAndOther).replace('${titleAccount}', titleAccount);
+    }
+    else
+        notification.text = null;
+    return notification;
+}
+
+function setTextRepMyCmtNotify(notification){
+    // Check if value is parse success
+    if(notification.values && notification.values.userAndOther){
+        // Get text owner comment 
+        const ownerComment = notification.comment ? notification.comment.comment : 'không tìm thấy';
+        // Get text user and other
+        const userAndOther = notification.values.userAndOther;
+        // Get format
+        const textFormat = config.notifyText[notification.type];
+        // Apply filter
+        notification.text = textFormat.replace('${userAndOther}', userAndOther).replace('${comment}', ownerComment);
+    }
+    else
+        notification.text = null;
+    return notification;
+}
+
+function setTextLikeMyCmtNotify(notification){
+    // Check if value is parse success
+    if(notification.values && notification.values.userAndOther){
+        // Get text owner comment 
+        const ownerComment = notification.comment ? notification.comment.comment : 'không tìm thấy';
+        // Get text user and other
+        const userAndOther = notification.values.userAndOther;
+        // Get format
+        const textFormat = config.notifyText[notification.type];
+        // Apply filter
+        notification.text = textFormat.replace('${userAndOther}', userAndOther).replace('${comment}', ownerComment);
+    }
+    else
+        notification.text = null;
+    return notification;
+}
+
+function setTextAdminLockAccount(notification){
+    // Check if account exist
+    if(notification.account){
+        // Get account c_name
+        const accountCname = notification.account.c_name;
+        const textFormat = config.notifyText[notification.type];
+        notification.text = textFormat.replace('${account_c_name}', accountCname);
+    }
+    else
+        notification.text = null;
+    return notification;
+}
+
+exports.getNotifications = (req, res) => {
+    // Analyze query
+    let query = {
+        owner: mongoose.Types.ObjectId(req.user._id)
+    };
+    if(typeof req.query.filter === 'string')
+        query.type = req.query.filter;
+    if(typeof req.query.status === 'string')
+        query.status = req.query.status;
+    if(typeof req.query.excludeId === 'string' && mongoose.Types.ObjectId.isValid(req.query.excludeId))
+        query._id = {$ne: mongoose.Types.ObjectId(req.query.excludeId)}
+    if(typeof req.query.continueTime === 'string' && new Date(req.query.continueTime).getTime() > 0)
+        query.updatedAt = {$lte: new Date(req.query.continueTime)}
+
+    waterfall([
+        cb => { // Query notification
+            const populateField = [
+                {
+                    path: 'comment',
+                    select: '_id comment'
+                },
+                {
+                    path: 'account',
+                    select: '_id title c_name',
+                }
+            ];
+            notificationModel.find(query).sort({updatedAt: -1}).limit(6).lean().populate(populateField).exec((err, notifications) => {
+                if(err){
+                    console.log('Error in ctl/user/profile.js -> getNotifications 01 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                cb(null, {notifications: notifications});
+            })
+        },
+        (result, cb) => { // Apply notification.values to config text format   
+            if(result.notifications.length === 0) return cb(null, result);
+            result.notifications = result.notifications.map(notification => {
+                // Parse values to object
+                try{
+                    notification.values = JSON.parse(notification.values);
+                }catch(err){
+                    notification.values = null
+                }
+                // Check type of notification
+                switch(notification.type){
+                    case 'comment-on-my-account':
+                        return setTextCmtOnMyAcNotify(notification)
+                    case 'reply-my-comment':
+                        return setTextRepMyCmtNotify(notification)
+                    case 'like-my-comment':
+                        return setTextLikeMyCmtNotify(notification)
+                    case 'admin-lock-account':
+                        return setTextAdminLockAccount(notification)
+                    default:
+                        notification.text = null;
+                        return notification;
+                }
+
+            });
+            cb(null, result);
+        },
+        (result, cb) => { // Get total left notification and continue updated Time
+            // If result is lower than 6 mean no more
+            if(result.notifications.length < 6){
+                result.continueTime = null;
+                result.excludeId = null;
+                result.totalLeft = 0;
+                return cb(null, result)
+            }
+            const lastUpdatedTime = result.notifications[(result.notifications.length - 1)].updatedAt;
+            const lastId = result.notifications[(result.notifications.length - 1)]._id;
+            let newQuery = query;
+            newQuery.updatedAt = {$lte: lastUpdatedTime}
+            newQuery._id = {$ne: mongoose.Types.ObjectId(lastId)}
+            notificationModel.countDocuments(newQuery, (err, count) => {
+                if(err){
+                    console.log('Error in ctl/user/profile.js -> getNotifications 03 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                if(count === 0){
+                    result.totalLeft = 0;
+                    result.continueTime = null;
+                    result.excludeId = null;
+                }
+                else{
+                    result.totalLeft = count;
+                    result.continueTime = lastUpdatedTime;
+                    result.excludeId = lastId;
+                }
+                cb(null, result);
+            })
+        }         
+    ], function(err, result){
+        if(err) return res.status(400).send(err)
+        res.send(result);
+    })
+}
+
+exports.checkBodyUpdateNotification = [
+    body('listIdNotifications', 'List Id không hợp lệ').optional().isArray(),
+    body('isAll', 'Mã không hợp lệ').optional().isBoolean(),
+    body('type', 'Type không hợp lệ').optional().isIn([
+        'comment-on-my-account',
+        'reply-my-comment',
+        'like-my-comment',
+        'admin-lock-account'
+    ]),
+    body('status', 'Status không hợp lệ').isIn(['seen', 'read']),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty())
+            return res.status(400).send(errors.array()[0].msg);
+        next();
+    }
+]
+
+exports.updateStatusNotifications = (req, res) => {
+    let query = {field: {}, update: {}};
+    if(req.body.listIdNotifications && (req.body.isAll || req.body.type))
+        return res.status(400).send('Không hợp lệ')
+    
+    let listIdUpdate = [];
+    let method = null;
+    if(Array.isArray(req.body.listIdNotifications)){
+        method = 'listId';
+        const notMongoId = req.body.listIdNotifications.some(id => {
+            if(!mongoose.Types.ObjectId.isValid(id))
+                return true;
+            else 
+                return false;
+        })
+        if(notMongoId)
+            return res.status(400).send('List Id không hợp lệ');
+        listIdUpdate = req.body.listIdNotifications.map(id => {
+            return mongoose.Types.ObjectId(id)
+        })
+        query.field._id = {$in: listIdUpdate};
+        // Update 'unseen' status to 'seen' status only
+        if(req.body.status === 'seen'){
+            query.field.status = 'unseen'
+            query.update.status = 'seen';
+        }
+        else if(req.body.status === 'read')
+            query.update.status = 'read';
+        else
+            return res.status(400).send('Status không hợp lệ');
+    }
+    
+    waterfall([
+        (cb) => {
+            if(method !== 'listId') return cb(null);
+            notificationModel.countDocuments({owner: req.user._id, _id: {$in: listIdUpdate}}, (err, count) => {
+                if(err){
+                    console.log('Error in ctl/user/profile.js -> updateStatusNotifications 01 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                if(count != listIdUpdate.length) return cb("Bạn không có quyền chỉnh sửa thông báo này")
+                cb(null);
+            });
+        },
+        (cb) => {
+            notificationModel.updateMany(query.field, query.update, err => {
+                if(err){
+                    console.log('Error in ctl/user/profile.js -> updateStatusNotification 02 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                cb(null, 'Cập nhật thành công status ' + query.update.status);
+            });
+        }
+    ], function(err, result){
+        if(err) return res.status(400).send(err);
+        res.send(result);
+    })
+} 
