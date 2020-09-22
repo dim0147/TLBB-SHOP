@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const waterfall = require('async-waterfall');
+const explain = require('mongoose-explain');
 
 const config = require('../config/config');
 const cache = require('../cache/cache');
@@ -39,20 +40,21 @@ const accountSchema = mongoose.Schema({
     userId: {type: mongoose.Schema.Types.ObjectId, ref:'users', required: true}
 },{ timestamps: { createdAt: 'createdAt' , updatedAt: 'updatedAt'} } );
 
-accountSchema.pre('save', async function(next) {
+accountSchema.pre('save', function(next) {
     // Initialize the list of field to check
     const fields = helper.getSlugItem();
-    
     // Initialize list promise
     const listPromise = [];
-
 
     // Checking phai
     if(!mongoose.Types.ObjectId.isValid(this.phai))
       return next("Phái không hợp lệ!");
     let phaiPromise = new Promise((resolve, reject) => {
       phaiModel.countDocuments({_id: this.phai}, (err, count) =>{
-        if(err) return reject(err);
+        if(err){
+          console.log('System Error, accountSchema.pre("save") 01 ' + err);
+          return reject('Có lỗi xảy ra vui lòng thử lại sau');
+        } 
         if(count === 0) return reject("Phái không tìm thấy");
         resolve();
       });
@@ -63,7 +65,10 @@ accountSchema.pre('save', async function(next) {
     if(typeof this.phaigiaoluu !== 'undefined'){
       let phaiGLPromise = new Promise((resolve, reject) => {
         phaiModel.countDocuments({_id: this.phaigiaoluu}, (err, count) =>{
-          if(err) return reject(err);
+          if(err){
+            console.log('System Error, accountSchema.pre("save") 02 ' + err);
+            return reject('Có lỗi xảy ra vui lòng thử lại sau');
+          } 
           if(count === 0) return reject("Phái giao lưu không tìm thấy");
           resolve();
         });
@@ -74,10 +79,15 @@ accountSchema.pre('save', async function(next) {
     // Checking server and sub server
     if(!mongoose.Types.ObjectId.isValid(this.server) || !mongoose.Types.ObjectId.isValid(this.sub_server))
       return next("Server không hợp lệ!");
+    const thisSubServer = this.sub_server;
+    const thisServer = this.server;
     let serverPromise = new Promise((resolve, reject) => {
-      itemPropertyModel.findOne({_id: this.sub_server, parent: this.server}).exec((err, property) => {
-        if(err) return reject(err);
-        if(property === null) return reject("Sub Server không trùng với Server");
+      itemPropertyModel.findOne({_id: thisSubServer, parent: thisServer}).exec((err, property) => {
+        if(err){
+          console.log('System Error, accountSchema.pre("save") 03 ' + err);
+          return reject('Có lỗi xảy ra vui lòng thử lại sau');
+        } 
+        if(!property) return reject("Sub Server không trùng với Server");
         resolve();
       });
     });
@@ -104,7 +114,10 @@ accountSchema.pre('save', async function(next) {
             // Check item property is exist
             (cb) => {
               itemPropertyModel.findOne({_id: this[field]}).exec(function(err, property){
-                if(err) return cb(err);
+                if(err){
+                  console.log('System Error, accountSchema.pre("save") 05 ' + err);
+                  return cb('Có lỗi xảy ra vui lòng thử lại sau');
+                } 
                 if(property === null) return cb("Không tìm thấy property " + field + " value " + this[field]);
                 cb(null, {idItem: property.itemId, slug: field});
               });
@@ -112,12 +125,15 @@ accountSchema.pre('save', async function(next) {
             // Check if item property is correct with slug
             (result, cb) => {
               itemModel.countDocuments({_id: result.idItem, slug: result.slug}, function(err, count){
-                if(err) return cb(err);
+                if(err){
+                  console.log('System Error, accountSchema.pre("save") 06 ' + err);
+                  return cb('Có lỗi xảy ra vui lòng thử lại sau');
+                } 
                 if (count === 0) return cb("Item property không hợp lệ với slug: " + result.slug);
                 cb(null);
               });
             }
-          ], function(err, result){
+          ], function(err){
             if(err) return reject(err);
             resolve();
           });
@@ -135,8 +151,7 @@ accountSchema.pre('save', async function(next) {
       next();
     })
     .catch((err) => {
-      console.log(err);
-      next(err);
+      next({isPreSave: true, message: err});
     })
 
 });
@@ -160,7 +175,10 @@ accountSchema.pre('updateOne', function(next) {
     // Check if is id of phai
     let phaiPromise = new Promise((resolve, reject) => {
       phaiModel.countDocuments({_id: doc.phai}, (err, count) =>{
-        if(err) return reject(err);
+        if(err){
+          console.log('System Error, accountSchema.pre("updateOne") 01 ' + err);
+          return reject('Có lỗi xảy ra vui lòng thử lại sau');
+        }
         if(count === 0) return reject("Phái không tìm thấy");
         resolve();
       });
@@ -175,7 +193,10 @@ accountSchema.pre('updateOne', function(next) {
 
   let phaiGLPromise = new Promise((resolve, reject) => {
     phaiModel.countDocuments({_id: doc.phaigiaoluu}, (err, count) =>{
-      if(err) return reject(err);
+      if(err){
+        console.log('System Error, accountSchema.pre("updateOne") 02 ' + err);
+        return reject('Có lỗi xảy ra vui lòng thử lại sau');
+      }
       if(count === 0) return reject("Phái giao lưu không tìm thấy");
       resolve();
     });
@@ -193,7 +214,10 @@ accountSchema.pre('updateOne', function(next) {
         return next("Server không hợp lệ!");
       let serverPromise = new Promise((resolve, reject) => {
         itemPropertyModel.findOne({_id: doc.sub_server, parent: doc.server}).exec((err, property) => {
-          if(err) return reject(err);
+          if(err){
+            console.log('System Error, accountSchema.pre("updateOne") 03 ' + err);
+            return reject('Có lỗi xảy ra vui lòng thử lại sau');
+          }
           if(property === null) return reject("Sub Server không trùng với Server");
           resolve();
         });
@@ -217,7 +241,10 @@ accountSchema.pre('updateOne', function(next) {
           // Check item property is exist
           (cb) => {
             itemPropertyModel.findOne({_id: doc[field]}).exec(function(err, property){
-              if(err) return cb(err);
+              if(err){
+                console.log('System Error, accountSchema.pre("updateOne") 04 ' + err);
+                return cb('Có lỗi xảy ra vui lòng thử lại sau');
+              }
               if(property === null) return cb("Không tìm thấy property " + field + " value " + doc[field]);
               cb(null, {idItem: property.itemId, slug: field});
             });
@@ -225,12 +252,15 @@ accountSchema.pre('updateOne', function(next) {
           // Check if item property is correct with slug
           (result, cb) => {
             itemModel.countDocuments({_id: result.idItem, slug: result.slug}, function(err, count){
-              if(err) return cb(err);
+              if(err){
+                console.log('System Error, accountSchema.pre("updateOne") 05 ' + err);
+                return cb('Có lỗi xảy ra vui lòng thử lại sau');
+              }
               if (count === 0) return cb("Item property không hợp lệ với slug: " + result.slug);
               cb(null);
             });
           }
-        ], function(err, result){
+        ], function(err){
           if(err) return reject(err);
           resolve();
         });
@@ -248,10 +278,11 @@ accountSchema.pre('updateOne', function(next) {
       next();
     })
     .catch((err) => {
-      console.log(err);
-      next(err);
+      next({isPreUpdate: true, message: err});
     })
 });
+
+// accountSchema.plugin(explain);
 
 
 

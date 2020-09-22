@@ -34,6 +34,7 @@ $("document").ready(function() {
 
             commentObject = {
                 _id: comment._id,
+                userId: comment.userDetail._id,
                 name: comment.userDetail.name,
                 avatar: comment.userDetail.urlImage,
                 comment: comment.comment,
@@ -50,6 +51,7 @@ $("document").ready(function() {
                 comment.replies.map( (reply, i) => {
                     replyd = {
                         _id: reply._id,
+                        userId: reply.userDetail._id,
                         name: reply.userDetail.name,
                         avatar: reply.userDetail.urlImage,
                         comment: reply.comment,
@@ -76,6 +78,7 @@ $("document").ready(function() {
         /*
             comment = {
                 _id,
+                userId,
                 name,
                 avatar,
                 comment,
@@ -93,6 +96,7 @@ $("document").ready(function() {
         comments.data.map(function(comment, index) {
             commentObject = {
                 _id: comment._id,
+                userId: comment.userDetail[0]._id,
                 name: comment.userDetail[0].name,
                 avatar: comment.userDetail[0].urlImage,
                 comment: comment.comment,
@@ -109,6 +113,7 @@ $("document").ready(function() {
                 comment.replies.data.map( (reply, i) => {
                     replyd = {
                         _id: reply._id,
+                        userId: reply.userReply[0]._id,
                         name: reply.userReply[0].name,
                         avatar: reply.userReply[0].urlImage,
                         comment: reply.comment,
@@ -150,6 +155,7 @@ $("document").ready(function() {
         comments.data.map( (reply, i) => {
             replyd = {
                 _id: reply._id,
+                userId: reply.userDetail[0]._id,
                 name: reply.userDetail[0].name,
                 avatar: reply.userDetail[0].urlImage,
                 comment: reply.comment,
@@ -212,7 +218,7 @@ $("document").ready(function() {
                 _csrf: $('#_csrf').val()
             },
             success: res => {
-                createComment({_id: res.comment._id, name: res.comment.name, avatar: res.comment.avatar, comment: res.comment.comment, parent: null, rate: res.rate, time: res.comment.createdAt})
+                createComment({_id: res.comment._id, userId: $('#userId').val(), name: res.comment.name, avatar: res.comment.avatar, comment: res.comment.comment, parent: null, rate: res.rate, time: res.comment.createdAt})
                 showAlert('Đăng bình luận thành công!', 1);
                 $('#comment').val('');
                 $(this).prop("disabled",false);
@@ -282,7 +288,7 @@ $("document").ready(function() {
                 _csrf: $("#_csrf").val()
             },
             success: function(res){
-                createComment({_id: res.comment._id, name: res.comment.name, avatar: res.comment.avatar, comment: res.comment.comment, parent: res.comment.parent, rate: res.rate, time: res.comment.createdAt}, $('.replyTextarea').prev());
+                createComment({_id: res.comment._id, userId:$('#userId').val(), name: res.comment.name, avatar: res.comment.avatar, comment: res.comment.comment, parent: res.comment.parent, rate: res.rate, time: res.comment.createdAt}, $('.replyTextarea').prev());
                 $('.replyTextarea').remove();
             },
             error: function(err){
@@ -387,6 +393,7 @@ $("document").ready(function() {
         /*
             comment = {
                 _id,
+                userId,
                 name,
                 avatar,
                 comment,
@@ -460,7 +467,7 @@ $("document").ready(function() {
         '											'+
                                                     divRate + replyTextDiv +
         '											<div class="name">'+
-        '												<h5>' + comment.name +'</h5>'+
+        '												<a href="/user/'+comment.userId+'/accounts"><h5>' + comment.name +'</h5></a>'+
         '											</div>'+
         '											<div class="date">'+
         '												<p>' + comment.time +'</p>'+

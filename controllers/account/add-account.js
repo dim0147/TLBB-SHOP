@@ -227,8 +227,14 @@ exports.addNewAccount = async (req, res) => {
     waterfall([
         //  Create account
         cb => {
-            accountModel.create([req.body], {session: session} ,(err, newAccount) => {
-                if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
+            accountModel.create([req.body], {session: session}, (err, newAccount) => {
+                if(err){
+                    if(err.isPreSave) return cb(err.message);
+                    else{
+                        console.log('Error in CTL/account/add-account.js -> addNewAccount 01 ' + err);
+                        return cb("Có lỗi xảy ra, vui lòng thử lại sau")
+                    }
+                }
                 cb(null, newAccount[0])
             });
         },

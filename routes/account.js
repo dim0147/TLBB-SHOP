@@ -74,7 +74,6 @@ function isNormalUserAjax(req, res, next){
   return res.status(401).send("Tài khoản không hợp lệ, xin vui lòng logout")
 }
 
-
 //---------------------------ACCOUNT------------------------------------
 
 /* Create account post listing. */

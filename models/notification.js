@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const typeNotify = [
     'comment-on-my-account',
+    'rate-my-account',
     'reply-my-comment',
     'like-my-comment',
     'admin-lock-account'

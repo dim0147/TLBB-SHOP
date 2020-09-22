@@ -9,6 +9,7 @@ const activityModel = require('../models/activity');
 const commentModel = require('../models/comment');
 const likeModel = require('../models/like');
 const notificationModel = require('../models/notification');
+const rateModel = require('../models/rate');
 
 const cache = require('../cache/cache')
 
@@ -281,19 +282,17 @@ function CmtOnMyAccount(data){
             })
             .catch(err => console.log(err));
         },
-        (result, cb) => { // Update if exist
+        (result, cb) => { // Remove if exist
             if(!result.notification) return cb(null, result);
-            notificationModel.findByIdAndUpdate(result.notification._id, {values: result.data.values}, (err) => {
+            notificationModel.findByIdAndDelete(result.notification._id, (err) => {
                 if(err){
                     console.log('Error in help/helper.js -> CmtOnMyAccount 02 ' + err);
                     return cb('Có lỗi xảy ra vui lòng thử lại sau')
                 }
-                result.message = 'Update success';
                 cb(null, result);
             });
         },
         (result, cb) => { // Create if not exist
-            if(result.notification) return cb(null, result);
             const payload = {
                 account: result.data.account,
                 owner: result.data.owner,
@@ -313,6 +312,142 @@ function CmtOnMyAccount(data){
 } 
 
 /* ********************************************************************************* */
+
+function getUserAndOtherRate(idAccount, ownerId){
+    return new Promise((resolve, reject) => {
+        rateModel.aggregate([
+            {
+                $match: {
+                    account: mongoose.Types.ObjectId(idAccount),
+                    user: {$ne: mongoose.Types.ObjectId(ownerId)}
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'user', 
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
+            {
+                $unwind: '$user'
+            },
+            {
+                $group: {
+                    _id: '$user._id',
+                    name: {$first: '$user.name'},
+                    rateCreatedAt : {$last: '$createdAt'}
+                }
+            },
+            {
+                $facet: {
+                    data: [
+                        {
+                            $sort: {rateCreatedAt: -1}
+                        },
+                        {
+                            $limit: 2
+                        }
+                    ],
+                    count: [
+                        {
+                            $count: 'totalUser'
+                        }
+                    ]
+                }
+            },
+        ], function(err, rs){
+            if(err){
+                console.log('Error in help/helper.js -> getTotalUserCmt 01 ' + err);
+                return reject('Có lỗi xảy ra vui lòng thử lại sau')
+            }
+            // Get two recent user and total user comment
+            const users = rs[0].data.length === 0 ? [] : rs[0].data;
+            const totalUserComment = rs[0].count.length === 0 ? 0 : rs[0].count[0].totalUser;
+
+            // Check if have two user or one user comment or nobody
+            let recentUserCmt = null;
+            if(users.length === 2)
+                recentUserCmt = users[0].name + ', ' + users[1].name;
+            else if(users.length === 1)
+                recentUserCmt = users[0].name;
+            else
+                recentUserCmt = 'Không có ai';
+            
+            /// Check if total user comment more than 3 or 2 or 1
+            let text = null;
+            if(totalUserComment === 0)
+                text = 'Không có ai đánh giá';
+            else if (totalUserComment === 1 || totalUserComment === 2) // If 1 or 2 user comment
+                text = recentUserCmt;
+            else // More than 3
+                text = recentUserCmt + ' và ' + (totalUserComment - 2) + ' người khác';
+            resolve(text);
+        })
+    });
+}
+
+function RateMyAccount(data){
+    if(data.rateOwner.toString() == data.owner.toString()) // means owner rate on his/her account
+        return;
+    waterfall([
+        (cb) => { // Check if notification is exist
+            notificationModel.findOne(
+            {
+                owner: mongoose.Types.ObjectId(data.owner),
+                account: mongoose.Types.ObjectId(data.account),
+                type: 'rate-my-account'
+            })
+            .lean()
+            .exec(function(err, notification){
+                if(err){
+                    console.log('Error in help/helper.js -> RateMyAccount 01 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                let result = { data: data, notification: notification };
+                return cb(null, result);
+            });
+        },
+        (result, cb) => { // Get text recent user comment and total comment and add to values field
+            getUserAndOtherRate(result.data.account, result.data.owner)
+            .then(text => {
+                result.data.values = JSON.stringify({userAndOther: text});
+                cb(null, result);
+            })
+            .catch(err => console.log(err));
+        },
+        (result, cb) => { // Remove if exist
+            if(!result.notification) return cb(null, result);
+            notificationModel.findByIdAndDelete(result.notification._id, (err) => {
+                if(err){
+                    console.log('Error in help/helper.js -> RateMyAccount 02 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                cb(null, result);
+            });
+        },
+        (result, cb) => { // Create if not exist
+            const payload = {
+                account: result.data.account,
+                owner: result.data.owner,
+                values: result.data.values,
+                type: 'rate-my-account'
+            }
+            const newNotification = new notificationModel(payload).save(err => {
+                if(err){
+                    console.log('Error in help/helper.js -> RateMyAccount 03 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                result.message = 'Create success';
+                cb(null, result);
+            });
+        }
+    ]);
+} 
+
+/* ********************************************************************************* */
+
 
 //---------"reply-my-comment" TYPE ---------------------
 function getUserAndOtherRepCmt(idComment, ownerId){
@@ -420,19 +555,17 @@ function RepMyComment(data){
             })
             .catch(err => console.log(err));
         },
-        (result, cb) => { // Update if exist
+        (result, cb) => { // Remove if exist
             if(!result.notification) return cb(null, result);
-            notificationModel.findByIdAndUpdate(result.notification._id, {values: result.data.values}, (err) => {
+            notificationModel.findByIdAndDelete(result.notification._id, (err) => {
                 if(err){
                     console.log('Error in help/helper.js -> RepMyComment 02 ' + err);
                     return cb('Có lỗi xảy ra vui lòng thử lại sau')
                 }
-                result.message = 'Update success';
                 cb(null, result);
             });
         },
         (result, cb) => { // Create if not exist
-            if(result.notification) return cb(null, result);
             const payload = {
                 comment: result.data.comment,
                 owner: result.data.owner,
@@ -559,19 +692,17 @@ function LikeMyComment(data){
             })
             .catch(err => console.log(err));
         },
-        (result, cb) => { // Update if exist
+        (result, cb) => { // Remove if exist
             if(!result.notification) return cb(null, result);
-            notificationModel.findByIdAndUpdate(result.notification._id, {values: result.data.values}, (err) => {
+            notificationModel.findByIdAndDelete(result.notification._id, (err) => {
                 if(err){
                     console.log('Error in help/helper.js -> LikeMyComment 02 ' + err);
                     return cb('Có lỗi xảy ra vui lòng thử lại sau')
                 }
-                result.message = 'Update success';
                 cb(null, result);
             });
         },
         (result, cb) => { // Create if not exist
-            if(result.notification) return cb(null, result);
             const payload = {
                 comment: result.data.comment,
                 owner: result.data.owner,
@@ -631,6 +762,9 @@ exports.createNotification = function(data){
     switch (data.type){
         case 'comment-on-my-account':
             CmtOnMyAccount(data)
+            break;
+        case 'rate-my-account':
+            RateMyAccount(data)
             break;
         case 'reply-my-comment':
             RepMyComment(data)

@@ -29,7 +29,8 @@
 		<input id="idAccount" type="hidden" value="<%= account._id %>">
 	<% } %>
 	<% if(typeof userSS !== "undefined"){ %>
-		<input id="urlImage" type="hidden" value= "<%= userSS.urlImage %>">
+        <input id="urlImage" type="hidden" value= "<%= userSS.urlImage %>">
+        <input id="userId" type="hidden" value= "<%= userSS._id %>">
     <% } %>
     <% if(typeof idComment !== "undefined"){ %>
         <input id="idComment" type="hidden" value= "<%= idComment %>">

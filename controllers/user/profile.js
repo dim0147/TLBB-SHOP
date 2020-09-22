@@ -976,6 +976,23 @@ function setTextCmtOnMyAcNotify(notification){
     return notification;
 }
 
+function setTextRateMyAcNotify(notification){
+    // Check if value is parse success
+    if(notification.values && notification.values.userAndOther){
+        // Get title account
+        const titleAccount = notification.account ? notification.account.title : 'không tìm thấy';
+        // Get text user and other
+        const userAndOther = notification.values.userAndOther;
+        // Get format
+        const textFormat = config.notifyText[notification.type];
+        // Apply filter
+        notification.text = textFormat.replace('${userAndOther}', userAndOther).replace('${titleAccount}', titleAccount);
+    }
+    else
+        notification.text = null;
+    return notification;
+}
+
 function setTextRepMyCmtNotify(notification){
     // Check if value is parse success
     if(notification.values && notification.values.userAndOther){
@@ -1032,10 +1049,8 @@ exports.getNotifications = (req, res) => {
         query.type = req.query.filter;
     if(typeof req.query.status === 'string')
         query.status = req.query.status;
-    if(typeof req.query.excludeId === 'string' && mongoose.Types.ObjectId.isValid(req.query.excludeId))
-        query._id = {$ne: mongoose.Types.ObjectId(req.query.excludeId)}
-    if(typeof req.query.continueTime === 'string' && new Date(req.query.continueTime).getTime() > 0)
-        query.updatedAt = {$lte: new Date(req.query.continueTime)}
+    if(typeof req.query.continueId === 'string' && mongoose.Types.ObjectId.isValid(req.query.continueId))
+        query._id = {$lt: mongoose.Types.ObjectId(req.query.continueId)}
 
     waterfall([
         cb => { // Query notification
@@ -1049,7 +1064,7 @@ exports.getNotifications = (req, res) => {
                     select: '_id title c_name',
                 }
             ];
-            notificationModel.find(query).sort({updatedAt: -1}).limit(6).lean().populate(populateField).exec((err, notifications) => {
+            notificationModel.find(query).sort({createdAt: -1}).limit(6).lean().populate(populateField).exec((err, notifications) => {
                 if(err){
                     console.log('Error in ctl/user/profile.js -> getNotifications 01 ' + err);
                     return cb('Có lỗi xảy ra vui lòng thử lại sau')
@@ -1070,6 +1085,8 @@ exports.getNotifications = (req, res) => {
                 switch(notification.type){
                     case 'comment-on-my-account':
                         return setTextCmtOnMyAcNotify(notification)
+                    case 'rate-my-account':
+                        return setTextRateMyAcNotify(notification)
                     case 'reply-my-comment':
                         return setTextRepMyCmtNotify(notification)
                     case 'like-my-comment':
@@ -1088,15 +1105,12 @@ exports.getNotifications = (req, res) => {
             // If result is lower than 6 mean no more
             if(result.notifications.length < 6){
                 result.continueTime = null;
-                result.excludeId = null;
                 result.totalLeft = 0;
                 return cb(null, result)
             }
-            const lastUpdatedTime = result.notifications[(result.notifications.length - 1)].updatedAt;
             const lastId = result.notifications[(result.notifications.length - 1)]._id;
             let newQuery = query;
-            newQuery.updatedAt = {$lte: lastUpdatedTime}
-            newQuery._id = {$ne: mongoose.Types.ObjectId(lastId)}
+            newQuery._id = {$lt: mongoose.Types.ObjectId(lastId)}
             notificationModel.countDocuments(newQuery, (err, count) => {
                 if(err){
                     console.log('Error in ctl/user/profile.js -> getNotifications 03 ' + err);
@@ -1104,13 +1118,11 @@ exports.getNotifications = (req, res) => {
                 }
                 if(count === 0){
                     result.totalLeft = 0;
-                    result.continueTime = null;
-                    result.excludeId = null;
+                    result.continueId = null;
                 }
                 else{
                     result.totalLeft = count;
-                    result.continueTime = lastUpdatedTime;
-                    result.excludeId = lastId;
+                    result.continueId = lastId;
                 }
                 cb(null, result);
             })

@@ -71,6 +71,9 @@ $(document).ready(function(){
                 case 'comment-on-my-account':
                     renderAddComment(notification);
                     break;
+                case 'rate-my-account':
+                    renderRateAccount(notification);
+                    break;
                 case 'reply-my-comment':
                     renderAddReplyComment(notification);
                     break;
@@ -85,7 +88,7 @@ $(document).ready(function(){
         })
         $('#loadMoreBtn').remove();
         if(res.totalLeft > 0)
-            $('.notificationsDiv').append(' <button id="loadMoreBtn" continue-time="'+res.continueTime+'" exclude-id="'+res.excludeId+'" class="btn btn-large btn-block btn-primary" type="button">Xem thêm '+ res.totalLeft +' thông báo</button>')      
+            $('.notificationsDiv').append(' <button id="loadMoreBtn" continue-id="'+res.continueId+'" class="btn btn-large btn-block btn-primary" type="button">Xem thêm '+ res.totalLeft +' thông báo</button>')      
         updateSeenNotifications(listIdNotifications, 'seen');
     }
 
@@ -98,6 +101,22 @@ $(document).ready(function(){
         '                            <div class="col-md-12">'+
         '                                <div class="search-result '+bg+' titleNotification">'+
         '                                    <h5 style="color: green"><i class="fas fa-comment"></i>  '+text+'</h5>'+
+        '                                    <p>'+dateFormat(new Date(notification.updatedAt), "d mmmm, yyyy")+'</p>'+
+        '                                </div>'+
+        '                            </div>'+
+        '                        </div>';
+        $('.notificationsDiv').append(myvar);
+    }
+
+    function renderRateAccount(notification){
+        if(!notification.account || !notification.text)
+            return
+        const text  = notification.text;
+        const bg = notification.status === 'read' ? null : 'bg-gray';
+        var myvar = '<div class="row divNotification" data-notification-id="'+notification._id+'" data-href="/account/view-account/'+notification.account._id+'" >'+
+        '                            <div class="col-md-12">'+
+        '                                <div class="search-result '+bg+' titleNotification">'+
+        '                                    <h5 style="color: rgb(240, 112, 8)"><i class="fas fa-smile"></i>   '+text+'</h5>'+
         '                                    <p>'+dateFormat(new Date(notification.updatedAt), "d mmmm, yyyy")+'</p>'+
         '                                </div>'+
         '                            </div>'+
@@ -182,8 +201,7 @@ $(document).ready(function(){
     $(document).on('click', '#loadMoreBtn', function(){
         const filter = getParameterByName('filter');
         const status = getParameterByName('status');
-        const excludeId = $(this).attr('exclude-id');
-        const continueTime = $(this).attr('continue-time');
+        const continueId = $(this).attr('continue-id');
         const button = this;
         setAllowPointer(button, false);
         $(button).prop('disabled', true);
@@ -193,8 +211,7 @@ $(document).ready(function(){
         }
         if(filter && filter !== 'all') query.filter = filter;
         if(status && status !== 'all') query.status = status;
-        if(excludeId) query.excludeId = excludeId;
-        if(continueTime) query.continueTime = continueTime;
+        if(continueId) query.continueId = continueId;
         $.ajax({
             url: '/user/profile/get-notifications',
             method: 'GET',

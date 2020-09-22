@@ -25,20 +25,20 @@ exports.createRating = function(req, res){
                 if(account === null) return cb("Không tìm thấy tài khoản")
                 if(account.status.toString() != 'pending') return cb("Không thể đánh giá tài khoản này")
                 if(account.userId && account.userId.status != 'normal') return cb("Tài khoản thuộc người đăng không hợp lệ")
-                cb(null);
+                cb(null, account);
             });
         },
-        //  Check if rate is exist, update
-        cb => {
+        //  Check if rate is exist
+        (account, cb) => {
             rateModel.findOne({account: req.body.accountId, user: req.user._id}, (err, rate) => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
-                if(rate !== null) return cb(null, rate)
-                return cb(null, false)
+                if(rate !== null) return cb(null, rate, account)
+                return cb(null, false, account)
             });
         },
         //  Update if exist
-        (rate, cb) => {
-            if(rate === false) return cb(null, false)
+        (rate, account, cb) => {
+            if(rate === false) return cb(null, false, account)
             rateModel.findOneAndUpdate({_id: rate._id}, {rate: req.body.rate}, err => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
                 // Save activity
@@ -48,11 +48,11 @@ exports.createRating = function(req, res){
                     account: req.body.accountId,
                     owner: req.user._id
                 });
-                cb(null, true);
+                cb(null, true, account);
             });
         },
         // Create new rate
-        (isExist, cb) => {
+        (isExist, account, cb) => {
             if(isExist) return cb(null, "Cập nhật đánh giá thành công!!!")
             rateModel.create({account: req.body.accountId, user: req.user._id, rate: req.body.rate}, err => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
@@ -63,6 +63,13 @@ exports.createRating = function(req, res){
                     rate: req.body.rate,
                     owner: req.user._id
                 });
+                // Create notification
+                helper.createNotification({
+                    type: 'rate-my-account',
+                    account: req.body.accountId,
+                    owner: account.userId._id,
+                    rateOwner: req.user._id
+                })
                 cb(null, "Đánh giá tài khoản thành công!!!");
             })
         }

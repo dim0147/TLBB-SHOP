@@ -45,6 +45,7 @@
 		<input id="idAccount" type="hidden" value="<%= account._id %>">
 	<% } %>
 	<% if(typeof userSS !== "undefined"){ %>
+		<input id="idUser" type="hidden" value= "<%= userSS._id %>">
 		<input id="urlImage" type="hidden" value= "<%= userSS.urlImage %>">
 	<% } %>
     <% include ../partials/menu %>

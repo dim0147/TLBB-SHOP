@@ -265,7 +265,13 @@ function validateUpdateList(updateList){
 function updateAccount(idAccount, updateList, session){
     return new Promise((resolve, reject) => {
         accountModel.updateOne({_id: idAccount}, updateList, {session: session, runValidators: true}, (err, result) => {
-            if(err) return reject(new Error("Có lỗi xảy ra, vui lòng thử lại sau"));
+            if(err){
+                if(err.isPreUpdate) return reject(new Error(err.message))
+                else{
+                    console.log('System error, ctl/account/edit-account->updateAccount 01 ' + err );
+                    return reject(new Error("Có lỗi xảy ra, vui lòng thử lại sau"));
+                }
+            }
             resolve();
         });
     });
@@ -465,7 +471,7 @@ exports.updateAccount =  async (req, res) => {
                 owner: req.user._id
             });
 
-            res.send('Chỉnh sửa tài khoản thành công, vui lòng tải lại trang để xem thay đổi'); 
+            res.send('Chỉnh sửa tài khoản thành công, <a href="/account/view-account/'+idAccount+'"> bấm vào đây để xem thay đổi</a>'); 
         }
         catch(err){
             // Delete storage image
