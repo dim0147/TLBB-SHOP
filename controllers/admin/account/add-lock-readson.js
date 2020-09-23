@@ -3,6 +3,7 @@ const waterfall = require('async-waterfall');
 const mongoose = require('mongoose');
 
 const helper = require('../../../help/helper');
+const socketApi = require('../../../io/io');
 
 const accountModel = require('../../../models/account');
 const lockReasonModel = require('../../../models/lock-reason');
@@ -70,11 +71,8 @@ exports.addLockReason = async function (req, res){
             if(result.account.status === 'lock') return cb(null, result)
             accountModel.findByIdAndUpdate(result.account._id, {status: 'lock'}, {session: session}, err => {
                 if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau')
-                helper.createNotification({
-                    type: 'admin-lock-account',
-                    account: result.account._id,
-                    owner: result.account.userId
-                });
+                // Perform locking, use for create notification
+                result.performLocked = true;
                 cb(null, result);
             });
         },
@@ -93,6 +91,29 @@ exports.addLockReason = async function (req, res){
             });
             payload.save({session: session}, function(err) {
                 if(err) return cb('Có lỗi xảy ra, vui lòng thử lại sau')
+                // If perform lock then create notification
+                if(result.performLocked){
+                    // Create notification for account owner
+                    helper.createNotification({
+                        type: 'admin-lock-account',
+                        account: result.account._id,
+                        owner: result.account.userId
+                    });
+                    // Emit socket event about lock account to owner
+                    helper.getUserConnections(result.account.userId)
+                    .then(sockets => {
+                        if(sockets){
+                            socketApi.emitSockets(sockets, {
+                                event: 'push_notification',
+                                value: {
+                                    type: 'admin-lock-account',
+                                    link: '/user/profile/accounts?id='+result.account._id,
+                                    text:  'Tài khoản "' + (result.account.title.length > 20 ? result.account.title.substring(0, 20) + '...' : result.account.title) + '" đã bị khoá'
+                                }
+                            });
+                        }
+                    })
+                }
                 return cb(null, 'Khoá tài khoản ' + result.account.c_name + ' thành công!');
             });
         }

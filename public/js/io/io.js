@@ -67,6 +67,18 @@ function showNotification(data){
         });        
         incNumbOfUnreadNotifications();
     }
+    else if(data.type === 'admin-lock-account'){
+        iziToast.show({
+            backgroundColor: '#18b7ba',
+            icon: 'fas fa-lock',
+            iconColor: '#5f1d91',
+            title: titleNotification,
+            titleColor: '#5f1d91',
+            progressBar: false,
+            position: 'bottomRight', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
+        });        
+        incNumbOfUnreadNotifications();
+    }
 }
 
 
