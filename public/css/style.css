@@ -1,5 +1,14 @@
 /*=== MEDIA QUERY ===*/
 @import url("https://fonts.googleapis.com/css?family=Muli:300,400,600,700,800,900");
+.linkNotification{
+  color: #003fff;
+}
+
+.linkNotification:hover{
+  color: #426ced; 
+}
+
+
 .navbar .dropdown-toggle, .navbar .dropdown-menu a {
   cursor: pointer;
 }

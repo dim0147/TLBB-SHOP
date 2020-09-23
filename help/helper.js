@@ -10,6 +10,7 @@ const commentModel = require('../models/comment');
 const likeModel = require('../models/like');
 const notificationModel = require('../models/notification');
 const rateModel = require('../models/rate');
+const userConnectionModel = require('../models/user_connection');
 
 const cache = require('../cache/cache')
 
@@ -24,7 +25,6 @@ exports.checkEmptyRequest = function(req, arrayProperty, arrayNoCheckNull = []){
     }
     return false;
 }
-
 
 exports.getMenuData = function(){
   return new Promise((resolve, reject) => {
@@ -164,6 +164,31 @@ exports.getItemPopACField = function(menuView = cache.getKey('menuView')){
     }
     return arraySlugItem;
 }
+//----------------------- GET CONNECTIONS OF USER SECTION------------------------
+
+exports.getUserConnections = function(userId) {
+    return new Promise((resolve, reject) => {
+        userConnectionModel.find({
+            user: mongoose.Types.ObjectId(userId)
+        })
+        .lean()
+        .select('socketId')
+        .exec((err, connections) => {
+            if(err){
+                console.log('Error in help/helper.js -> getUserConnections ' + err);
+                return reject('Có lỗi xảy ra vui lòng thử lại sau')
+            }
+            // If have connections, loop through them and get socketId for each connection
+            if(connections.length > 0){
+                const listSockets = connections.map(connection => connection.socketId)
+                return resolve(listSockets);
+            }
+            else
+                return resolve(null);
+        });
+    })
+}
+
 
 //----------------------- NOTIFICATION SECTION------------------------
 

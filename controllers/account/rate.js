@@ -4,6 +4,7 @@ const waterfall = require('async-waterfall');
 const { body, validationResult } = require('express-validator');
 
 const helper = require('../../help/helper');
+const socketApi = require('../../io/io');
 
 exports.validateBody = [
     body('rate', 'Thiếu trường').isInt({min:1, max: 5}),
@@ -71,6 +72,24 @@ exports.createRating = function(req, res){
                     rateOwner: req.user._id
                 })
                 cb(null, "Đánh giá tài khoản thành công!!!");
+
+                // Check if owner rate his own account
+                if(account.userId._id.toString() != req.user._id.toString()){
+                    // Emit event to user socket about have person rate their account
+                    helper.getUserConnections(account.userId._id)
+                    .then(sockets => {
+                        if(sockets){
+                            socketApi.emitSockets(sockets, {
+                                event: 'push_notification',
+                                value: {
+                                    type: 'rate-my-account',
+                                    link: '/account/view-account/'+account._id,
+                                    text: req.user.name + ' vừa đánh giá tài khoản của bạn: "'+(account.title.length > 20 ? account.title.substring(0, 20) + '...' : account.title)+'"'
+                                }
+                            });
+                        }
+                    });
+                }
             })
         }
     ], function (err, result){

@@ -31,6 +31,13 @@ const httpsOptions = {
 var server = http.createServer(httpsOptions, app);
 
 /**
+ *  Attack IO to Server
+ */
+
+const io = app.io;
+io.attach(server);
+
+/**
  * Listen on provided port, on all network interfaces.
  */
 

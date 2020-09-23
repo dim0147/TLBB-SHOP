@@ -34,7 +34,9 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
     "passport-remember-me": "0.0.1",
+    "passport.socketio": "^3.7.0",
     "password-hash": "^1.2.2",
-    "rand-token": "^1.0.1"
+    "rand-token": "^1.0.1",
+    "socket.io": "^2.3.0"
   }
 }

@@ -9,7 +9,8 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const passport = require('passport');
 const flash = require('connect-flash');
 const cors = require('cors');
-const csurf = require('csurf') 
+const csurf = require('csurf'); 
+const passportSocketIo = require("passport.socketio");
 
 
 const config = require('./config/config');
@@ -20,6 +21,8 @@ const usersRouter = require('./routes/users');
 const adminRouter = require('./routes/admin');
 const accountRouter = require('./routes/account');
 const imageRouter = require('./routes/image');
+
+const socketApi = require('./io/io');
 
 const app = express();
 
@@ -41,6 +44,7 @@ app.use(cors({
 console.log('Connect to mongodb...');
 mongoose.connect(config.mongodb.uri, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false})
 .then(() => console.log('Connect success'));
+mongoose.set('useCreateIndex', true);
 
 // Setup session
   // Store to store session in db
@@ -55,6 +59,7 @@ store.on('error', function(error) {
 app.use(session({
   secret: config.session.secretKey,
   resave: false,
+  key: config.session.key,
   saveUninitialized: false,
   cookie: {maxAge: config.session.cookieRememberMe}, // 86400000
   store: store
@@ -73,6 +78,17 @@ app.use(middlewareHandle.setUserSession);
 
 // Pass menu data to ejs
 app.use(middlewareHandle.loadMenuView);
+
+// Setup socket
+socketApi.io.use(passportSocketIo.authorize({
+  cookieParser: cookieParser,      
+  key:          config.session.key,       // the name of the cookie where express/connect stores its session_id
+  secret:       config.session.secretKey,    // the session_secret to parse the cookie
+  store:        store        // we NEED to use a sessionstore. no memorystore please
+}));
+
+app.io = socketApi.io;
+
 
 
 // setup route

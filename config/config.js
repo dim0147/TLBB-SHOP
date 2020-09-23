@@ -51,6 +51,7 @@ const config = {
 
     session: {
         secretKey: 'BonSexy',
+        key: 'tlbb-shop',
         cookieRememberMe: 2592000000 // 30 day
     },
 

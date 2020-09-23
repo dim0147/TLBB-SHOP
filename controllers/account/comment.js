@@ -4,6 +4,7 @@ const dateFormat = require('dateformat');
 const mongoose = require('mongoose');
 
 const helper = require('../../help/helper');
+const socketApi = require('../../io/io');
 
 const commentModel = require('../../models/comment');
 const accountModel = require('../../models/account');
@@ -102,13 +103,34 @@ exports.createComment = function (req, res){
                 }
                 helper.createActivity(payload);
 
-                // Create notification add my comment
-                helper.createNotification({
-                    account: account._id,
-                    commentOwner: comment.user, // For checking if is owner
-                    owner: account.userId._id,
-                    type: 'comment-on-my-account'
-                })
+                if(!comment.parent){
+                    // Create notification add my comment
+                    helper.createNotification({
+                        account: account._id,
+                        commentOwner: comment.user, // For checking if is owner
+                        owner: account.userId._id,
+                        type: 'comment-on-my-account'
+                    })
+
+                    // Check if the user comment this account not equal account owner
+                    if(comment.user.toString() != account.userId._id.toString()){
+                        // Emit event to user socket about comment my account
+                        helper.getUserConnections(account.userId._id)
+                        .then(sockets => {
+                            if(sockets){
+                                socketApi.emitSockets(sockets, {
+                                    event: 'push_notification',
+                                    value: {
+                                        type: 'comment-on-my-account',
+                                        link: '/account/view-account/'+account._id,
+                                        text: req.user.name + ' vừa luận của về tài khoản của bạn: "'+(account.title.length > 20 ? account.title.substring(0, 20) + '...' : account.title)+'"'
+                                    }
+                                });
+                            }
+
+                        })
+                    }
+                }
 
                 // Create notification reply my comment
                 if(comment.parent){
@@ -118,6 +140,25 @@ exports.createComment = function (req, res){
                         owner: commentParent.user,
                         type: 'reply-my-comment'
                     })
+
+                    // Check if he/she reply his/her own comment
+                    if(comment.user.toString() != commentParent.user.toString()){
+                        // Emit event to user socket about have person reply their comment
+                        helper.getUserConnections(commentParent.user)
+                        .then(sockets => {
+                            if(sockets){
+                                socketApi.emitSockets(sockets, {
+                                    event: 'push_notification',
+                                    value: {
+                                        type: 'reply-my-comment',
+                                        link: '/account/view-comment/'+commentParent._id,
+                                        text: req.user.name + ' vừa trả lời bình luận của bạn: "'+(commentParent.comment.length > 20 ? commentParent.comment.substring(0, 20) + '...' : commentParent.comment)+'"'
+                                    }
+                                });
+                            }
+
+                        });
+                    }
                 }
                 cb(null, comment);
             });

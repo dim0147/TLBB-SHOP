@@ -4,6 +4,7 @@ const commentModel = require('../../models/comment');
 const {body, validationResult} = require('express-validator');
 
 const helper = require('../../help/helper');
+const socketApi = require('../../io/io');
 
 exports.validationBody = [
     body('commentId', 'Thiếu trường').notEmpty().isMongoId(),
@@ -64,6 +65,24 @@ exports.likeHandler = function (req, res){
                         likeOwner: newLike.user,
                         owner: comment.user
                     });
+
+                    // Check if owner like his own comment
+                    if(comment.user.toString() != newLike.user.toString()){
+                    // Emit event to user socket
+                        helper.getUserConnections(comment.user)
+                        .then(sockets => {
+                            if(sockets){
+                                socketApi.emitSockets(sockets, {
+                                    event: 'push_notification',
+                                    value: {
+                                        type: 'like-my-comment',
+                                        link: '/account/view-comment/'+comment._id,
+                                        text: req.user.name + ' vừa thích bình luận của bạn: "'+comment.comment + '"'
+                                    }
+                                });
+                            }
+                        })
+                    }
                     cb(null, 'Like thành công');
                 });
             }
