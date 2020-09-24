@@ -41,6 +41,7 @@ exports.checkBody = [
 ]
 
 exports.renderPage = (req, res) => {
+    
     const popAcFields = config.account.popAcFields.concat(helper.getItemPopACField());
     popAcFields.push({
         path: 'userId',
@@ -270,7 +271,7 @@ exports.renderPage = (req, res) => {
                 }
                 if(accounts.length === 0){
                     result.relevantAccount = [];
-                    return result;
+                    return cb(null, result);
                 }
                 accountModel.populate(accounts, popAcFields, (err, accounts) => { // Populate
                     if(err){

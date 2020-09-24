@@ -17,6 +17,7 @@ const profileAC = require('../controllers/user/profile');
 const logoutAC = require('../controllers/user/logout');
 const viewUserAC = require('../controllers/user/view-user');
 const collectionC = require('../controllers/user/collection');
+const chatC = require('../controllers/user/chat');
 
 
 function redirectOldUrl(req, res, next){ // redirect when user login or register finish
@@ -129,6 +130,13 @@ router.get('/:id/accounts', viewUserAC.checkParams, viewUserAC.renderPage);
 router.get('/:id/get-accounts', viewUserAC.checkParamGetUserAccounts, viewUserAC.getUserAccounts);
 
 // ---------------------------------------- END Other User's PROFILE -----------------------------------------
+
+// ---------------------------------------- CHAT -----------------------------------------
+
+router.get('/chat', isLogin, isNormalUser, chatC.renderChatPage)
+
+// ----------------------------------------  END CHAT -----------------------------------------
+
 
 /* Logout . */
 router.get('/logout', logoutAC.logout);

@@ -732,5 +732,29 @@ $("document").ready(function() {
             }
         });
     })
+
+    $('.offerBtn').click(function(e){
+        e.preventDefault();
+    })
+
+    $('.ipOfferPrice').on('input', function(){
+        const price = Number($(this).val());
+        if(!isNaN(price))
+          $('.priceLabel').html('Đề nghị với giá '+ price.toLocaleString('en-US', {style : 'currency', currency : 'VND'}));
+    })
+
+    $('.btnSendOffer').click(function(){
+        const priceOffer = Number($('.ipOfferPrice').val());
+        const priceOrigin = Number($('.currentPrice').val());
+        
+        const limit = Math.floor((priceOrigin * 20) / 100);
+        if(priceOffer < limit){
+            return iziToast.error({
+                message: 'Xin hãy đề nghị giá cao hơn, tối thiểu ' + limit.toLocaleString('en-US', {style : 'currency', currency : 'VND'}),
+                position: 'center'
+            })
+        }
+    })
+
 })
 

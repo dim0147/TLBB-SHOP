@@ -37,6 +37,47 @@
 </head>
 
 <body class="body-wrapper">
+
+	<!-- Model -->
+	<% if(typeof account !== 'undefined'){ %>
+		<% if(account.transaction_type === 'sell' || account.transaction_type === 'all'){ %>
+		<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header text-center">
+				<h5 class="modal-title" id="exampleModalLabel">Đưa ra đề nghị</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				</div>
+				<div class="modal-body">
+				<form>
+					<div class="form-group">
+					<div class="text-center">
+						<input type="hidden" class="currentPrice" value="<%= account.price %>">
+						<p>Giá hiện tại đang là <%= Number(account.price).toLocaleString('en-US', {style : 'currency', currency : 'VND'}) %></p>
+					</div>
+					<label for="recipient-name" class="col-form-label">Giá đề nghị:</label>
+					<p class="priceLabel"></p>
+					<input type="number" class="form-control ipOfferPrice" min="100">
+					</div>
+					<div class="form-group">
+					<label for="message-text" class="col-form-label">Nhắn thêm với chủ tài khoản:</label>
+					<textarea class="form-control" id="ipOfferText" placeholder=""></textarea>
+					</div>
+				</form>
+				</div>
+				<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+				<button type="button" class="btn btn-success btnSendOffer"><i class="fas fa-paper-plane"></i>   Gửi đề nghị</button>
+				</div>
+			</div>
+			</div>
+		</div>
+		<% } %>
+	<% } %>
+
+
 	<% if(typeof csrfToken !== "undefined"){ %>
 		<input type="hidden" id="_csrf" value="<%= csrfToken %>">
 	<% } %>
@@ -47,7 +88,8 @@
 		<input id="idUser" type="hidden" value= "<%= userSS._id %>">
 		<input id="urlImage" type="hidden" value= "<%= userSS.urlImage %>">
 	<% } %>
-    <% include ../partials/menu %>
+	<% include ../partials/menu %>
+	
     
 <!--===================================
 =            Store Section            =
@@ -357,8 +399,8 @@
 							<% if(!account.isOwner){ %>
 								<li class="list-inline-item"><a href="<%= account.contactFB %>" target="_blank" class="btn btn-contact d-inline-block  btn-success px-lg-5 my-1 px-md-3"><i class="fas fa-sms"></i>  Liên Hệ</a></li>
 							<% } %>
-							<% if(account.status == 'pending' && !account.isOwner){ %>
-								<li class="list-inline-item"><a href="" class="btn btn-offer d-inline-block btn-warning ml-n1 my-1 px-lg-4 px-md-3"><i class="fab fa-accusoft"></i>    Đưa Ra 
+							<% if(account.status == 'pending' && !account.isOwner && (account.transaction_type == 'sell' || account.transaction_type == 'all')){ %>
+								<li class="list-inline-item"><a href="" class="btn btn-offer d-inline-block btn-warning ml-n1 my-1 px-lg-4 px-md-3 offerBtn"  data-toggle="modal" data-target="#exampleModal" ><i class="fab fa-accusoft"></i>    Đưa Ra 
 									Đề Nghị</a></li>
 							<% } %>
 							<% if(typeof account.phone !== "undefined" && account.phone != null && !account.isOwner){ %>
