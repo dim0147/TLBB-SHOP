@@ -2,19 +2,26 @@ function incNumbOfUnreadNotifications(){
     let currentNumb = isNaN($('.spanNotification').attr('amount')) ? false : Number($('.spanNotification').attr('amount'))
     if(currentNumb === false || currentNumb > 9) return
     currentNumb++;
-    const testNotification = currentNumb > 9 ? '9+' : currentNumb;
-    var myvar = '<i class="fas fa-bell" aria-hidden="true"></i>'+
-    '								'+
-    '									'+
-    '										<span class="badge badge-danger">'+testNotification+'</span>'+
-    '									'+
-    '								'+
-    '								Thông Báo'+
-    '							</a>';
-        
-    
-    $('.spanNotification').html(myvar);
-    $('.spanNotification').attr('amount', currentNumb);
+
+    $.ajax({
+        url: '/api-service/notification/get-unread-notifications',
+        method: 'GET',
+        success: function(res){
+            const testNotification = Number(res.count) > 9 ? '9+' : Number(res.count);
+            var myvar = '<i class="fas fa-bell" aria-hidden="true"></i>'+
+            '								'+
+            '									'+
+            '										<span class="badge badge-danger">'+testNotification+'</span>'+
+            '									'+
+            '								'+
+            '								Thông Báo'+
+            '							</a>';
+                
+            
+            $('.spanNotification').html(myvar);
+            $('.spanNotification').attr('amount', currentNumb);
+        }
+    })
 }
 
 function showNotification(data){
@@ -79,9 +86,19 @@ function showNotification(data){
         });        
         incNumbOfUnreadNotifications();
     }
+    else if(data.type === 'place-offer-on-my-account'){
+        iziToast.show({
+            backgroundColor: '#9ded07',
+            icon: 'fas fa-donate',
+            iconColor: '#739630',
+            title: titleNotification,
+            titleColor: '#739630',
+            progressBar: false,
+            position: 'bottomRight', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
+        });   
+        incNumbOfUnreadNotifications();
+    }
 }
-
-
 
 const host = window.location.origin;
 const socket = io(host);

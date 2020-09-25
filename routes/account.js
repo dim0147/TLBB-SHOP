@@ -14,6 +14,7 @@ const viewCommentAC = require('../controllers/account/view-comment');
 const removeAC = require('../controllers/account/remove-account');
 const setStatusAC = require('../controllers/account/set-status-account');
 const getLockReasonAC = require('../controllers/account/get-lock-reason');
+const placeOfferAC = require('../controllers/account/place-offer');
 
 const rateC = require('../controllers/account/rate');
 const commentC = require('../controllers/account/comment');
@@ -104,6 +105,9 @@ router.get('/search', searchC.checkFields, searchC.renderPage);
 
 /* Remove account. */
 router.delete('/remove-account', isLogin, isNormalUserAjax, removeAC.checkBody, removeAC.removeAccount);
+
+/* Place offer account. */
+router.post('/place-offer', isLogin, isNormalUserAjax, placeOfferAC.checkBodyPlaceOffer, placeOfferAC.placeOffer);
 
 
 //---------------------------USER--------------------------------------

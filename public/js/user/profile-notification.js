@@ -45,7 +45,6 @@ $(document).ready(function(){
             method: 'GET',
             data: query,
             success: function(res){
-                    console.log(res);
                     $('#loadingDiv').remove();
                     if(res.notifications.length === 0)
                         $('.notificationsDiv').append('<h1>Chưa có lịch sử hoạt động nào!');
@@ -70,6 +69,9 @@ $(document).ready(function(){
             switch(notification.type){
                 case 'comment-on-my-account':
                     renderAddComment(notification);
+                    break;
+                case 'place-offer-on-my-account':
+                    renderPlaceOffer(notification);
                     break;
                 case 'rate-my-account':
                     renderRateAccount(notification);
@@ -101,6 +103,22 @@ $(document).ready(function(){
         '                            <div class="col-md-12">'+
         '                                <div class="search-result '+bg+' titleNotification">'+
         '                                    <h5 style="color: green"><i class="fas fa-comment"></i>  '+text+'</h5>'+
+        '                                    <p>'+dateFormat(new Date(notification.updatedAt), "d mmmm, yyyy")+'</p>'+
+        '                                </div>'+
+        '                            </div>'+
+        '                        </div>';
+        $('.notificationsDiv').append(myvar);
+    }
+
+    function renderPlaceOffer(notification){
+        if(!notification.account || !notification.text)
+            return
+        const text  = notification.text;
+        const bg = notification.status === 'read' ? null : 'bg-gray';
+        var myvar = '<div class="row divNotification" data-notification-id="'+notification._id+'" data-href="/user/chat?account_id='+notification.account._id+'" >'+
+        '                            <div class="col-md-12">'+
+        '                                <div class="search-result '+bg+' titleNotification">'+
+        '                                    <h5 style="color: #fc0f03"><i class="fas fa-donate"></i>  '+text+'</h5>'+
         '                                    <p>'+dateFormat(new Date(notification.updatedAt), "d mmmm, yyyy")+'</p>'+
         '                                </div>'+
         '                            </div>'+

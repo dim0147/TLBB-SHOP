@@ -22,6 +22,8 @@ const adminRouter = require('./routes/admin');
 const accountRouter = require('./routes/account');
 const imageRouter = require('./routes/image');
 
+const apiServiceNotify = require('./routes/api-service/notification'); 
+
 const socketApi = require('./io/io');
 
 const app = express();
@@ -97,6 +99,7 @@ app.use('/user', usersRouter);
 app.use('/admin', adminRouter);
 app.use('/account', accountRouter);
 app.use('/image', imageRouter);
+app.use('/api-service/notification', apiServiceNotify);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -68,20 +68,15 @@ exports.likeHandler = function (req, res){
 
                     // Check if owner like his own comment
                     if(comment.user.toString() != newLike.user.toString()){
-                    // Emit event to user socket
-                        helper.getUserConnections(comment.user)
-                        .then(sockets => {
-                            if(sockets){
-                                socketApi.emitSockets(sockets, {
-                                    event: 'push_notification',
-                                    value: {
-                                        type: 'like-my-comment',
-                                        link: '/account/view-comment/'+comment._id,
-                                        text: req.user.name + ' vừa thích bình luận của bạn: "'+comment.comment + '"'
-                                    }
-                                });
+                        // Emit event to user socket
+                        helper.pushNotification(comment.user, {
+                            event: 'push_notification',
+                            value: {
+                                type: 'like-my-comment',
+                                link: '/account/view-comment/'+comment._id,
+                                text: req.user.name + ' vừa thích bình luận của bạn: "'+comment.comment + '"'
                             }
-                        })
+                        });
                     }
                     cb(null, 'Like thành công');
                 });

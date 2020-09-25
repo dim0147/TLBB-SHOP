@@ -744,16 +744,51 @@ $("document").ready(function() {
     })
 
     $('.btnSendOffer').click(function(){
+        const button = this;
         const priceOffer = Number($('.ipOfferPrice').val());
         const priceOrigin = Number($('.currentPrice').val());
         
         const limit = Math.floor((priceOrigin * 20) / 100);
-        if(priceOffer < limit){
-            return iziToast.error({
-                message: 'Xin hãy đề nghị giá cao hơn, tối thiểu ' + limit.toLocaleString('en-US', {style : 'currency', currency : 'VND'}),
-                position: 'center'
-            })
-        }
+        // if(priceOffer < limit){
+        //     return iziToast.error({
+        //         message: 'Xin hãy đề nghị giá cao hơn, tối thiểu ' + limit.toLocaleString('en-US', {style : 'currency', currency : 'VND'}),
+        //         position: 'center'
+        //     })
+        // }    
+        const message = $('#ipOfferText').val();
+        let data = {};
+        if(message.length > 0)
+            data.message = message;
+        data.price = priceOffer;
+        data.idAccount =  $('#idAccount').val();
+        data._csrf = $('#_csrf').val();
+        setAllowPointer(button, false);
+        $(button).prop('disabled', true);
+        $(button).html('<i class="fas fa-spinner fa-spin"></i>   Đang xử lý');
+        $.ajax({
+            url: '/account/place-offer',
+            method: 'POST',
+            data: data,
+            success: function(res){
+                setAllowPointer(button, true);
+                $(button).prop('disabled', false);
+                $(button).html('<i class="fas fa-check"></i>   Thành công');
+                iziToast.success({
+                    message: res,
+                    position: 'center',
+                })
+            },
+            error: function(err){
+                setAllowPointer(button, true);
+                $(button).prop('disabled', false);
+                $(button).html('<i class="fas fa-paper-plane" aria-hidden="true"></i>   Gửi đề nghị');
+                iziToast.error({
+                    title: 'Có lỗi xảy ra',
+                    message: err.responseText,
+                    position: 'center',
+                })
+            }
+        })
     })
 
 })

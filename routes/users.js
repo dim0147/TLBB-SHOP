@@ -1,13 +1,5 @@
 var express = require('express');
 var router = express.Router();
-const helper = require('../help/helper');
-
-const path = require('path');
-const fs = require('fs');
-//  Config multer to upload image
-const multer = require('multer');
-
-const upload = multer()
 
 const passport = require('passport');
 

@@ -115,20 +115,14 @@ exports.createComment = function (req, res){
                     // Check if the user comment this account not equal account owner
                     if(comment.user.toString() != account.userId._id.toString()){
                         // Emit event to user socket about comment my account
-                        helper.getUserConnections(account.userId._id)
-                        .then(sockets => {
-                            if(sockets){
-                                socketApi.emitSockets(sockets, {
-                                    event: 'push_notification',
-                                    value: {
-                                        type: 'comment-on-my-account',
-                                        link: '/account/view-account/'+account._id,
-                                        text: req.user.name + ' vừa luận của về tài khoản của bạn: "'+(account.title.length > 20 ? account.title.substring(0, 20) + '...' : account.title)+'"'
-                                    }
-                                });
+                        helper.pushNotification(account.userId._id, {
+                            event: 'push_notification',
+                            value: {
+                                type: 'comment-on-my-account',
+                                link: '/account/view-account/'+account._id,
+                                text: req.user.name + ' vừa bình luận của về tài khoản của bạn: "'+(account.title.length > 20 ? account.title.substring(0, 20) + '...' : account.title)+'"'
                             }
-
-                        })
+                        });
                     }
                 }
 
@@ -144,19 +138,13 @@ exports.createComment = function (req, res){
                     // Check if he/she reply his/her own comment
                     if(comment.user.toString() != commentParent.user.toString()){
                         // Emit event to user socket about have person reply their comment
-                        helper.getUserConnections(commentParent.user)
-                        .then(sockets => {
-                            if(sockets){
-                                socketApi.emitSockets(sockets, {
-                                    event: 'push_notification',
-                                    value: {
-                                        type: 'reply-my-comment',
-                                        link: '/account/view-comment/'+commentParent._id,
-                                        text: req.user.name + ' vừa trả lời bình luận của bạn: "'+(commentParent.comment.length > 20 ? commentParent.comment.substring(0, 20) + '...' : commentParent.comment)+'"'
-                                    }
-                                });
+                        helper.pushNotification(commentParent.user, {
+                            event: 'push_notification',
+                            value: {
+                                type: 'reply-my-comment',
+                                link: '/account/view-comment/'+commentParent._id,
+                                text: req.user.name + ' vừa trả lời bình luận của bạn: "'+(commentParent.comment.length > 20 ? commentParent.comment.substring(0, 20) + '...' : commentParent.comment)+'"'
                             }
-
                         });
                     }
                 }

@@ -100,19 +100,14 @@ exports.addLockReason = async function (req, res){
                         owner: result.account.userId
                     });
                     // Emit socket event about lock account to owner
-                    helper.getUserConnections(result.account.userId)
-                    .then(sockets => {
-                        if(sockets){
-                            socketApi.emitSockets(sockets, {
-                                event: 'push_notification',
-                                value: {
-                                    type: 'admin-lock-account',
-                                    link: '/user/profile/accounts?id='+result.account._id,
-                                    text:  'Tài khoản "' + (result.account.title.length > 20 ? result.account.title.substring(0, 20) + '...' : result.account.title) + '" đã bị khoá'
-                                }
-                            });
+                    helper.pushNotification(result.account.userId, {
+                        event: 'push_notification',
+                        value: {
+                            type: 'admin-lock-account',
+                            link: '/user/profile/accounts?id='+result.account._id,
+                            text:  'Tài khoản "' + (result.account.title.length > 20 ? result.account.title.substring(0, 20) + '...' : result.account.title) + '" đã bị khoá'
                         }
-                    })
+                    });
                 }
                 return cb(null, 'Khoá tài khoản ' + result.account.c_name + ' thành công!');
             });

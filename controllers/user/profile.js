@@ -975,6 +975,22 @@ function setTextCmtOnMyAcNotify(notification){
         notification.text = null;
     return notification;
 }
+function setTextPlaceOfferOnMyAcNotify(notification){
+    // Check if value is parse success
+    if(notification.values && notification.values.userAndOther){
+        // Get title account
+        const titleAccount = notification.account ? notification.account.title : 'không tìm thấy';
+        // Get text user and other
+        const userAndOther = notification.values.userAndOther;
+        // Get format
+        const textFormat = config.notifyText[notification.type];
+        // Apply filter
+        notification.text = textFormat.replace('${userAndOther}', userAndOther).replace('${titleAccount}', titleAccount);
+    }
+    else
+        notification.text = null;
+    return notification;
+}
 
 function setTextRateMyAcNotify(notification){
     // Check if value is parse success
@@ -1085,6 +1101,8 @@ exports.getNotifications = (req, res) => {
                 switch(notification.type){
                     case 'comment-on-my-account':
                         return setTextCmtOnMyAcNotify(notification)
+                    case 'place-offer-on-my-account':
+                        return setTextPlaceOfferOnMyAcNotify(notification)
                     case 'rate-my-account':
                         return setTextRateMyAcNotify(notification)
                     case 'reply-my-comment':

@@ -41,16 +41,12 @@ content-type: application/json
 
 ###
 
-PATCH https://localhost:3000/account/edit-account/5f51ad4a7acdce085044542a HTTP/1.1
+POST https://localhost:3000/account/place-offer HTTP/1.1
 content-type: application/json
+Cookie: tlbb-shop=s%3ALeM8dl5TfkXaWIyb4leJNU5UHN7a1A5B.zY%2Fyeqk4frAqzhk1RcTl7jdgK%2FYFba8Z%2F4YHBazni8I; io=DV_psvXyxHbwlg3SAAAC
 
 {
-    "_csrf": "mldS7upI-sAcz-hOdrcQDji00hUgs-HIX1-A",
-    "idAccount": "5f51ad4a7acdce085044542a",
-    "postType": "sell",
-    "price": 33,
-    "listImgDel": {
-        "1": 3,
-        "4": 5
-    }
+    "idAccount": "5f55b6b389b8060040bd7785",
+    "price": 300000,
+    "_csrf": "EQ4wLNCc-4p2GPnDYcXb6NQ8F9-vzF5LW3KI"
 }

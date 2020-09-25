@@ -11,8 +11,10 @@ const likeModel = require('../models/like');
 const notificationModel = require('../models/notification');
 const rateModel = require('../models/rate');
 const userConnectionModel = require('../models/user_connection');
+const conversationModel = require('../models/conversation');
 
 const cache = require('../cache/cache')
+const socketApi = require('../io/io');
 
 exports.checkEmptyRequest = function(req, arrayProperty, arrayNoCheckNull = []){
     for (var i = 0; i < arrayProperty.length; i++){
@@ -164,29 +166,36 @@ exports.getItemPopACField = function(menuView = cache.getKey('menuView')){
     }
     return arraySlugItem;
 }
-//----------------------- GET CONNECTIONS OF USER SECTION------------------------
+//----------------------- PUSH NOTIFICATION TO USER SCREEN------------------------
 
-exports.getUserConnections = function(userId) {
-    return new Promise((resolve, reject) => {
-        userConnectionModel.find({
-            user: mongoose.Types.ObjectId(userId)
-        })
-        .lean()
-        .select('socketId')
-        .exec((err, connections) => {
-            if(err){
-                console.log('Error in help/helper.js -> getUserConnections ' + err);
-                return reject('Có lỗi xảy ra vui lòng thử lại sau')
+exports.pushNotification = function(userId, data){
+    waterfall([
+        cb => { // Get list socket of user
+            userConnectionModel.find({
+                user: mongoose.Types.ObjectId(userId)
+            })
+            .lean()
+            .select('socketId')
+            .exec((err, connections) => {
+                if(err){
+                    console.log('Error in help/helper.js -> pushNotification 01 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                // If have connections, loop through them and get socketId for each connection
+                if(connections.length > 0){
+                    const listSockets = connections.map(connection => connection.socketId)
+                    return cb(null, listSockets);
+                }
+                else
+                    return cb(null, null);
+            });
+        },
+        (sockets, cb) => { // Emit socket
+            if(sockets){
+                socketApi.emitSockets(sockets, data);
             }
-            // If have connections, loop through them and get socketId for each connection
-            if(connections.length > 0){
-                const listSockets = connections.map(connection => connection.socketId)
-                return resolve(listSockets);
-            }
-            else
-                return resolve(null);
-        });
-    })
+        }
+    ])
 }
 
 
@@ -327,6 +336,120 @@ function CmtOnMyAccount(data){
             const newNotification = new notificationModel(payload).save(err => {
                 if(err){
                     console.log('Error in help/helper.js -> CmtOnMyAccount 03 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                result.message = 'Create success';
+                cb(null, result);
+            });
+        }
+    ]);
+} 
+
+/* ********************************************************************************* */
+
+//---------"place-offer-on-my-account" TYPE ---------------------
+function getUserAndOtherOffer(idAccount, ownerId){
+    return new Promise((resolve, reject) => {
+        const twoRecentUser = new Promise((res, rej) => {
+            conversationModel.find({
+                account: idAccount,
+                peoples: ownerId
+            })
+            .select('peoples')
+            .populate({
+                path: 'peoples',
+                select: 'name'
+            })
+            .sort({updatedAt: -1})
+            .limit(2)
+            .lean()
+            .exec((err, conversations) => {
+                if(conversations.length === 0) return rej('Không có user in helper -> getUserAndOtherOffer 01');
+                let twoRecentUser = [];
+                conversations.forEach(conversation => {
+                    const peoples = conversation.peoples;
+                    peoples.forEach(user => {
+                        if(user._id != ownerId.toString())
+                            twoRecentUser.push(user.name);
+                    });
+                });
+                res(twoRecentUser.toString());
+            })
+        })  
+
+        const totalUser = new Promise((res, rej) => {
+            conversationModel.countDocuments({
+                account: idAccount,
+                peoples: ownerId
+            }, (err, count) => {
+                if(err){
+                    console.log('Error in help/helper.js -> getUserAndOtherOffer -> totalUser 01  ' + err);
+                    return rej('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                if(count === 0)
+                    rej('Không có ai')
+                else if(count <= 2)
+                    res('')
+                else
+                    res(` và ${count - 2} người khác`)
+            })
+        })
+
+        Promise.all([twoRecentUser, totalUser])
+        .then(values => {
+            resolve(values[0] + values[1]);
+        })
+        .catch(err => reject(err))
+    })
+}
+
+function PlaceOfferMyAccount(data){
+    waterfall([
+        (cb) => { // Check if notification is exist
+            notificationModel.findOne(
+            {
+                owner: mongoose.Types.ObjectId(data.owner),
+                account: mongoose.Types.ObjectId(data.account),
+                type: 'place-offer-on-my-account'
+            })
+            .lean()
+            .exec(function(err, notification){
+                if(err){
+                    console.log('Error in help/helper.js -> PlaceOfferMyAccount 01 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                let result = { data: data, notification: notification };
+                return cb(null, result);
+            });
+        },
+        (result, cb) => { // Get text recent user comment and total comment and add to values field
+            getUserAndOtherOffer(result.data.account, result.data.owner)
+            .then(text => {
+                result.data.values = JSON.stringify({userAndOther: text});
+                cb(null, result);
+            })
+            .catch(err => console.log(err));
+        },
+        (result, cb) => { // Remove if exist
+            if(!result.notification) return cb(null, result);
+            notificationModel.findByIdAndDelete(result.notification._id, (err) => {
+                if(err){
+                    console.log('Error in help/helper.js -> PlaceOfferMyAccount 02 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                cb(null, result);
+            });
+        },
+        (result, cb) => { // Create if not exist
+            const payload = {
+                account: result.data.account,
+                owner: result.data.owner,
+                values: result.data.values,
+                type: 'place-offer-on-my-account'
+            }
+            const newNotification = new notificationModel(payload).save(err => {
+                if(err){
+                    console.log('Error in help/helper.js -> PlaceOfferMyAccount 03 ' + err);
                     return cb('Có lỗi xảy ra vui lòng thử lại sau')
                 }
                 result.message = 'Create success';
@@ -787,6 +910,9 @@ exports.createNotification = function(data){
     switch (data.type){
         case 'comment-on-my-account':
             CmtOnMyAccount(data)
+            break;
+        case 'place-offer-on-my-account':
+            PlaceOfferMyAccount(data)
             break;
         case 'rate-my-account':
             RateMyAccount(data)
