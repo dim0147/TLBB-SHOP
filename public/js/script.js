@@ -232,6 +232,50 @@
 
 })(jQuery);
 
+
+// Your custom functions
+function getDateDiff(date){
+  const dateToCheck = new Date(date);
+
+  const today = new Date();
+  const yesterday = new Date(today);
+  const twoDayAgo = new Date(yesterday);
+  const threeDayAgo = new Date(yesterday);
+  const fourDayAgo = new Date(yesterday);
+  const fiveDayAgo = new Date(yesterday);
+  const sixDayAgo = new Date(yesterday);
+  const sevenDayAgo = new Date(yesterday);
+
+  yesterday.setDate(yesterday.getDate() - 1);
+  twoDayAgo.setDate(yesterday.getDate() - 1);
+  threeDayAgo.setDate(yesterday.getDate() - 2);
+  fourDayAgo.setDate(yesterday.getDate() - 3);
+  fiveDayAgo.setDate(yesterday.getDate() - 4);
+  sixDayAgo.setDate(yesterday.getDate() - 5);
+  sevenDayAgo.setDate(yesterday.getDate() - 6);
+
+  if (dateToCheck.toDateString() === today.toDateString()) {
+    return "Hôm nay";
+  } else if (dateToCheck.toDateString() === yesterday.toDateString()) {
+      return "Hôm qua";
+  } else if (dateToCheck.toDateString() === twoDayAgo.toDateString()) {
+      return '2 ngày trước';
+  } else if (dateToCheck.toDateString() === threeDayAgo.toDateString()) {
+      return '3 ngày trước';
+  } else if (dateToCheck.toDateString() === fourDayAgo.toDateString()) {
+      return '4 ngày trước';
+  } else if (dateToCheck.toDateString() === fiveDayAgo.toDateString()) {
+      return '5 ngày trước';
+  } else if (dateToCheck.toDateString() === sixDayAgo.toDateString()) {
+      return '6 ngày trước';
+  } else if (dateToCheck.toDateString() === sevenDayAgo.toDateString()) {
+      return '7 ngày trước';
+  } else {
+      return false;
+  }
+}
+
+
 $(document).ready(function () {
 
   $('.navbar .dropdown-item').on('click', function (e) {

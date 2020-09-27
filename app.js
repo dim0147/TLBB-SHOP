@@ -23,6 +23,8 @@ const accountRouter = require('./routes/account');
 const imageRouter = require('./routes/image');
 
 const apiServiceNotify = require('./routes/api-service/notification'); 
+const apiServiceChat = require('./routes/api-service/chat'); 
+const apiServiceOffer = require('./routes/api-service/offer'); 
 
 const socketApi = require('./io/io');
 
@@ -100,6 +102,9 @@ app.use('/admin', adminRouter);
 app.use('/account', accountRouter);
 app.use('/image', imageRouter);
 app.use('/api-service/notification', apiServiceNotify);
+app.use('/api-service/chat', apiServiceChat);
+app.use('/api-service/offer', apiServiceOffer);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

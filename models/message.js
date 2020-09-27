@@ -8,7 +8,9 @@ const status = [
 const type = [
     'message',
     'offer',
-    'cancel_offer'
+    'cancel_offer',
+    'denied_offer',
+    'accept_offer'
 ]
 
 const messageSchema = mongoose.Schema({
@@ -16,7 +18,7 @@ const messageSchema = mongoose.Schema({
     conversation: {type: mongoose.Schema.Types.ObjectId, ref: 'conversations', index: true, required: true},
     message: String,
     price_offer: Number,
-    offer_cancelled: {type: mongoose.Schema.Types.ObjectId, ref: 'messages'},
+    offer: {type: mongoose.Schema.Types.ObjectId, ref: 'messages'},
     type: {type: String, enum: type, required: true},
 }, {timestamps: true} )
 

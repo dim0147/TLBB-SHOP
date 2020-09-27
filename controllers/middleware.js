@@ -1,8 +1,4 @@
 const dateFormat = require('dateformat');
-
-const cache = require('../cache/cache');
-const helper = require('../help/helper');
-
 dateFormat.i18n = {
     dayNames: [
         'CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7',
@@ -17,7 +13,8 @@ dateFormat.i18n = {
     ]
 };
 
-
+const cache = require('../cache/cache');
+const helper = require('../help/helper');
 
 // Set user session and convert image, user created day
 exports.setUserSession = async function(req, res, next) {

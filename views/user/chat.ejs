@@ -3,309 +3,238 @@
   <head>
     <% include ../partials/head %>
     <link rel="stylesheet" href="/css/user/chat.css" />
+
+    <style>
+      .unread *{
+        color: black!important;
+        font-weight: bold;
+      }
+      .read *{
+
+      }
+      #loadMoreBtn{
+        color: blue;
+      }
+      .offer{
+        color: rgb(190, 114, 63);
+      }
+      .cancel-offer{
+        color: rgb(71, 146, 180);
+      }
+      .denied-offer{
+        color: rgb(187, 44, 44);
+      }
+      .accept-offer{
+        color: green;
+      }
+
+      .btn-sm{
+        padding: .25rem .5rem;
+        font-size: .875rem;
+        line-height: 1.5;
+        border-radius: .2rem;
+      }
+    </style>
   </head>
 
   <body class="body-wrapper">
-    <% include ../partials/menu %> <% if(typeof csrfToken !== "undefined"){ %>
-    <input type="hidden" id="_csrf" value="<%= csrfToken %>" />
-    <% } %> <% if(typeof userSS != "undefined"){ %>
-    <div class="container-fluid containerChat">
-      <div class="row no-gutters">
+    <% include ../partials/menu %>
+    <% if(typeof csrfToken !== "undefined"){ %>
+      <input type="hidden" id="_csrf" value="<%= csrfToken %>" />
+    <% } %>
+     <% if(typeof userSS != "undefined"){ %>
+      <input type="hidden" id="userId" value="<%= userSS._id %>">
+      <div class="container-fluid containerChat">
+        <div class="row no-gutters">
 
-        <!-- Panel left -->
-        <div class="col-md-4 border-right">
+          <!-- Panel left -->
+          <div class="col-md-4 border-right">
 
-          <!--  Tray -->
-          <div class="settings-tray">
-            <img
-              class="profile-image"
-              src="<%= userSS.urlImage %>"
-              alt="Profile img"
-            />
-            <span class="settings-tray--right">
-              <i title="Tải lại" class="fa fa-refresh" aria-hidden="true"></i>
-              <i title="Đi tới hòm thư" class="fas fa-envelope"></i>
-              <i
-                class="fas fa-bars"
-                data-toggle="dropdown"
-                id="dropdownMenuButtonvcc"
-              ></i>
-              <div
-                class="dropdown-menu"
-                aria-labelledby="dropdownMenuButtonvcc"
-              >
-                <a class="dropdown-item" href="#">Đánh dấu tất cả đã đọc</a>
-              </div>
-            </span>
-          </div>
-
-          <!-- Search and people chat section -->
-          <div class="chat-left scrollbar">
-            <!-- Search section -->
-            <div class="search-box">
-              <div class="input-wrapper">
-                <i class="fas fa-search"></i>
-                <input
-                  placeholder="Tìm người dùng"
-                  id="ipSearchUser"
-                  type="text"
-                />
-              </div>
-            </div>
-
-            <!-- List user to chat -->
-            <div class="listUser">
-              <div class="friend-drawer friend-drawer--onhover">
-                <img
-                  class="profile-image"
-                  src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/robocop.jpg"
-                  alt=""
-                />
-                <div class="text">
-                  <p style="color: black">Robo Cop</p>
-                  <h6>Nick Tlong Full 67</h6>
-                  <p class="text-muted">Hey, you're arrested!</p>
-                </div>
-                <div class="account-info-div">
-                    <span class="time text-muted small">13:21</span>
-                    <img
-                    class="profile-image account-image"
-                    src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/robocop.jpg"
-                    alt=""
-                    />
-                </div>
-              </div>
-              <hr />
-              <div class="friend-drawer friend-drawer--onhover">
-                <img
-                  class="profile-image"
-                  src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/optimus-prime.jpeg"
-                  alt=""
-                />
-                <div class="text">
-                  <p style="color: black">Robo Cop</p>
-                  <h6>Nick Tlong Full 67</h6>
-                  <p class="text-muted">Wanna grab a beer?</p>
-                </div>
-                <div class="account-info-div">
-                    <span class="time text-muted small">13:21</span>
-                    <img
-                    class="profile-image account-image"
-                    src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/robocop.jpg"
-                    alt=""
-                    />
-                </div>
-              </div>
-              <hr />
-              <div class="friend-drawer friend-drawer--onhover">
-                <img
-                  class="profile-image"
-                  src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/optimus-prime.jpeg"
-                  alt=""
-                />
-                <div class="text">
-                  <p style="color: black">Robo Cop</p>
-                  <h6>Nick Tlong Full 67</h6>
-                  <p class="text-muted">Wanna grab a beer?</p>
-                </div>
-                <div class="account-info-div">
-                    <span class="time text-muted small">13:21</span>
-                    <img
-                    class="profile-image account-image"
-                    src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/robocop.jpg"
-                    alt=""
-                    />
-                </div>
-              </div>
-              <hr />
-              <div class="friend-drawer friend-drawer--onhover">
-                <img
-                  class="profile-image"
-                  src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/optimus-prime.jpeg"
-                  alt=""
-                />
-                <div class="text">
-                  <p style="color: black">Robo Cop</p>
-                  <h6>Nick Tlong Full 67</h6>
-                  <p class="text-muted">Wanna grab a beer?</p>
-                </div>
-                <div class="account-info-div">
-                    <span class="time text-muted small">13:21</span>
-                    <img
-                    class="profile-image account-image"
-                    src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/robocop.jpg"
-                    alt=""
-                    />
-                </div>
-              </div>
-              <hr />
-              <div class="friend-drawer friend-drawer--onhover">
-                <img
-                  class="profile-image"
-                  src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/optimus-prime.jpeg"
-                  alt=""
-                />
-                <div class="text">
-                  <p style="color: black">Robo Cop</p>
-                  <h6>Nick Tlong Full 67</h6>
-                  <p class="text-muted">Wanna grab a beer?</p>
-                </div>
-                <div class="account-info-div">
-                    <span class="time text-muted small">13:21</span>
-                    <img
-                    class="profile-image account-image"
-                    src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/robocop.jpg"
-                    alt=""
-                    />
-                </div>
-              </div>
-              <hr />
-              <div class="friend-drawer friend-drawer--onhover">
-                <img
-                  class="profile-image"
-                  src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/optimus-prime.jpeg"
-                  alt=""
-                />
-                <div class="text">
-                  <p style="color: black">Robo Cop</p>
-                  <h6>Nick Tlong Full 67</h6>
-                  <p class="text-muted">Wanna grab a beer?</p>
-                </div>
-                <div class="account-info-div">
-                    <span class="time text-muted small">13:21</span>
-                    <img
-                    class="profile-image account-image"
-                    src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/robocop.jpg"
-                    alt=""
-                    />
-                </div>
-              </div>
-              <hr />
-              <div class="friend-drawer friend-drawer--onhover">
-                <img
-                  class="profile-image"
-                  src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/optimus-prime.jpeg"
-                  alt=""
-                />
-                <div class="text">
-                  <p style="color: black">Robo Cop</p>
-                  <h6>Nick Tlong Full 67</h6>
-                  <p class="text-muted">Wanna grab a beer?</p>
-                </div>
-                <div class="account-info-div">
-                    <span class="time text-muted small">13:21</span>
-                    <img
-                    class="profile-image account-image"
-                    src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/robocop.jpg"
-                    alt=""
-                    />
-                </div>
-              </div>
-              <hr />
-              
-            </div>
-          </div>
-        </div>
-
-        <!-- Panel right -->
-        <div class="col-md-8">
-
-            <!-- Tray -->
-          <div class="settings-tray">
-            <div class="friend-drawer no-gutters friend-drawer--grey">
+            <!--  Tray -->
+            <div class="settings-tray">
               <img
                 class="profile-image"
-                src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/robocop.jpg"
-                alt=""
+                src="<%= userSS.urlImage %>"
+                alt="Profile img"
               />
-              <div class="text">
-                <h6>Robo Cop</h6>
-                <p class="text-muted">
-                  Layin' down the law since like before Christ...
-                </p>
-              </div>
               <span class="settings-tray--right">
                 <i title="Tải lại" class="fa fa-refresh" aria-hidden="true"></i>
+                <i title="Đi tới hòm thư" class="fas fa-envelope"></i>
                 <i
                   class="fas fa-bars"
                   data-toggle="dropdown"
-                  id="dropdownMenuButtonhmm"
+                  id="dropdownMenuButtonvcc"
                 ></i>
                 <div
                   class="dropdown-menu"
-                  aria-labelledby="dropdownMenuButtonhmm"
+                  aria-labelledby="dropdownMenuButtonvcc"
                 >
                   <a class="dropdown-item" href="#">Đánh dấu tất cả đã đọc</a>
-                  <a class="dropdown-item" href="#"
-                    >Báo cáo cuộc trò chuyện này</a
-                  >
                 </div>
               </span>
             </div>
+
+            <!-- Search and people chat section -->
+            <div class="chat-left scrollbar">
+              <!-- Search section -->
+              <div class="search-box">
+                <div class="input-wrapper">
+                  <i class="fas fa-search"></i>
+                  <input
+                    placeholder="Tìm người dùng"
+                    id="ipSearchUser"
+                    type="text"
+                  />
+                </div>
+              </div>
+
+              <!-- List user to chat -->
+              <div class="listUser">
+                <!-- <div class="friend-drawer friend-drawer--onhover">
+                  <img
+                    class="profile-image"
+                    src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/robocop.jpg"
+                    alt=""
+                  />
+                  <div class="text">
+                    <p style="color: black">Robo Cop</p>
+                    <h6>Nick Tlong Full 67</h6>
+                    <p class="text-muted">Hey, you're arrested!</p>
+                  </div>
+                  <div class="account-info-div">
+                      <span class="time text-muted small">13:21</span>
+                      <img
+                      class="profile-image account-image"
+                      src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/robocop.jpg"
+                      alt=""
+                      />
+                  </div>
+                </div> -->
+                <hr />
+              </div>
+            </div>
           </div>
 
-          <!-- Chat panel -->
-          <div class="chat-panel">
+          <!-- Panel right -->
+          <div class="col-md-8">
 
-            <!-- Messages section -->
-            <div class="chat-right scrollbar">
+              <!-- Tray -->
+            <div class="settings-tray">
+              <div class="friend-drawer no-gutters friend-drawer--grey tray-right">
+                <img
+                  class="profile-image image-user"
+                  src="/images/member-disable.png"
+                  alt=""
+                />
+                <div class="text">
+                  <h6 class="user-title">Nhấp vào 1 người để xem</h6>
+                  <!-- <p class="text-muted">
+                    Layin' down the law since like before Christ...
+                  </p> -->
+                </div>
+                <span class="settings-tray--right">
+                  <i title="Tải lại" class="fa fa-refresh" aria-hidden="true"></i>
+                  <i
+                    class="fas fa-bars"
+                    data-toggle="dropdown"
+                    id="dropdownMenuButtonhmm"
+                  ></i>
+                  <div
+                    class="dropdown-menu"
+                    aria-labelledby="dropdownMenuButtonhmm"
+                  >
+                    <a class="dropdown-item" href="#">Đánh dấu tất cả đã đọc</a>
+                    <a class="dropdown-item" href="#"
+                      >Báo cáo cuộc trò chuyện này</a
+                    >
+                  </div>
+                </span>
+              </div>
+            </div>
+
+            <!-- Chat panel -->
+            <div class="chat-panel">
+
+              <!-- Messages section -->
+              <div class="chat-right scrollbar" data-conversation="5f6ed1ef61051b10adab2876">
 
                 <!-- Sticky account -->
-                <div class="row sticky" style="position:sticky; top:0">
+                <!-- <div class="row sticky" style="position:sticky; top:0">
                     <div class="w-100 sticky-account border-bottom">
                         <img class="profile-image account-image" src="https://www.clarity-enhanced.net/wp-content/uploads/2020/06/robocop.jpg" alt="">
                         <a href="#"><h6 style="margin: 10px;">Nick Full 67 <br><p>đ300.000</p></h6></a>
+                        <p style="margin: 5px;color: red;"><i class="fas fa-dollar-sign"></i>   Đề nghị với giá đ600.000</p>
                         <div>
                             <button class="btn btn btn-outline-primary"><i class="fa fa-handshake-o" aria-hidden="true"></i>   Chấp nhận đề nghị</button>
                             <button class="btn btn btn-outline-success"><i class="fas fa-check"></i>   Đánh dấu hoàn thành</button>
                         </div>
                     </div>
-                  </div>
+                </div> -->
+                
 
-              <!-- Target chat -->
-              <div class="row no-gutters">
-                <div class="col-md-3">
-                  <div title="Ngày 16" class="chat-bubble chat-bubble--left">
-                    Hello dude!
-                    <span class="time text-muted small timeChat">13:21</span>
+                <div class="chat-list">
+                <!-- Target chat -->
+                <!-- <div class="row no-gutters">
+                  <div class="col-md-3">
+                    <div title="Ngày 16" class="chat-bubble chat-bubble--left">
+                      <h4 class="offer"><i class="fas fa-hand-holding-usd"></i>  Đưa ra đề nghị<br>đ300.300</h4>
+                      <span class="time text-muted small timeChat">13:21</span>
+                    </div>
                   </div>
+                </div> -->
+
                 </div>
+                 <!-- Target chat -->
+                 <!-- <div class="row no-gutters">
+                  <div class="col-md-3">
+                    <div title="Ngày 16" class="chat-bubble chat-bubble--left">
+                      <h4 class="cancel-offer"><i class="fas fa-strikethrough"></i>  Huỷ đề nghị<br>đ300.300</h4>
+                      <span class="time text-muted small timeChat">13:21</span>
+                    </div>
+                  </div>
+                </div> -->
+
+                <!-- Your Chat -->
+                <!-- <div class="row no-gutters">
+                  <div class="col-md-3 offset-md-9">
+                    <div class="chat-bubble chat-bubble--right">
+                      <h4 class="denied-offer"><i class="fas fa-handshake-alt-slash"></i>   Từ chối đề nghị<br>đ300.300</h4>
+                      <span class="time small timeChat timeChatRight">13:21</span>
+                    </div>
+                  </div>
+                </div> -->
+
+              
+                <!-- Your Chat -->
+                <!-- <div class="row no-gutters">
+                  <div class="col-md-3 offset-md-9">
+                    <div class="chat-bubble chat-bubble--right">
+                      <h4 class="accept-offer"><i class="far fa-handshake"></i>   Chấp nhận đề nghị<br>đ300.300</h4>
+                      <span class="time small timeChat timeChatRight">13:21</span>
+                    </div>
+                  </div>
+                </div> -->
+
+
               </div>
 
-              <!-- Time Center -->
+              <!-- User Input And Emotions  -->
               <div class="row">
-                <div class="text-center w-100">Ngày 16</div>
-              </div>
-
-              <!-- Your Chat -->
-              <div class="row no-gutters">
-                <div class="col-md-3 offset-md-9">
-                  <div class="chat-bubble chat-bubble--right">
-                    Hello dude!
-                    <span class="time small timeChat timeChatRight">13:21</span>
+                <div class="col-12">
+                  <div class="chat-box-tray">
+                    <input
+                      type="text"
+                      class="ipMessage"
+                      placeholder="Nhập tin nhắn..."
+                    />
+                    <i class="fas fa-paper-plane sendBtn"></i>
                   </div>
-                </div>
-              </div>
-
-            </div>
-
-            <!-- User Input And Emotions  -->
-            <div class="row">
-              <div class="col-12">
-                <div class="chat-box-tray">
-                  <input
-                    type="text"
-                    class="ipMessage"
-                    placeholder="Nhập tin nhắn..."
-                  />
-                  <i class="fas fa-paper-plane sendBtn"></i>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
     <% } %>
 
     <!--============================

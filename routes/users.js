@@ -125,7 +125,13 @@ router.get('/:id/get-accounts', viewUserAC.checkParamGetUserAccounts, viewUserAC
 
 // ---------------------------------------- CHAT -----------------------------------------
 
-router.get('/chat', isLogin, isNormalUser, chatC.renderChatPage)
+router.get('/chat', isLogin, isNormalUser, chatC.renderChatPage);
+
+router.get('/chat/get-conversations', isLogin, isNormalUserAjax, chatC.getConversations);
+
+router.get('/chat/get-messages', isLogin, isNormalUserAjax, chatC.checkQueryGetMessages, chatC.getMessages);
+
+router.get('/chat/get-specific-conversation', isLogin, isNormalUserAjax, chatC.checkQueryGetSpecificConversation, chatC.getSpecificConversation);
 
 // ----------------------------------------  END CHAT -----------------------------------------
 
