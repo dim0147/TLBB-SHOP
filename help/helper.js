@@ -16,17 +16,6 @@ const conversationModel = require('../models/conversation');
 const cache = require('../cache/cache')
 const socketApi = require('../io/io');
 
-exports.checkEmptyRequest = function(req, arrayProperty, arrayNoCheckNull = []){
-    for (var i = 0; i < arrayProperty.length; i++){
-        let property = arrayProperty[i];
-        if(typeof req[property] === 'undefined'){
-            return true;
-        }
-        if(!arrayNoCheckNull.includes(property) && req[property].length === 0)
-            return true;
-    }
-    return false;
-}
 
 exports.getMenuData = function(){
   return new Promise((resolve, reject) => {
@@ -166,9 +155,10 @@ exports.getItemPopACField = function(menuView = cache.getKey('menuView')){
     }
     return arraySlugItem;
 }
-//----------------------- PUSH NOTIFICATION TO USER SCREEN------------------------
 
-exports.pushNotification = function(userId, data){
+
+//----------------------- PUSH NOTIFICATION TO USER SCREEN------------------------
+const pushNotification = (userId, data) => {
     waterfall([
         cb => { // Get list socket of user
             userConnectionModel.find({
@@ -198,6 +188,43 @@ exports.pushNotification = function(userId, data){
     ])
 }
 
+exports.pushNotification = pushNotification;
+
+//----------------------- PUSH STATUS OF ACCOUNT TO ALL USER------------------------
+
+exports.pushStatusAccount = function(accountId, excludePeopleId, status, currentUserId){
+    let query = {
+        account: accountId
+    };
+    if(mongoose.Types.ObjectId.isValid(excludePeopleId)) // Check if have exclude
+        query['peoples'] = {$ne: excludePeopleId} 
+
+    conversationModel // Find conversation
+    .find(query)
+    .select('peoples')
+    .populate('peoples')
+    .lean()
+    .exec((err, conversations) => {
+        if(err) console.log(err);
+
+        if(conversations.length === 0) return;
+
+        conversations.forEach(conversation => { // Loop each conversation of account
+            conversation.peoples.map(user => { // Loop each people in conversation
+                if(user._id.toString() !== currentUserId.toString()){ // Check if not owner
+                    pushNotification(user._id, {
+                        event: 'status-account-update',
+                        value: {
+                            accountId: accountId,
+                            status: status
+                        }
+                    })
+                }
+            });
+        })
+        
+    })
+}
 
 //----------------------- NOTIFICATION SECTION------------------------
 

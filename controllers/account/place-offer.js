@@ -170,22 +170,20 @@ exports.placeOffer = async function (req, res){
               });
         session.endSession();
 
-        // Create notification add my comment
+        // Create notification place offer
         helper.createNotification({
             account: result.account._id,
             owner: result.account.userId._id,
             type: 'place-offer-on-my-account'
         })
 
-        // Push notification to user 
+        // Push message 
         helper.pushNotification(result.account.userId._id, {
-            event: 'push_notification',
+            event: 'user-send-message',
             value: {
-                type: 'place-offer-on-my-account',
-                link: '/user/chat?conversation_id='+result.conversation._id,
-                text: req.user.name + ' vừa nhắn tin về tài khoản của bạn: "'+(result.account.title.length > 20 ? result.account.title.substring(0, 20) + '...' : result.account.title)+'"'
+                message: result.messageOffer
             }
-        });
-        res.send('SUccess')
+        })
+        res.send({offer: result.messageOffer, OK: true, message: 'Đề nghị thành công'});
     })
 }

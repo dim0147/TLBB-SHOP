@@ -25,4 +25,7 @@ router.patch('/accept-offer', isLogin, isNormalUserAjax, offerC.checkBodyAcceptO
 /* Denied offer . */
 router.patch('/denied-offer', isLogin, isNormalUserAjax, offerC.checkBodyDeniedOffer, offerC.deniedOffer);
 
+/* Cancel offer . */
+router.patch('/cancel-offer', isLogin, isNormalUserAjax, offerC.checkBodyCancelOffer, offerC.cancelOffer);
+
 module.exports = router;

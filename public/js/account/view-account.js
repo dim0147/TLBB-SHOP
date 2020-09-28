@@ -749,12 +749,12 @@ $("document").ready(function() {
         const priceOrigin = Number($('.currentPrice').val());
         
         const limit = Math.floor((priceOrigin * 20) / 100);
-        // if(priceOffer < limit){
-        //     return iziToast.error({
-        //         message: 'Xin hãy đề nghị giá cao hơn, tối thiểu ' + limit.toLocaleString('en-US', {style : 'currency', currency : 'VND'}),
-        //         position: 'center'
-        //     })
-        // }    
+        if(priceOffer < limit){
+            return iziToast.error({
+                message: 'Xin hãy đề nghị giá cao hơn, tối thiểu ' + limit.toLocaleString('en-US', {style : 'currency', currency : 'VND'}),
+                position: 'center'
+            })
+        }    
         const message = $('#ipOfferText').val();
         let data = {};
         if(message.length > 0)
@@ -774,7 +774,7 @@ $("document").ready(function() {
                 $(button).prop('disabled', false);
                 $(button).html('<i class="fas fa-check"></i>   Thành công');
                 iziToast.success({
-                    message: res,
+                    message: res.message,
                     position: 'center',
                 })
             },

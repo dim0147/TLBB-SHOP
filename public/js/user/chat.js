@@ -128,7 +128,7 @@ $(document).ready(function(){
             '                  <div class="text">'+
             '                    <p style="color: black">'+conversation.target.name+'</p>'+
                                 titleAccount +
-            '                    <p class="text-muted">'+lastMessage+'</p>'+
+            '                    <p class="text-muted messageFirst">'+lastMessage+'</p>'+
             '                  </div>'+
             '                  <div class="account-info-div">'+
             '                      <span class="time text-muted small">'+updatedTime+'</span>'+
@@ -154,7 +154,8 @@ $(document).ready(function(){
             },
             success: function(res){
                 console.log(res);
-                renderMessages([res], 'after')
+                renderMessages([res], 'after');
+                makeConversationOnTop(res);
             },
             error: function(err){
                 iziToast.error({
@@ -310,12 +311,12 @@ $(document).ready(function(){
             else if(!conversation.account.isOwner){
                 // Edit offer if place offer already
                 if(conversation.offer && conversation.account.status === 'pending'){
-                    buttonDiv =  '<button  data-offer="'+conversation.offer._id+'" style="margin: 5px; color:orange" class="btn btn-sm btnEditOffer"><i class="fas fa-edit"></i>   Chỉnh sửa đề nghị</button>'+
+                    buttonDiv =  '<button  data-offer="'+conversation.offer._id+'" style="margin: 5px; color:orange" class="btn btn-sm btnEditOffer" data-toggle="modal" data-target="#exampleModal"><i class="fas fa-edit"></i>   Chỉnh sửa đề nghị</button>'+
                     '<button  data-offer="'+conversation.offer._id+'" class="btn btn-sm cancel-offer btnCancelOffer"><i class="fas fa-strikethrough"></i>   Huỷ bỏ đề nghị</button>';
                 }
                 // Place offer if not place offer yet
                 else if(!conversation.offer && conversation.account.status === 'pending'){
-                    buttonDiv =  '<button data-account="'+conversation.account._id+'" style="margin: 5px" class="btn btn-sm offer btnPlaceOffer"><i class="fas fa-hand-holding-usd" aria-hidden="true"></i>  Đề nghị giá</button>';
+                    buttonDiv =  '<button data-account="'+conversation.account._id+'" style="margin: 5px" class="btn btn-sm offer btnPlaceOffer" data-toggle="modal" data-target="#exampleModal"><i class="fas fa-hand-holding-usd" aria-hidden="true"></i>  Đề nghị giá</button>';
                 }
                 else if(conversation.account.status === 'done' && conversation.status === 'archived')
                     buttonDiv = 'Chúc mừng bạn đã mua thành công tài khoản này'
@@ -363,6 +364,42 @@ $(document).ready(function(){
                 })
             }
         })
+    }
+
+    function makeConversationOnTop(message){ // message contain conversation id
+        $('.friend-drawer').each(function(i, obj) {
+            const currentConversation = $(this).attr('data-conversation');
+            if(currentConversation === message.conversation){
+                // Append to top
+                $(this).next().remove('hr');
+                $('.listUser').prepend($(this).detach());
+                $(this).after('<hr />');
+                 // Analyze last message
+                let lastMessage = '';
+                if(message && message.type === "offer"){
+                    lastMessage = 'Đề nghị với giá ' + message.price_offer.toLocaleString('en-US', {style : 'currency', currency : 'VND'});
+                }
+                else if(message && message.type === 'accept_offer'){
+                    lastMessage = 'Đồng ý với giá ' + message.offer.price_offer.toLocaleString('en-US', {style : 'currency', currency : 'VND'});
+                }
+                else if(message && message.type === 'cancel_offer'){
+                    lastMessage = 'Từ chối với giá ' + message.offer.price_offer.toLocaleString('en-US', {style : 'currency', currency : 'VND'});
+                }
+                else if(message && message.type === 'denied_offer'){
+                    lastMessage = 'Từ chối với giá ' + message.offer.price_offer.toLocaleString('en-US', {style : 'currency', currency : 'VND'});
+                }
+                else if(message && message.type === 'message'){
+                    lastMessage = message.message;
+                }
+                else
+                    lastMessage = 'Có lỗi xảy ra, không thể xem tin nhắn';
+
+                if(message && message.user == $('#userId').val()){
+                    lastMessage = 'Bạn: ' + lastMessage;
+                }
+                $(this).find('.messageFirst').html(lastMessage);
+            }
+        });
     }
 
     loadConversation();
@@ -436,7 +473,8 @@ $(document).ready(function(){
             success: function(res){
                 console.log('accept offer ');
                 console.log(res);
-                renderMessages([res], 'after')
+                renderMessages([res], 'after');
+                makeConversationOnTop(res);
                 $('.divButton').html('<p>Bạn đã chấp nhận đề nghị này </p>');
             },
             error: function(err){
@@ -462,6 +500,7 @@ $(document).ready(function(){
                 console.log('denied offer ');
                 console.log(res);
                 renderMessages([res], 'after')
+                makeConversationOnTop(res);
                 $('.divButton').html('<p>Đang chờ đề nghị</p>');
                 $('.offerTarget').remove();
             },
@@ -497,16 +536,113 @@ $(document).ready(function(){
         })
     })
     
-    $(document).on('click', '.btnEditOffer', function(){
-        alert('btnEditOffer')
+    $(document).on('click', '.btnSendOffer', function(){
+        const accountId = $('.chat-right').attr('data-account');
+        const price = $('.ipOfferPrice').val();
+        $.ajax({
+            url: '/account/place-offer',
+            method: 'POST',
+            data: {
+                idAccount: accountId,
+                price: price,
+                _csrf: $('#_csrf').val()
+            },
+            success: function(res){
+                console.log('edit offer ');
+                console.log(res);
+                $('#exampleModal').modal('hide');
+                renderMessages([res.offer], 'after')
+                makeConversationOnTop(res.offer);
+                $('.offerTarget').remove();
+                $('.divButton').remove();
+                $('.sticky-account').append('<p class="offerTarget" style="margin: 5px;color: red;"><i class="fas fa-dollar-sign" aria-hidden="true"></i>   Đề nghị với giá '+Number(price).toLocaleString('en-US', {style : 'currency', currency : 'VND'})+'</p>')
+                $('.sticky-account').append('<div class="divButton"><button  data-offer="'+res.offer._id+'" style="margin: 5px; color:orange" class="btn btn-sm btnEditOffer" data-toggle="modal" data-target="#exampleModal"><i class="fas fa-edit"></i>   Chỉnh sửa đề nghị</button>'+
+                '<button  data-offer="'+res.offer._id+'" class="btn btn-sm cancel-offer btnCancelOffer"><i class="fas fa-strikethrough"></i>   Huỷ bỏ đề nghị</button></div>')
+            },
+            error: function(err){
+                iziToast.error({
+                    title: err.responseText
+                })
+            }
+        })
     })
     
     $(document).on('click', '.btnCancelOffer', function(){
-        alert('btnCancelOffer')
+        const conversationId = $('.chat-right').attr('data-conversation');
+        const offerId = $(this).attr('data-offer');
+        const accountId = $('.chat-right').attr('data-account');
+        $.ajax({
+            url: '/api-service/offer/cancel-offer',
+            method: 'PATCH',
+            data: {
+                conversation_id: conversationId,
+                offer_id: offerId,
+                _csrf: $('#_csrf').val()
+            },
+            success: function(res){
+                console.log('cancel offer ');
+                console.log(res);
+                renderMessages([res], 'after');
+                makeConversationOnTop(res);
+                $('.divButton').html('<button  data-toggle="modal" data-target="#exampleModal" data-account="'+accountId+'" style="margin: 5px" class="btn btn-sm offer btnPlaceOffer"><i class="fas fa-hand-holding-usd" aria-hidden="true"></i>  Đề nghị giá</button>');
+                $('.offerTarget').remove();
+            },
+            error: function(err){
+                iziToast.error({
+                    title: err.responseText
+                })
+            }
+        })
     })
     
-    $(document).on('click', '.btnPlaceOffer', function(){
-        alert('btnPlaceOffer')
+    socket.on('user-send-message', data => {
+        console.log('user-send-message');
+        console.log(data.message);
+        const message = data.message;
+
+        const currentConversation = $('.chat-right').attr('data-conversation');
+        if(message.conversation === currentConversation){
+            if(message.type !== 'message'){
+                $('.offerTarget').remove();
+                $('.divButton').remove();
+            }
+
+            const idAccount = $('.chat-right').attr('data-account');
+
+            if(message.type === 'offer'){   // From client
+                $('.sticky-account').append('<p class="offerTarget" style="margin: 5px;color: red;"><i class="fas fa-dollar-sign"></i>   Đề nghị với giá '+Number(message.price_offer).toLocaleString('en-US', {style : 'currency', currency : 'VND'})+'</p>');
+                $('.sticky-account').append('<div class="divButton"><button data-offer="'+message._id+'" style="margin: 5px" class="btn btn-sm accept-offer btnAcceptOffer"><i class="fa fa-handshake-o" aria-hidden="true"></i>   Chấp nhận đề nghị</button>'+
+                '<button data-offer="'+message._id+'" style="margin: 5px;color: red" class="btn btn-sm btnDeniedOffer"><i class="fas fa-handshake-alt-slash"></i>   Từ chối đề nghị</button>'+
+                '<button data-account="'+idAccount+'" class="btn btn-sm btn-success btnMarkAsDone"><i class="fas fa-check"></i>   Đánh dấu hoàn thành</button></div>');
+            }else if(message.type === 'cancel_offer'){ // From client
+                $('.sticky-account').append('<p class="offerTarget">Đang chờ đề nghị</p>')
+            }else if(message.type === 'denied_offer'){ // From owner
+                $('.sticky-account').append('<div class="divButton"><button data-account="'+idAccount+'" style="margin: 5px" class="btn btn-sm offer btnPlaceOffer" data-toggle="modal" data-target="#exampleModal"><i class="fas fa-hand-holding-usd" aria-hidden="true"></i>  Đề nghị giá</button></div>')
+            }else if(message.type === 'accept_offer'){ // From owner
+                $('.sticky-account').append('<div class="divButton">Chúc mừng bạn đã mua thành công tài khoản này</div>')
+            }
+
+            renderMessages([message], 'after');
+        }
+        makeConversationOnTop(message);
+    })
+
+    socket.on('status-account-update', data => {
+        console.log('status-account-update');
+        console.log(data);
+
+        const currentAccountId = $('.chat-right').attr('data-account');
+        if(data.accountId === currentAccountId){
+            $('.offerTarget').remove();
+            $('.divButton').remove();
+            $('.sticky-account').append('<p>Tài khoản đã hoàn thành giao dịch </p><a href="/account/view-account/'+data.accountId+'"><button style="margin: 5px" class="btn btn-sm btn-primary">  Xem tài khoản</button></a>')
+        }
+    })
+
+    $('.ipOfferPrice').on('input', function(){
+        const price = Number($(this).val());
+        if(!isNaN(price))
+          $('.priceLabel').html('Đề nghị với giá '+ price.toLocaleString('en-US', {style : 'currency', currency : 'VND'}));
     })
 
 });

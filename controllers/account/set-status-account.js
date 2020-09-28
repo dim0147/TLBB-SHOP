@@ -2,6 +2,7 @@ const waterfall = require('async-waterfall');
 const { body, validationResult } = require('express-validator');
 
 const config = require('../../config/config');
+const helper = require('../../help/helper');
 
 const accountModel = require('../../models/account');
 
@@ -33,6 +34,10 @@ exports.markDoneAccount = function (req, res){
         (result, cb) => {
             accountModel.updateOne({ _id: result.account._id }, { status: 'done' }, (err) => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
+                
+                // Notify for user chat about current status of account
+                helper.pushStatusAccount(result.account._id, null, 'done', req.user._id);
+
                 cb(null, 'Đánh dấu tài khoản ' + result.account.c_name + ' hoàn thành thành công!');
             });
         }
