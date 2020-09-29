@@ -8,6 +8,7 @@ const helper = require('../../help/helper');
 const conversationModel = require('../../models/conversation');
 const messageModel = require('../../models/message');
 const imageModel = require('../../models/image');
+const conversationTrackerModel = require('../../models/conversation-tracker');
 
 
 exports.renderChatPage = (req, res) => {
@@ -15,206 +16,285 @@ exports.renderChatPage = (req, res) => {
 } 
 
 exports.getConversations = (req, res) => {
-    // Setup query for conversation
-    const setUpQuery = {
-            peoples: mongoose.Types.ObjectId(req.user._id)
-    };
+    waterfall([
+        cb => { // Get conversation
 
-    // If have continue timestamp
-    if(req.query.continueTimeStamp)
-        setUpQuery.updatedAt = {$lt: new Date(req.query.continueTimeStamp)}
+            // Setup query for conversation
+            const setUpQuery = {
+                    peoples: mongoose.Types.ObjectId(req.user._id)
+            };
 
-    const query = [
-        {
-            $match: setUpQuery
-        }
-    ];
-    const lookup = [
-        {
-            $lookup: { // Get latest message
-                from: 'messages',
-                let: {idConversation: '$_id'},
-                pipeline: [
-                    {
-                        $match: {
-                            $expr: {$eq: ['$conversation', '$$idConversation']}
-                        }
-                    },
-                    {
-                        $lookup: { // Get offer denied or cancelled 
-                            from: 'messages',
-                            localField: 'offer',
-                            foreignField: '_id',
-                            as: 'offer'
-                        }
-                    },
-                    {
-                        $addFields: {
-                            offer: {$cond: [
-                                { $anyElementTrue: ['$offer'] },
-                                { $arrayElemAt: ['$offer', 0] },
-                                null
-                            ]}
-                        }
-                    },
-                    {
-                        $sort: { createdAt: -1 }
-                    },
-                    {
-                        $limit: 1
-                    }
-                ],
-                as: 'message'   
-            },
-        },
-        {
-            $lookup: { // Get offer
-                from: 'messages',
-                localField: 'offer',
-                foreignField: '_id',
-                as: 'offer'
-            },
-        },
-        {
-            $lookup: { // Get User
-                from: 'users',
-                localField: 'peoples',
-                foreignField: '_id',
-                as: 'peoples'
-            },
-        },
-        {
-            $lookup: { // Get account
-                from: 'accounts',
-                let: {idAccount: '$account'},
-                pipeline: [
-                    {
-                        $match: {
-                            $expr: {$eq: ['$_id', '$$idAccount']}
-                        }
-                    },
-                    {
-                        $lookup: { // Get first image
-                            from: 'images',
-                            localField: '_id',
-                            foreignField: 'account',
-                            as: 'image'
-                        }
-                    },
-                    {
-                        $lookup: { // Get phaigiaoluu if have
-                            from: 'phais',
-                            localField: 'phaigiaoluu',
-                            foreignField: '_id',
-                            as: 'phaigiaoluu'
-                        }
-                    },
-                    {
-                        $addFields:{
-                            image: { $cond: [
-                                { $anyElementTrue: ['$image'] },
-                                { $arrayElemAt: ['$image.url', 0] },
-                                'no-image.png'
-                            ]},
-                            phaigiaoluu: { $cond: [
-                                { $anyElementTrue: ['$phaigiaoluu'] },
-                                { $arrayElemAt: ['$phaigiaoluu.name', 0] },
-                                null
-                            ]}
-                        } 
-                    }
-                ],
-                as: 'account'
-            }
-        }
-    ];
+            // If have continue timestamp
+            if(req.query.continueTimeStamp)
+                setUpQuery.updatedAt = {$lt: new Date(req.query.continueTimeStamp)}
 
-    const addFields = [
-        {
-            $addFields: {
-                message: { $cond: [
-                    { $anyElementTrue: ['$message'] },
-                    { $arrayElemAt: ['$message', 0] },
-                    null
-                ]},
-                offer: { $cond: [
-                    { $anyElementTrue: ['$offer'] },
-                    { $arrayElemAt: ['$offer', 0] },
-                    null
-                ]},
-                account: { $cond: [
-                    { $anyElementTrue: ['$account'] },
-                    { $arrayElemAt: ['$account', 0] },
-                    null
-                ]},
-                target: { $filter: {
-                    input: '$peoples',
-                    as: 'user', 
-                    cond: { $ne: ['$$user._id', mongoose.Types.ObjectId(req.user._id) ] }
-                }}
-            }
-        },
-        {
-            $addFields: {
-                target: { $cond: [
-                    { $anyElementTrue: ['$target'] },
-                    { $arrayElemAt: ['$target', 0] },
-                    null
-                ]},
-            }
-        }
-    ]
+            // If have specific conversation
+            if(req.query.conversation_id)
+                setUpQuery._id = mongoose.Types.ObjectId(req.query.conversation_id);
 
-    const project = [
-        {
-            $project: {
-                _id: 1,
-                status: 1,
-                updatedAt: 1,
-                account: {
-                    _id: 1,
-                    title: 1,
-                    image: 1,
-                    transaction_type: 1,
-                    status: 1,
-                    price: 1,
-                    phaigiaoluu: 1
-                },
-                message: {
-                    user: 1,
-                    message: 1,
-                    price_offer: 1,
-                    offer: 1,
-                    type: 1,
-                },
-                offer: {
-                    createdAt: 1,
-                    price_offer: 1,
-                    type: 1,
-                },
-                target: {
-                    name: 1,
-                    role: 1,
-                    status: 1,
-                    urlImage: 1,
-                    _id: 1
+            // If have specific account
+            if(req.query.account_id)
+                setUpQuery.account = mongoose.Types.ObjectId(req.query.account_id);
+
+            const query = [
+                {
+                    $match: setUpQuery
                 }
-            }
-        },
-    ];
+            ];
+            const lookup = [
+                {
+                    $lookup: { // Get latest message
+                        from: 'messages',
+                        let: {idConversation: '$_id'},
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {$eq: ['$conversation', '$$idConversation']}
+                                }
+                            },
+                            {
+                                $lookup: { // Get offer denied or cancelled 
+                                    from: 'messages',
+                                    localField: 'offer',
+                                    foreignField: '_id',
+                                    as: 'offer'
+                                }
+                            },
+                            {
+                                $addFields: {
+                                    offer: {$cond: [
+                                        { $anyElementTrue: ['$offer'] },
+                                        { $arrayElemAt: ['$offer', 0] },
+                                        null
+                                    ]}
+                                }
+                            },
+                            {
+                                $sort: { createdAt: -1 }
+                            },
+                            {
+                                $limit: 1
+                            }
+                        ],
+                        as: 'message'   
+                    },
+                },
+                {
+                    $lookup: { // Get offer
+                        from: 'messages',
+                        localField: 'offer',
+                        foreignField: '_id',
+                        as: 'offer'
+                    },
+                },
+                {
+                    $lookup: { // Get User
+                        from: 'users',
+                        localField: 'peoples',
+                        foreignField: '_id',
+                        as: 'peoples'
+                    },
+                },
+                {
+                    $lookup: { // Get account
+                        from: 'accounts',
+                        let: {idAccount: '$account'},
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {$eq: ['$_id', '$$idAccount']}
+                                }
+                            },
+                            {
+                                $lookup: { // Get first image
+                                    from: 'images',
+                                    localField: '_id',
+                                    foreignField: 'account',
+                                    as: 'image'
+                                }
+                            },
+                            {
+                                $lookup: { // Get phaigiaoluu if have
+                                    from: 'phais',
+                                    localField: 'phaigiaoluu',
+                                    foreignField: '_id',
+                                    as: 'phaigiaoluu'
+                                }
+                            },
+                            {
+                                $addFields:{
+                                    image: { $cond: [
+                                        { $anyElementTrue: ['$image'] },
+                                        { $arrayElemAt: ['$image.url', 0] },
+                                        'no-image.png'
+                                    ]},
+                                    phaigiaoluu: { $cond: [
+                                        { $anyElementTrue: ['$phaigiaoluu'] },
+                                        { $arrayElemAt: ['$phaigiaoluu.name', 0] },
+                                        null
+                                    ]}
+                                } 
+                            }
+                        ],
+                        as: 'account'
+                    }
+                },
+                {
+                    $lookup: { // Get tracker
+                        from: 'conversation-tracks',
+                        let: {idConversation: '$_id'},
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {$eq: ['$conversation', '$$idConversation']},
+                                    user: mongoose.Types.ObjectId(req.user._id)
+                                }
+                            }
+                        ],
+                        as: 'tracker'
+                    }
+                }
+            ];
 
-    const option = [
-        {
-            $sort: { updatedAt: -1 }
+            const addFields = [
+                {
+                    $addFields: {
+                        message: { $cond: [
+                            { $anyElementTrue: ['$message'] },
+                            { $arrayElemAt: ['$message', 0] },
+                            null
+                        ]},
+                        offer: { $cond: [
+                            { $anyElementTrue: ['$offer'] },
+                            { $arrayElemAt: ['$offer', 0] },
+                            null
+                        ]},
+                        account: { $cond: [
+                            { $anyElementTrue: ['$account'] },
+                            { $arrayElemAt: ['$account', 0] },
+                            null
+                        ]},
+                        target: { $filter: {
+                            input: '$peoples',
+                            as: 'user', 
+                            cond: { $ne: ['$$user._id', mongoose.Types.ObjectId(req.user._id) ] }
+                        }},
+                        tracker: { $cond: [
+                            { $anyElementTrue: ['$tracker'] },
+                            { $arrayElemAt: ['$tracker', 0] },
+                            null
+                        ]},
+                    }
+                },
+                {
+                    $addFields: {
+                        target: { $cond: [
+                            { $anyElementTrue: ['$target'] },
+                            { $arrayElemAt: ['$target', 0] },
+                            null
+                        ]},
+                    }
+                }
+            ]
+
+            const project = [
+                {
+                    $project: {
+                        _id: 1,
+                        status: 1,
+                        updatedAt: 1,
+                        account: {
+                            _id: 1,
+                            title: 1,
+                            image: 1,
+                            transaction_type: 1,
+                            status: 1,
+                            price: 1,
+                            phaigiaoluu: 1
+                        },
+                        message: {
+                            user: 1,
+                            message: 1,
+                            price_offer: 1,
+                            offer: 1,
+                            type: 1,
+                        },
+                        offer: {
+                            createdAt: 1,
+                            price_offer: 1,
+                            type: 1,
+                        },
+                        target: {
+                            name: 1,
+                            role: 1,
+                            status: 1,
+                            urlImage: 1,
+                            _id: 1
+                        },
+                        tracker: {
+                            _id: 1,
+                            message: 1,
+                            user: 1,
+                        }
+                    }
+                },
+            ];
+
+            const option = [
+                {
+                    $sort: { updatedAt: -1 }
+                },
+                {
+                    $limit: 2
+                }
+            ];
+
+            const pipeline = [...query, ...lookup, ...addFields,...project, ...option];
+            conversationModel.aggregate(pipeline, function(err, conversations){
+                if(err){
+                    console.log('Error in CTL/user/chat.js -> getConversations 01  ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                cb(null, conversations);
+            })
         },
-        {
-            $limit: 2
+        (conversations, cb) => { // Get tracker and analyze
+            if(conversations.length === 0) return cb(null, conversations);
+            const listPromises = conversations.map((conversation) => {
+                return new Promise((resolve, reject) => {
+
+                    let query = {};
+                    // If don't have tracker mean just start conversation
+                    if(!conversation.tracker){
+                        query.user = {$ne: req.user._id};
+                        query.conversation = conversation._id;
+                    }
+                    // If have tracker
+                    else{
+                        query.user = {$ne: conversation.tracker.user},
+                        query.conversation = conversation._id,
+                        query._id = {$gt: conversation.tracker.message}
+                    }
+                    messageModel.countDocuments(query, (err, count) => {
+                        if(err){
+                            console.log('Error in ctl/user/chat.js -> getConversations Tracker 01 ' + err);
+                            return reject('Có lỗi xảy ra vui lòng thử lại sau')
+                        }
+                        conversation.totalUnreadMessage = count;
+                        resolve(conversation);
+                    })
+                })
+            });
+            Promise.all(listPromises)
+            .then(conversations => {
+                cb(null, conversations)
+            })
+            .catch(err => {
+                cb('Có lỗi xảy ra vui lòng thử lại sau');
+            })
         }
-    ];
-
-    const pipeline = [...query, ...lookup, ...addFields,...project, ...option];
-    conversationModel.aggregate(pipeline, function(err, result){
-        if(err)  console.log(err);
+    ], function(err, result){
+        if(err) return res.status(400).send(err);
         res.send(result);
     })
 

@@ -1,4 +1,6 @@
 
+
+
 (function ($) {
   'use strict';
 
@@ -274,7 +276,6 @@ function getDateDiff(date){
       return false;
   }
 }
-
 
 $(document).ready(function () {
 

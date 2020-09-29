@@ -177,7 +177,17 @@ exports.placeOffer = async function (req, res){
             type: 'place-offer-on-my-account'
         })
 
-        // Push message 
+        // Push notification account place offer
+        helper.pushNotification(result.account.userId._id, {
+            event: 'push_notification',
+            value: {
+                type: 'place-offer-on-my-account',
+                link: '/user/chat?account_id='+result.account._id,
+                text: req.user.name + ' vừa đặt đề nghị cho tài khoản của bạn: "'+(result.account.title.length > 20 ? result.account.title.substring(0, 20) + '...' : result.account.title)+'"'
+            }
+        });
+
+        // Push message to chat
         helper.pushNotification(result.account.userId._id, {
             event: 'user-send-message',
             value: {

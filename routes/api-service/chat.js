@@ -19,7 +19,13 @@ function isNormalUserAjax(req, res, next){
     return res.status(401).send("Tài khoản không hợp lệ, xin vui lòng logout")
 }
 
-/* User Profile . */
+/* Create normal message . */
 router.post('/create-message', isLogin, isNormalUserAjax, chatC.checkBodyCreateTextMessage, chatC.createTextMessage);
+
+/* Tracking conversation. */
+router.put('/tracking-conversation', isLogin, isNormalUserAjax, chatC.checkBodyTrackingConversation, chatC.trackingConversation);
+
+/* Get unread conversation. */
+router.get('/get-unread-conversations', chatC.getUnreadConversation);
 
 module.exports = router;

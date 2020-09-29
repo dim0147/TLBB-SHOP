@@ -27,19 +27,13 @@ $(document).ready(function(){
         return decodeURIComponent(results[2].replace(/\+/g, ' '));
     }
 
-    function cleanListUser(){
-        $('.listUser').html('');
-    }
-
-    function cleanConversation(){
-        $('.tray-right').html('');
-        $('.chat-right').html('');
-    }
-
     function loadConversation(continueTimeStamp = null){
         let query = {};
         if(continueTimeStamp)
             query.continueTimeStamp = continueTimeStamp;
+        const idAccount = getParameterByName('account_id');
+        if(idAccount)
+            query.account_id = idAccount;
         $.ajax({
             url : '/user/chat/get-conversations',
             type: 'GET',
@@ -63,13 +57,15 @@ $(document).ready(function(){
         })
     }
 
-    function renderConversation(conversations){
+    function renderConversation(conversations, onTop = false){
         conversations.forEach(function(conversation){
             // Analyze target image and url
             if(!conversation.target || (conversation.target && conversation.target.status != 'normal')){
-                conversation.target.urlImage = '/images/member-disable.png';
+                conversation.target.urlImage = '/images/member-disable.png'; // User not able to view
                 conversation.target.name = 'Người dùng không còn hợp lệ';
-            }
+            }else{ // Add number of unread message to title account message 
+                conversation.target.name += ` <span class="unreadMessage" value="${conversation.totalUnreadMessage ? conversation.totalUnreadMessage : 0}">${conversation.totalUnreadMessage ? "(" + conversation.totalUnreadMessage + ")" : ''}</span> `
+            }   
 
              // Analyze account title
             const titleAccount = conversation.account ? `<h6>${sortString(conversation.account.title, 15)}</h6>` : '';
@@ -118,8 +114,15 @@ $(document).ready(function(){
                 '                      />';
             }
 
+            // Analyze read unread status
+            let status = '';
+            if(!conversation.totalUnreadMessage) // Means 0
+                status = 'read';
+            else
+                status = 'unread'
+
             const accountId = conversation.account ? conversation.account._id : '';
-            var myvar = '<div class="friend-drawer read friend-drawer--onhover"  data-account="'+accountId+'" data-conversation="'+conversation._id+'">'+
+            var myvar = '<div class="friend-drawer '+status+' friend-drawer--onhover"  data-account="'+accountId+'" data-conversation="'+conversation._id+'">'+
             '                  <img'+
             '                    class="profile-image"'+
             '                    src="'+conversation.target.urlImage+'"'+
@@ -131,12 +134,15 @@ $(document).ready(function(){
             '                    <p class="text-muted messageFirst">'+lastMessage+'</p>'+
             '                  </div>'+
             '                  <div class="account-info-div">'+
-            '                      <span class="time text-muted small">'+updatedTime+'</span>'+
+            '                      <span class="time text-muted small timeOfConversation">'+updatedTime+'</span>'+
                                 imageAccount +
             '                  </div>'+
             '                </div>'+
             '                <hr />';
-            $('.listUser').append(myvar);
+            if(!onTop)
+                $('.listUser').append(myvar);
+            else
+                $('.listUser').prepend(myvar);
         })
         $('.divLoadMore').remove();
         $('.listUser').append(' <div class="text-center divLoadMore"><button id="loadMoreBtn" class="btn" type="button">Tải thêm</button></div>')
@@ -156,6 +162,7 @@ $(document).ready(function(){
                 console.log(res);
                 renderMessages([res], 'after');
                 makeConversationOnTop(res);
+                trackingConversation(res.conversation, res._id);
             },
             error: function(err){
                 iziToast.error({
@@ -243,6 +250,14 @@ $(document).ready(function(){
                 console.log(res);
                 // Check if target user is valid
                 if(Array.isArray(res.peoples) && res.peoples.length > 0 && res.peoples[0].status === 'normal'){
+                    // Tracking conversation
+                    if(res.messages.length > 0){
+                        // Get id of latest message
+                        const lastMessageId = res.messages[0]._id;
+                        const conversationId = res._id;
+                        trackingConversation(conversationId, lastMessageId);
+                    }
+                    // Render tray
                     renderTrayChatList(res.peoples[0])
                     // If conversation have account
                     if(res.account)
@@ -260,7 +275,7 @@ $(document).ready(function(){
     }
     
     function renderTrayChatList(user){
-        $('.user-title').html(user.name);
+        $('.user-title').html(`<a href="/user/${user._id}/accounts">${user.name}</a>`);
         $('.image-user').attr('src', user.urlImage);
     }
 
@@ -367,9 +382,12 @@ $(document).ready(function(){
     }
 
     function makeConversationOnTop(message){ // message contain conversation id
+        let isExistInListChat = false;
+        // Check if new message come is include in list chat
         $('.friend-drawer').each(function(i, obj) {
             const currentConversation = $(this).attr('data-conversation');
             if(currentConversation === message.conversation){
+                isExistInListChat = true;
                 // Append to top
                 $(this).next().remove('hr');
                 $('.listUser').prepend($(this).detach());
@@ -398,11 +416,62 @@ $(document).ready(function(){
                     lastMessage = 'Bạn: ' + lastMessage;
                 }
                 $(this).find('.messageFirst').html(lastMessage);
+                $(this).find('.timeOfConversation').html(dateFormat(message.createdAt, 'HH:MM'));
+                
+                const currentChatConversation = $('.chat-right').attr('data-conversation');
+                if(currentChatConversation !== currentConversation){ // Mean new message is not the same current chatting
+                    $(this).addClass('unread');
+                    $(this).removeClass('read');
+
+                    const currentUnread = $(this).find('.unreadMessage').attr('value');
+                    $(this).find('.unreadMessage').html(`(${Number(currentUnread) + 1})`)
+                    $(this).find('.unreadMessage').attr('value', Number(currentUnread) + 1);
+                }
             }
         });
+        
+        // If not query conversation and append to top
+        if(!isExistInListChat){
+            $.ajax({
+                url : '/user/chat/get-conversations',
+                type: 'GET',
+                data: {
+                    conversation_id: message.conversation
+                },
+                success: function(res){
+                    console.log('Load conversation not exist in list chat');
+                    console.log(res);
+                    if(res.length > 0)
+                        renderConversation(res, true);
+                },
+                error: function(err){
+                    iziToast.error({message: err.responseText})
+                }
+            })
+        }
+    }
+
+    function trackingConversation(conversationId, messageId){
+        $.ajax({
+            url: '/api-service/chat/tracking-conversation',
+            method: 'PUT',
+            data: {
+                'conversation_id': conversationId,
+                'message_id': messageId,
+                _csrf: $('#_csrf').val()
+            },
+            success: function(res){
+                console.log('tracking conversation');
+                console.log(res);
+            },
+            error: function(err){
+                iziToast.error({title: err.responseText})
+            }
+        })
     }
 
     loadConversation();
+
 
     // Load more conversation
     $(document).on('click', '#loadMoreBtn', function(err) {
@@ -425,7 +494,10 @@ $(document).ready(function(){
     // Click on conversation
     $( document ).on( 'click', '.friend-drawer--onhover',  function() {
         $('.friend-drawer--onhover').css('background', '');
+        $(this).removeClass('unread');
         $(this).css('background', '#eee');
+        $(this).find('.unreadMessage').attr('value', 0);
+        $(this).find('.unreadMessage').html('');
         // Remove sticky account
         $('.sticky').remove();
         // Remove messages
@@ -475,6 +547,7 @@ $(document).ready(function(){
                 console.log(res);
                 renderMessages([res], 'after');
                 makeConversationOnTop(res);
+                trackingConversation(res.conversation, res._id);
                 $('.divButton').html('<p>Bạn đã chấp nhận đề nghị này </p>');
             },
             error: function(err){
@@ -501,6 +574,7 @@ $(document).ready(function(){
                 console.log(res);
                 renderMessages([res], 'after')
                 makeConversationOnTop(res);
+                trackingConversation(res.conversation, res._id);
                 $('.divButton').html('<p>Đang chờ đề nghị</p>');
                 $('.offerTarget').remove();
             },
@@ -553,6 +627,7 @@ $(document).ready(function(){
                 $('#exampleModal').modal('hide');
                 renderMessages([res.offer], 'after')
                 makeConversationOnTop(res.offer);
+                trackingConversation(res.offer.conversation, res.offer._id);
                 $('.offerTarget').remove();
                 $('.divButton').remove();
                 $('.sticky-account').append('<p class="offerTarget" style="margin: 5px;color: red;"><i class="fas fa-dollar-sign" aria-hidden="true"></i>   Đề nghị với giá '+Number(price).toLocaleString('en-US', {style : 'currency', currency : 'VND'})+'</p>')
@@ -584,6 +659,7 @@ $(document).ready(function(){
                 console.log(res);
                 renderMessages([res], 'after');
                 makeConversationOnTop(res);
+                trackingConversation(res.conversation, res._id);
                 $('.divButton').html('<button  data-toggle="modal" data-target="#exampleModal" data-account="'+accountId+'" style="margin: 5px" class="btn btn-sm offer btnPlaceOffer"><i class="fas fa-hand-holding-usd" aria-hidden="true"></i>  Đề nghị giá</button>');
                 $('.offerTarget').remove();
             },
@@ -623,8 +699,10 @@ $(document).ready(function(){
             }
 
             renderMessages([message], 'after');
+            trackingConversation(message.conversation, message._id)
         }
         makeConversationOnTop(message);
+        updateUnreadConversation();
     })
 
     socket.on('status-account-update', data => {

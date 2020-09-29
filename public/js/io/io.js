@@ -100,11 +100,43 @@ function showNotification(data){
     }
 }
 
+function updateUnreadConversation(){
+    $.ajax({
+      url: '/api-service/chat/get-unread-conversations',
+      method: 'GET',
+      success: function(res){
+        console.log('res unread conversations');
+        console.log(res);
+        const unreadNumb = Number(res.total);
+        if(unreadNumb === 0){
+          $('.spanConversation').html('<i class="fas fa-comments"></i>   Tin nhắn')
+        }
+        else if (unreadNumb <= 9){
+          $('.spanConversation').html(`<i class="fas fa-comments"></i>	<span class="badge badge-danger">${unreadNumb}</span>  Tin nhắn`)
+        }
+        else if(unreadNumb > 9){
+          $('.spanConversation').html(`<i class="fas fa-comments"></i>	<span class="badge badge-danger">9+</span>  Tin nhắn`)
+        }
+      },
+      error: function(err){
+        console.log(err);
+      }
+    })
+  }
+
 const host = window.location.origin;
 const socket = io(host);
 
 socket.on('push_notification', data => {
-    showNotification(data)
-  console.log(data);  
+    showNotification(data) 
 });
+
+// Check if login and display 'Tin nhắn menu then load unread conversation'
+if($('.spanConversation').length){
+    updateUnreadConversation();
+}
+
+socket.on('user-send-message', data => {
+  updateUnreadConversation();
+})
 

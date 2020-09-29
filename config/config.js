@@ -84,7 +84,7 @@ const config = {
     notifyText: {
         'comment-on-my-account': '${userAndOther} đã bình luận về tài khoản của bạn: "${titleAccount}"',
         'rate-my-account': '${userAndOther} đã đánh giá về tài khoản của bạn: "${titleAccount}"',
-        'place-offer-on-my-account': '${userAndOther} đã nhắn tin về tài khoản của bạn: "${titleAccount}"',
+        'place-offer-on-my-account': '${userAndOther} đã đưa ra đề nghị về tài khoản của bạn: "${titleAccount}"',
         'reply-my-comment': '${userAndOther} đã phản hồi bình luận của bạn: "${comment}"',
         'like-my-comment': '${userAndOther} đã thích bình luận của bạn: "${comment}"',
         'admin-lock-account': 'Tài khoản "${account_c_name}" đã bị khoá, bấm vào đây để xem lí do khoá, vui lòng liên hệ hỗ trợ để biết thêm thông tin',
