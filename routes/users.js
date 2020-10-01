@@ -133,6 +133,10 @@ router.get('/chat/get-messages', isLogin, isNormalUserAjax, chatC.checkQueryGetM
 
 router.get('/chat/get-specific-conversation', isLogin, isNormalUserAjax, chatC.checkQueryGetSpecificConversation, chatC.getSpecificConversation);
 
+router.patch('/chat/mark-all-read', isLogin, isNormalUserAjax, chatC.markAllRead);
+
+router.post('/chat/report', isLogin, isNormalUserAjax, chatC.checkBodyCreateReportConversation, chatC.createReportConversation);
+
 // ----------------------------------------  END CHAT -----------------------------------------
 
 

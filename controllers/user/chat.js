@@ -1,7 +1,6 @@
 const waterfall = require('async-waterfall');
-const { query, validationResult } = require('express-validator');
+const { query, body, validationResult } = require('express-validator');
 const mongoose = require('mongoose');
-const { use } = require('passport');
 
 const helper = require('../../help/helper');
 
@@ -9,6 +8,7 @@ const conversationModel = require('../../models/conversation');
 const messageModel = require('../../models/message');
 const imageModel = require('../../models/image');
 const conversationTrackerModel = require('../../models/conversation-tracker');
+const reportModel = require('../../models/report');
 
 
 exports.renderChatPage = (req, res) => {
@@ -245,7 +245,7 @@ exports.getConversations = (req, res) => {
                     $sort: { updatedAt: -1 }
                 },
                 {
-                    $limit: 2
+                    $limit: 5
                 }
             ];
 
@@ -424,7 +424,7 @@ exports.getSpecificConversation = (req, res) => {
                     return user._id.toString() !== req.user._id.toString();
                 });
 
-                // Check if don't have user or user is not valiid 
+                // Check if don't have user or user is not valid 
                 if(conversation.peoples.length === 0) return cb('Cuộc trò chuyện không hợp lệ')
                 if(conversation.peoples[0].status !== 'normal') return cb('Người dùng không còn hợp lệ')
 
@@ -466,6 +466,175 @@ exports.getSpecificConversation = (req, res) => {
                 }
                 conversation.messages = messages;
                 cb(null, conversation)
+            })
+        },
+        (conversation, cb) => { // Get tracker of target user in conversation
+            conversationTrackerModel
+            .findOne({user: conversation.peoples[0]._id, conversation: conversation._id})
+            .select('message conversation updatedAt')
+            .lean()
+            .exec((err, tracker) => {
+                if(err){
+                    console.log('Error in CTL/user/chat.js -> getMessages 02  ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                conversation.peoples[0].tracker = tracker;
+                cb(null, conversation);
+            })
+        }
+    ], function(err, result){
+        if(err) return res.status(400).send(err);
+        res.send(result);
+    })
+}
+
+exports.markAllRead = (req, res) => {
+    waterfall([
+        cb => { // Get all conversations and id of last message for each conversation
+            conversationModel.aggregate([
+                {
+                    $match: {peoples: mongoose.Types.ObjectId(req.user._id)}
+                },
+                {
+                    $lookup: {
+                        from: 'messages',
+                        let: {idConversation: '$_id'},
+                        pipeline: [
+                            {
+                                $match: {$expr: {$eq: ['$conversation', '$$idConversation']} }
+                            },
+                            { $sort: {createdAt: -1} },
+                            { $limit: 1 }
+                        ],
+                        as: 'messages'
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        message: {$cond: [
+                            { $anyElementTrue: ['$messages'] },
+                            { $arrayElemAt: ['$messages._id',0] },
+                            null
+                        ]}
+                    }
+                }
+            ], function(err, conversations){
+                if(err){
+                    console.log('Error in ctl/user/chat.js -> markAsAllRead ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                if(conversations.length === 0) return cb('Không có cuộc trò chuyện nào')
+                cb(null, conversations)
+            })
+        },
+        (conversations, cb) => {
+            const listPromises = conversations.map(conversation => { // Loop each conversation
+
+                return new Promise((resolve, reject) => {
+                    waterfall([
+                        (cb) => { // Get tracker
+                            conversationTrackerModel
+                            .findOne({user: req.user._id, conversation: conversation._id})
+                            .select('message')
+                            .lean()
+                            .exec((err, tracker) => {
+                                if(err){
+                                    console.log('Error in ctl/user/chat.js -> markAllRead 02  ' + err);
+                                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                                }
+                                cb(null, tracker);
+                            })
+                        },
+                        (tracker, cb) => { // Check if tracker is exist, update it if message in tracker not newest
+                            if(!tracker) return cb(null, conversation, tracker);
+                            // Check if message in tracker is newest than no need update
+                            if(tracker.message.toString() === conversation.message.toString()) return cb(null, conversation, tracker);
+                            // Update tracker message to newest
+                            conversationTrackerModel.findByIdAndUpdate(tracker._id, {message: conversation.message}, err => {
+                                if(err){
+                                    console.log('Error in ctl/user/chat.js -> markAllRead 03 ' + err);
+                                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                                }
+                                cb(null, conversation, tracker);
+                            })
+                        },
+                        (conversation, tracker, cb) => { // Go to create if not have tracker
+                            if(tracker) return cb(null, tracker) // Mean update already
+                            // Go to create if not have tracker
+                            new conversationTrackerModel({
+                                user: req.user._id,
+                                conversation: conversation._id,
+                                message: conversation.message
+                            }).save((err, newTracker) => {
+                                if(err){
+                                    console.log('Error in ctl/user/chat.js -> markAllRead 04 ' + err);
+                                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                                }
+                                cb(null, newTracker);
+                            })
+                        }
+                    ], function(err, result){
+                        if(err) return reject(err);
+                        resolve(result);
+                    })
+                })
+
+            });
+            Promise.all(listPromises)
+            .then(result => cb(null, result))
+            .catch(err => cb(err));
+        }
+    ], function(err, result){
+        if(err) return res.status(400).send(err);
+        res.send('Đánh dấu thành công')
+    })
+}
+
+exports.checkBodyCreateReportConversation = [
+    body('reason', 'Lí do phải hơn 5 kí tự và không quá 50 kí tự').isString().isLength({min: 5, max: 50}),
+    body('conversation_id', 'Id không hợp lệ').isMongoId(),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty())
+            return res.status(400).send(errors.array()[0].msg);
+        next();
+    }
+]
+
+exports.createReportConversation = (req, res) => {
+    waterfall([
+        (cb) => {
+            reportModel
+            .findOne({
+                conversation: req.body.conversation_id,
+                reason: req.body.reason, 
+                user: req.user._id, 
+                type: 'conversation'
+            })
+            .select('_id')
+            .lean()
+            .exec((err, report) => {
+                if(err){
+                    console.log('Error in ctl/user/chat.js -> createReportConversation 01 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                if(report) return cb(`Bạn đã báo cáo với lí do "${req.body.reason}" rồi`);
+                cb(null);
+            })
+        },
+        (cb) => {
+            new reportModel({
+                conversation: req.body.conversation_id,
+                reason: req.body.reason,
+                user: req.user._id,
+                type: 'conversation'
+            }).save(err => {
+                if(err){
+                    console.log('Error in ctl/user/chat.js -> createReportConversation 02 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }   
+                cb(null, 'Báo cáo thành công');
             })
         }
     ], function(err, result){

@@ -105,8 +105,6 @@ function updateUnreadConversation(){
       url: '/api-service/chat/get-unread-conversations',
       method: 'GET',
       success: function(res){
-        console.log('res unread conversations');
-        console.log(res);
         const unreadNumb = Number(res.total);
         if(unreadNumb === 0){
           $('.spanConversation').html('<i class="fas fa-comments"></i>   Tin nhắn')

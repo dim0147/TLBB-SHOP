@@ -111,7 +111,7 @@ exports.trackingConversation = (req, res) => {
       cb => {   // Get conversation from id and make sure current user in that conversation
         conversationModel
         .findOne({_id: req.body.conversation_id, peoples: req.user._id})
-        .select('_id')
+        .select('_id peoples')
         .lean()
         .exec((err, conversation) => {
             if(err){
@@ -161,6 +161,21 @@ exports.trackingConversation = (req, res) => {
                     console.log('Error in ctl/api-service/chat.js -> trackingConversation 04 ' + err);
                     return cb('Có lỗi xảy ra vui lòng thử lại sau')
                 }
+                    // Push 'Đã xem' to another people in conversation
+                const idUserLeft = conversation.peoples.find(userId => userId.toString() !== req.user._id.toString());
+                console.log('userId in update');
+                console.log(idUserLeft);
+                if(idUserLeft){
+                    console.log('found');
+                    helper.pushNotification(idUserLeft, {
+                        event: 'send-tracker-message',
+                        value: {
+                            conversation: conversation._id,
+                            message: message._id,
+                            updatedAt: new Date()    
+                        }
+                    })
+                }
                 cb(null, conversation, message, tracker);
             })
       },
@@ -176,6 +191,21 @@ exports.trackingConversation = (req, res) => {
                   return cb('Có lỗi xảy ra vui lòng thử lại sau')
               }
               if(!newTracker) return cb('Có lỗi xảy ra vui lòng thử lại sau');
+
+              // Push 'Đã xem' to another people in conversation
+              const idUserLeft = conversation.peoples.find(userId => userId.toString() !== req.user._id.toString());
+              console.log('userId');
+              console.log(idUserLeft);
+              if(idUserLeft){
+                  console.log('found');
+                helper.pushNotification(idUserLeft, {
+                    event: 'send-tracker-message',
+                    value: {
+                        messageId: message._id 
+                    }
+                })
+              }
+
               cb(null, newTracker._id);
           })
       }

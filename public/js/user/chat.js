@@ -1,10 +1,56 @@
 
 $(document).ready(function(){
     
-    let lastTimeStampConversation = '';
-    let lastTimeStampMessage = '';
+    let lastTimeStampConversation, lastTimeStampMessage, targetUser = '';
 
     $('.ipMessage').emoji();
+
+    function timeDifference(previous) {
+    
+        var msPerMinute = 60 * 1000;
+        var msPerHour = msPerMinute * 60;
+        var msPerDay = msPerHour * 24;
+        var msPerMonth = msPerDay * 30;
+        var msPerYear = msPerDay * 365;
+        var elapsed = new Date() - new Date(previous);
+        if (elapsed < msPerMinute) {
+             return Math.round(elapsed/1000) + ' giây trước';   
+        }
+        
+        else if (elapsed < msPerHour) {
+             return Math.round(elapsed/msPerMinute) + ' phút trước';   
+        }
+        
+        else if (elapsed < msPerDay ) {
+             return Math.round(elapsed/msPerHour ) + ' giờ trước';   
+        }
+    
+        else if (elapsed < msPerMonth) {
+             return 'gần ' + Math.round(elapsed/msPerDay) + ' ngày trước';   
+        }
+        
+        else if (elapsed < msPerYear) {
+             return 'gần ' + Math.round(elapsed/msPerMonth) + ' tháng trước';   
+        }
+        
+        else {
+             return 'gần ' + Math.round(elapsed/msPerYear ) + ' năm trước';   
+        }
+    }
+    
+
+    function sortTime(time){
+        // Analyze updated time, check if updated time conversation is today or yesterday or days ago
+        let updatedTime = '';
+        const timeDiffFromCurrent = getDateDiff(time);
+        if( timeDiffFromCurrent === 'Hôm nay')
+            updatedTime = dateFormat(time, 'HH:MM');
+        else if(timeDiffFromCurrent)
+            updatedTime = timeDiffFromCurrent;
+        else
+            updatedTime = dateFormat(time, 'd mmmm, yyyy')
+        return updatedTime;
+    }
 
     function sortString(string, length = 10){
         return string.length > length ? string.substr(string, length) + '...' : string;
@@ -43,7 +89,7 @@ $(document).ready(function(){
                 console.log(res);
                 if(res.length > 0)
                     renderConversation(res);
-                if(res.length < 2)
+                if(res.length < 5)
                     $('.divLoadMore').remove();
             },
             error: function(err){
@@ -211,7 +257,7 @@ $(document).ready(function(){
                 target.time = 'time text-muted small timeChat'
             }
                 
-            var myvar = '<div class="row no-gutters" title="'+updatedTime+'">'+
+            var myvar = '<div class="row no-gutters messageDiv" data-user="'+message.user+'" title="'+updatedTime+'" data-message="'+message._id+'">'+
             '                  <div class="col-md-3 '+target.offset+'">'+
             '                    <div class="chat-bubble '+target.direction+'">'+
                                 messageToShow + 
@@ -225,8 +271,10 @@ $(document).ready(function(){
             else if (type === 'after') // Mean send message
                 $('.chat-list').append(myvar);
         })
-        if (type === 'after')
+        if (type === 'after'){
+            $('.isSeen').remove();
             $('.chat-right').scrollTop($('.chat-right')[0].scrollHeight);
+        }
         else if(type === 'before'){
             $('.divLoadMoreMessage').remove();
             // Limit each load is 10, equal 10 mean still have, lest than 10 means no more
@@ -264,6 +312,15 @@ $(document).ready(function(){
                         renderStickyAccount(res);
                     // Render message
                     renderMessages(res.messages);
+                    // Load tracker if have
+                    if(res.peoples[0].tracker)
+                        renderIsSeen(res.peoples[0].tracker);
+                    // Scroll to end
+                    $('.chat-right').scrollTop($('.chat-right')[0].scrollHeight);
+                    // Assign target user
+                    targetUser = res.peoples[0]._id;
+                    // Get user last_online
+                    socket.emit('get_user_last_online', {targetUser})
                 }
             },
             error: function(err){
@@ -271,6 +328,18 @@ $(document).ready(function(){
                     title: err.responseText
                 })
             }
+        })
+    }
+
+    function renderIsSeen(data){
+        $('.messageDiv').each(function(i, obj) {
+            const divMessageId = $(this).attr('data-message');
+            const userOfMessage = $(this).attr('data-user');    
+            if(data.message === divMessageId && data.conversation === $('.chat-right').attr('data-conversation') && userOfMessage === $('#userId').val()) {
+                $('.isSeen').remove();
+                $('<div class="row no-gutters isSeen" > <div class="col-md-3 offset-md-9"><p><i class="fas fa-check"></i>   Đã xem lúc '+sortTime(data.updatedAt)+'</p></div></div>       ').insertAfter(this);
+                $('.chat-right').scrollTop($('.chat-right')[0].scrollHeight);
+            } 
         })
     }
     
@@ -470,8 +539,29 @@ $(document).ready(function(){
         })
     }
 
+    function getTargetUserOnline(){
+        // Run every 5 seconds
+        setInterval(function(){
+            if(targetUser !== '')
+                socket.emit('get_user_last_online', {targetUser})
+        }, 5000);
+    
+        // Get data from server
+        socket.on('get_user_last_online', data => {
+            if(data.OK){ // Mean success
+                if(data.isOnline)
+                    $('.userOnline').html(` <i style="color: rgb(4, 233, 4)" class="fas fa-circle"></i>   Đang online`);
+                else{ // Mean offline
+                    if(data.last_online) // If have field last_online field
+                        $('.userOnline').html(`Hoạt động ${timeDifference(data.last_online)}`);
+                }
+            }
+        })
+    }
+
     loadConversation();
 
+    getTargetUserOnline();
 
     // Load more conversation
     $(document).on('click', '#loadMoreBtn', function(err) {
@@ -502,6 +592,8 @@ $(document).ready(function(){
         $('.sticky').remove();
         // Remove messages
         $('.chat-list').html('');
+        // Remove online status user
+        $('.userOnline').html('');
         // Set id Conversation to chat right
         const idConversation = $(this).attr('data-conversation');
         const idAccount = $(this).attr('data-account');
@@ -717,10 +809,110 @@ $(document).ready(function(){
         }
     })
 
+    socket.on('send-tracker-message', data => { 
+        console.log('send-tracker-message');
+        console.log(data);
+        renderIsSeen(data);
+    })
+
     $('.ipOfferPrice').on('input', function(){
         const price = Number($(this).val());
         if(!isNaN(price))
           $('.priceLabel').html('Đề nghị với giá '+ price.toLocaleString('en-US', {style : 'currency', currency : 'VND'}));
+    })
+
+    $('.refreshListUser').click(function(e){
+        $('.listUser').html('');
+        loadConversation();
+    })
+
+    $('.refreshConversation').click(function(e) {
+        $('.friend-drawer--onhover').css('background', '');
+
+        // Remove sticky account
+        $('.sticky').remove();
+        // Remove messages
+        $('.chat-list').html('');
+        // Remove online status user
+        $('.userOnline').html('');
+        // Get id Conversation from chat right
+        const idConversation = $('.chat-right').attr('data-conversation');
+        loadSpecificConversation(idConversation)
+    })
+
+    $('.markAllRead').click(function(e){
+        e.preventDefault();
+        $.ajax({
+            url: '/user/chat/mark-all-read',
+            method: 'PATCH',
+            data: {_csrf: $('#_csrf').val() },
+            success: function(res){
+                console.log(res);
+                $('.friend-drawer').each(function(){
+                    $(this).removeClass('unread');
+                    $(this).addClass('read');
+                    $(this).find('.unreadMessage').attr('value', 0);
+                    $(this).find('.unreadMessage').html('');
+                })
+                iziToast.success({
+                    title: res
+                })
+            },
+            error: function(err){
+                iziToast.error({
+                    title: err.responseText
+                })
+            }
+        })
+    })
+
+    $('.reportBtn').click(function(e){
+        e.preventDefault();
+        $('.modal-title-report').html('<i style="font-size: 15px;" class="fas fa-flag" aria-hidden="true"></i>   Báo cáo cuộc trò chuyện với người dùng ' + $('.user-title').html())
+    })
+
+    $('#reasonSelect').on('change', function(){
+        if(this.value === 'other')
+            $('#otherReason').removeClass('d-none');
+        else
+            $('#otherReason').addClass('d-none');
+    })
+
+    $('.btnSendReport').click(function(){
+        const button = this;
+        const conversation = $('.chat-right').attr('data-conversation');
+        if(!conversation)
+            return iziToast.error({title: 'Cuộc trò chuyện không hợp lệ'})
+        const reason = $('#reasonSelect').val() === 'other' ? $('#otherReason').val() :  $('#reasonSelect').val();
+        setAllowPointer(button, false);
+        $(button).prop('disable', true);
+        $(button).html('<i class="fas fa-spinner fa-pulse"></i>   Đang gửi báo cáo')
+        $.ajax({
+            url: '/user/chat/report',
+            method: 'POST',
+            data: {
+                conversation_id: conversation,
+                reason,
+                _csrf: $('#_csrf').val()
+            },
+            success: function(res){
+                setAllowPointer(button, true);
+                $(button).prop('disable', false);
+                $(button).html('Gửi báo cáo');
+                $('#exampleModalCenter').modal('hide');
+                iziToast.success({
+                    title: res,
+                })
+            },
+            error: function(err){
+                setAllowPointer(button, true);
+                $(button).prop('disable', false);
+                $(button).html('Gửi báo cáo');
+                iziToast.error({
+                    title: err.responseText,
+                })
+            }
+        })
     })
 
 });

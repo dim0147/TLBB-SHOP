@@ -45,6 +45,7 @@
     <% if(typeof csrfToken !== "undefined"){ %>
       <input type="hidden" id="_csrf" value="<%= csrfToken %>" />
     <% } %>
+      <!-- Price offerModal -->
     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 			<div class="modal-dialog" role="document">
 			<div class="modal-content">
@@ -69,7 +70,41 @@
 				</div>
 			</div>
 			</div>
-		</div>
+    </div>
+    
+      <!-- Report Modal -->
+  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title-report" id="exampleModalLongTitle"></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="text-center">
+            <h5>Hãy cho chúng tôi biết chuyện gì đang xảy ra</h5>
+            <select id="reasonSelect" class="w-100" style="display: none;">
+              <option value="Người dùng giả mạo">Người dùng giả mạo</option>
+              <option value="Tài khoản game không được xác minh">Tài khoản không được xác minh</option>
+              <option value="Xúc phạm admin">Xúc phạm admin</option>
+              <option value="Có ý đồ lừa đảo">Có ý đồ lừa đảo</option>
+              <option value="Nói xấu sau lưng">Nói xấu sau lưng</option>
+              <option value="Gái có c*">Gái có c*</option>
+              <option value="other">Khác</option>
+          </select>
+          
+          <input style="margin: 10px;" id="otherReason" type="text" name="c_name" class="d-none border w-100 p-2 bg-white" placeholder="Nhập lí do">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-dark btnSendReport">Gửi báo cáo</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
      <% if(typeof userSS != "undefined"){ %>
       <input type="hidden" id="userId" value="<%= userSS._id %>">
@@ -87,8 +122,7 @@
                 alt="Profile img"
               />
               <span class="settings-tray--right">
-                <i title="Tải lại" class="fa fa-refresh" aria-hidden="true"></i>
-                <i title="Đi tới hòm thư" class="fas fa-envelope"></i>
+                <i title="Tải lại" class="fa fa-refresh refreshListUser" aria-hidden="true"></i>
                 <i
                   class="fas fa-bars"
                   data-toggle="dropdown"
@@ -98,7 +132,7 @@
                   class="dropdown-menu"
                   aria-labelledby="dropdownMenuButtonvcc"
                 >
-                  <a class="dropdown-item" href="#">Đánh dấu tất cả đã đọc</a>
+                  <a class="dropdown-item markAllRead" href="#"><i style="font-size:15px" class="fas fa-check-square"></i>   Đánh dấu tất cả đã đọc</a>
                 </div>
               </span>
             </div>
@@ -136,12 +170,12 @@
                 />
                 <div class="text">
                   <h6 class="user-title">Nhấp vào 1 người để xem</h6>
-                  <!-- <p class="text-muted">
-                    Layin' down the law since like before Christ...
-                  </p> -->
+                  <p class="text-muted userOnline">
+                    <!-- <i style="color: rgb(4, 233, 4)" class="fas fa-circle"></i>   Đang online -->
+                  </p>
                 </div>
                 <span class="settings-tray--right">
-                  <i title="Tải lại" class="fa fa-refresh" aria-hidden="true"></i>
+                  <i title="Tải lại" class="fa fa-refresh refreshConversation" aria-hidden="true"></i>
                   <i
                     class="fas fa-bars"
                     data-toggle="dropdown"
@@ -151,10 +185,7 @@
                     class="dropdown-menu"
                     aria-labelledby="dropdownMenuButtonhmm"
                   >
-                    <a class="dropdown-item" href="#">Đánh dấu tất cả đã đọc</a>
-                    <a class="dropdown-item" href="#"
-                      >Báo cáo cuộc trò chuyện này</a
-                    >
+                    <a class="dropdown-item reportBtn" href="#" data-toggle="modal" data-target="#exampleModalCenter"><i style="font-size: 15px;" class="fas fa-flag"></i>   Báo cáo cuộc trò chuyện này</a>
                   </div>
                 </span>
               </div>
@@ -164,7 +195,7 @@
             <div class="chat-panel">
 
               <!-- Messages section -->
-              <div class="chat-right scrollbar" data-conversation="5f6ed1ef61051b10adab2876">
+              <div class="chat-right scrollbar">
 
                 <!-- Sticky account -->
                 <!-- <div class="row sticky" style="position:sticky; top:0">

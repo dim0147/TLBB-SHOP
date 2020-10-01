@@ -240,21 +240,22 @@ function getDateDiff(date){
   const dateToCheck = new Date(date);
 
   const today = new Date();
-  const yesterday = new Date(today);
-  const twoDayAgo = new Date(yesterday);
-  const threeDayAgo = new Date(yesterday);
-  const fourDayAgo = new Date(yesterday);
-  const fiveDayAgo = new Date(yesterday);
-  const sixDayAgo = new Date(yesterday);
-  const sevenDayAgo = new Date(yesterday);
+  const yesterday = new Date();
+  const twoDayAgo = new Date();
+  const threeDayAgo = new Date();
+  const fourDayAgo = new Date();
+  const fiveDayAgo = new Date();
+  const sixDayAgo = new Date();
+  const sevenDayAgo = new Date();
 
-  yesterday.setDate(yesterday.getDate() - 1);
-  twoDayAgo.setDate(yesterday.getDate() - 1);
-  threeDayAgo.setDate(yesterday.getDate() - 2);
-  fourDayAgo.setDate(yesterday.getDate() - 3);
-  fiveDayAgo.setDate(yesterday.getDate() - 4);
-  sixDayAgo.setDate(yesterday.getDate() - 5);
-  sevenDayAgo.setDate(yesterday.getDate() - 6);
+  yesterday.setDate(today.getDate() - 1);
+  twoDayAgo.setDate(today.getDate() - 2);
+  threeDayAgo.setDate(today.getDate() - 3);
+  fourDayAgo.setDate(today.getDate() - 4);
+  fiveDayAgo.setDate(today.getDate() - 5);
+  sixDayAgo.setDate(today.getDate() - 6);
+  sevenDayAgo.setDate(today.getDate() - 7);
+
 
   if (dateToCheck.toDateString() === today.toDateString()) {
     return "Hôm nay";

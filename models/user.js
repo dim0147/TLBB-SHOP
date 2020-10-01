@@ -14,7 +14,8 @@ const userSchema = mongoose.Schema({
     urlImage: String,
     type: {type: String, enum: ['web', 'facebook', 'google'], default: 'web',required: true},
     role: {type: String, required: true, enum: ['admin', 'user'], default: 'user'},
-    status: {type: String, required: true, enum: ['normal', 'lock'], default: 'normal'}
+    status: {type: String, required: true, enum: ['normal', 'lock'], default: 'normal'},
+    last_online: {type: Date},
 }, { timestamps: { createdAt: 'created_at' } });
 
 userSchema.statics.hashPassword = function(password){
