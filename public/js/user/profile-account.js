@@ -47,7 +47,7 @@ $(document).ready(function(){
                 searchable: false,
                 sortable: false,
                 render: function(data, t, row){
-                    return '<a href="/account/view-account/' + row[0] + '"><img src="/images/data/'+data+'" width=100 height=70></a>'
+                    return '<a href="/account/view-account/' + row[0] + '"><img src="'+configClient.urlImagePrefix+data+'" width=100 height=70></a>'
                 }
             },
             { 

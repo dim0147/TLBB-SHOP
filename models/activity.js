@@ -31,4 +31,6 @@ const activitySchema = mongoose.Schema({
     type: {type: String, enum: typeActivity, required: true}
 }, {timestamps: { createdAt: true, updatedAt: false }});
 
+activitySchema.index({user: 1});
+
 module.exports = mongoose.model('activities', activitySchema);

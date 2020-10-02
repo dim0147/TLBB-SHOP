@@ -71,7 +71,7 @@ $(document).ready(function(){
                     '                      <div class="row p-lg-3 p-sm-5 p-4">'+
                     '                          <div class="col-lg-4 align-self-center">'+
                     '                              <a href="/account/view-account/'+account._id+'">'+
-                    '                                  <img src="/images/data/'+account.image+'" class="img-fluid" alt="">'+
+                    '                                  <img src="'+configClient.urlImagePrefix+account.image+'" class="img-fluid" alt="">'+
                     '                              </a>'+
                     '                          </div>'+
                     '                          <div class="col-lg-8">'+
@@ -186,6 +186,17 @@ $(document).ready(function(){
         if(c_name != '')
             querySearch += '&' + 'c_name=' + c_name;
         window.location.href = window.location.href.split('?')[0] + querySearch;
+    })
+
+    $('.copyIdIcon').click(function(){
+        const userId = $(this).attr('user-id');
+        const el = document.createElement('textarea');
+        el.value = userId;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        iziToast.success({message: 'Copy thành công'})
     })
 
 })

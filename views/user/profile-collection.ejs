@@ -141,7 +141,7 @@
                                 <div class="price allPGL">- Giao lưu <%= collection.account.phaigiaoluu.name %> <br> hoặc <br>- Bán: <%= collection.account.price.toLocaleString('en-US', {style : 'currency', currency : 'VND'}); %></div>
                             <% } %>
                             <a href="/account/view-account/<%= collection.account._id %>">
-                                <img class="card-img-top" src="/images/data/<%= collection.account.image %>" alt="Card image cap" height="180px">
+                                <img class="card-img-top" src="<%=  urlImagePrefix +collection.account.image %>" alt="Card image cap" height="180px">
                             </a>
 
                         </div>

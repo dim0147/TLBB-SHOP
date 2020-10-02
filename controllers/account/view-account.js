@@ -9,10 +9,12 @@ const acLinkAddFieldModel = require('../../models/account-link-addfield');
 const rateModel = require('../../models/rate')
 const viewModel = require('../../models/view');
 const collectionModel = require('../../models/collection');
+const conversationModel = require('../../models/conversation');
 
 const config = require('../../config/config');
 const helper = require('../../help/helper');
 const cache = require('../../cache/cache');
+const account = require('../../models/account');
 
 
 dateFormat.i18n = {
@@ -125,6 +127,22 @@ exports.renderPage = (req, res) => {
                     return cb(null, result);
                 })
             });
+        },
+        (result, cb) => { // Get conversation if not owner of this account
+            if(account.isOwner) return cb(null, result); // Mean owners
+            if(!req.isAuthenticated()) return cb(null, result) // Not login
+            conversationModel
+            .findOne({account: result.account._id, peoples: req.user._id})
+            .select('offer')
+            .lean()
+            .exec((err, conversation) => {
+                if(err){
+                    console.log('Error in ctl/account/view-account.js -> renderPage Get conversation ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                result.conversation = conversation;
+                cb(null, result);
+            })
         },
         (result, cb) => { // Get total rate of account
             rateModel.aggregate([
@@ -285,7 +303,7 @@ exports.renderPage = (req, res) => {
                     cb(null, result);
                 });
             })
-        }
+        },
     ], function(err, result){
         if(err) return res.render('account/view-account', {title: 'Có lỗi xảy ra!',  error: err });
         // Save activity
@@ -305,6 +323,7 @@ exports.renderPage = (req, res) => {
                                             rate: result.rate,
                                             collection: result.collection,
                                             listItems: result.listItems,
+                                            conversation: result.conversation,
                                             csrfToken: req.csrfToken()
                                         });
     });

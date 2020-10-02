@@ -112,7 +112,7 @@ $(document).ready(function(){
         let divAccount = '';
         if(typeof account.status == 'string' && (account.status == 'pending' || account.status == 'done')){
             divAccount +=     '                                    <div style="margin: 5px;">'+
-            '                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="/images/data/'+account.image+'" alt="Card image cap">'+
+            '                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="'+configClient.urlImagePrefix+account.image+'" alt="Card image cap">'+
             '                                        <div style="display: inline-block;" >'+
             '                                            <span style="display: inline;color:purple">'+
             '                                                - '+account.title+' '+
@@ -194,7 +194,7 @@ $(document).ready(function(){
         let divAccount = '';
         if(account.status == 'pending' || account.status == 'done'){
             divAccount = '                                    <div style="margin: 5px;">'+
-            '                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="/images/data/'+account.image+'" alt="Card image cap">'+
+            '                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="'+configClient.urlImagePrefix+account.image+'" alt="Card image cap">'+
             '                                        <div style="display: inline-block;" >'+
             '                                            <span style="display: inline;color:purple">'+
             '                                                - '+account.title+' '+
@@ -236,7 +236,7 @@ $(document).ready(function(){
         let divAccount = '';
         if(account.status == 'pending' || account.status == 'done'){
             divAccount = '                                    <div style="margin: 5px;">'+
-            '                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="/images/data/'+account.image+'" alt="Card image cap">'+
+            '                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="'+configClient.urlImagePrefix+account.image+'" alt="Card image cap">'+
             '                                        <div style="display: inline-block;" >'+
             '                                            <span style="display: inline;color:purple">'+
             '                                                - '+account.title+' '+
@@ -290,7 +290,7 @@ $(document).ready(function(){
         let divAccount = '';
         if(account.status == 'pending' || account.status == 'done'){
             divAccount = '                                    <div style="margin: 5px;">'+
-            '                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="/images/data/'+account.image+'" alt="Card image cap">'+
+            '                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="'+configClient.urlImagePrefix+account.image+'" alt="Card image cap">'+
             '                                        <div style="display: inline-block;" >'+
             '                                            <span style="display: inline;color:purple">'+
             '                                                - '+account.title+' '+
@@ -333,7 +333,7 @@ $(document).ready(function(){
         let divAccount = '';
         if(account.status == 'pending' || account.status == 'done'){
             divAccount = '                                    <div style="margin: 5px;">'+
-            '                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="/images/data/'+account.image+'" alt="Card image cap">'+
+            '                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="'+configClient.urlImagePrefix+account.image+'" alt="Card image cap">'+
             '                                        <div style="display: inline-block;" >'+
             '                                            <span style="display: inline;color:purple">'+
             '                                                - '+account.title+' '+
@@ -416,7 +416,7 @@ $(document).ready(function(){
         let divAccount = '';
         if(account.status == 'pending' || account.status == 'done'){
             divAccount = '                                    <div style="margin: 5px;">'+
-            '                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="/images/data/'+account.image+'" alt="Card image cap">'+
+            '                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="'+configClient.urlImagePrefix+account.image+'" alt="Card image cap">'+
             '                                        <div style="display: inline-block;" >'+
             '                                            <span style="display: inline;color:purple">'+
             '                                                - '+account.title+' '+
@@ -470,7 +470,7 @@ $(document).ready(function(){
         let divAccount = '';
         if(account.status == 'pending' || account.status == 'done'){
             divAccount = '                                    <div style="margin: 5px;">'+
-            '                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="/images/data/'+account.image+'" alt="Card image cap">'+
+            '                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="'+configClient.urlImagePrefix+account.image+'" alt="Card image cap">'+
             '                                        <div style="display: inline-block;" >'+
             '                                            <span style="display: inline;color:purple">'+
             '                                                - '+account.title+' '+
@@ -523,7 +523,7 @@ $(document).ready(function(){
         let divAccount = '';
         if(account.status == 'pending' || account.status == 'done'){
             divAccount = '                                    <div style="margin: 5px;">'+
-            '                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="/images/data/'+account.image+'" alt="Card image cap">'+
+            '                                        <img style="width:160px;height:130px;display:inline" class="card-img-top img-fluid" src="'+configClient.urlImagePrefix+account.image+'" alt="Card image cap">'+
             '                                        <div style="display: inline-block;" >'+
             '                                            <span style="display: inline;color:purple">'+
             '                                                - '+account.title+' '+

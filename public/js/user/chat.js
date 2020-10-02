@@ -155,7 +155,7 @@ $(document).ready(function(){
             if(conversation.account && conversation.account.image){
                 imageAccount = '<img'+
                 '                      class="profile-image account-image"'+
-                '                      src="/images/data/'+conversation.account.image+'"'+
+                '                      src="'+configClient.urlImagePrefix+conversation.account.image+'"'+
                 '                      alt=""'+
                 '                      />';
             }
@@ -350,7 +350,7 @@ $(document).ready(function(){
 
     function renderStickyAccount(conversation){
         // Get image of account
-        const imageAccount = conversation.account.image ? '/images/data/' + conversation.account.image : '';
+        const imageAccount = conversation.account.image ? configClient.urlImagePrefix + conversation.account.image : '';
          // Get title of account
         const title = sortString(conversation.account.title, 20);
 

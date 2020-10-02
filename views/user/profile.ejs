@@ -29,6 +29,7 @@
                             <h5 class="text-center"><%= user.name %></h5>
                             <div class="text-center">
                                 <p>Tham gia vào ngày <%= user.created_at %></p>
+                                <p class="userId">ID: <%= userSS._id %>    <i title="Copy" user-id="<%= userSS._id %>" style="cursor:pointer;color: rgb(99, 99, 219)" class="copyIdIcon fas fa-copy"></i></p>
                                 <% if(user.type == "google"){ %>
                                         <i title="Xác thực với Google" style="color:red!important"  class="fab fa-google"></i>
                                 <% }else if(user.type == "facebook"){ %>

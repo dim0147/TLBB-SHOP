@@ -56,7 +56,7 @@
                                 <% if(account.status == 'pending' || account.status == 'done'){ %>
                                 <div class="thumb-content">
                                     <a href="/account/view-account/<%= account._id %>">
-                                        <img class="card-img-top" src="/images/data/<%= account.image %>" alt="Card image cap" height="180px">
+                                        <img class="card-img-top" src="<%=  urlImagePrefix + account.image %>" alt="Card image cap" height="180px">
                                     </a>
                                 </div>
                                 <div class="card-body">

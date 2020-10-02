@@ -4,9 +4,109 @@ const mongoose = require('mongoose')
 
 const helper = require('../../help/helper');
 
+const accountModel = require('../../models/account');
 const conversationModel = require('../../models/conversation');
 const messageModel = require('../../models/message');
 const conversationTrackerModel = require('../../models/conversation-tracker');
+
+function createAccountConversation(accountId, message, currentUserId){
+    return new Promise((resolve, reject) => {
+        waterfall([
+            (cb) => { // Get account if exist or not
+                accountModel
+                .findById(accountId)
+                .select('_id status')
+                .populate({
+                    path: 'userId',
+                    select: 'status'
+                })
+                .lean()
+                .exec((err, account) => {
+                    if(err){
+                        console.log('Error in ctl/api-service/chat.js -> createAccountConversation 01 ' + err);
+                        return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                    }
+                    if(!account) return cb('Tài khoản không tìm thấy')
+                    if(account.status !== 'pending' && account.status !== 'done') return cb('Tài khoản không thể liên hệ')
+                    if(!account.userId) return cb('Chủ tài khoản không hợp lệ')
+                    if(account.userId.status !== 'normal') return cb('Chủ tài khoản không còn hợp lệ')
+                    cb(null, account);
+                })
+            },
+            (account, cb) => { // Check if have conversation or not
+                conversationModel
+                .findOne({account: account._id, peoples: currentUserId})
+                .select('_id')
+                .lean()
+                .exec((err, conversation) => {
+                    if(err){
+                        console.log('Error in ctl/api-service/chat.js -> createAccountConversation 02 ' + err);
+                        return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                    }
+                    if(conversation) return cb('Đã có cuộc trò chuyện')
+                    cb(null, account);
+                })
+            },
+            (account, cb) => { // Create conversation
+                new conversationModel({
+                    starter: currentUserId,
+                    account: account._id,
+                    peoples: [
+                        currentUserId,
+                        account.userId._id
+                    ]
+                }).save((err, conversation) => {
+                    if(err){
+                        console.log('Error in ctl/api-service/chat.js -> createAccountConversation 03 ' + err);
+                        return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                    }
+                    cb(null, account, conversation);
+                })
+            },
+            (account, conversation, cb) => { // Create message to that conversation
+                new messageModel({
+                    user: currentUserId,
+                    conversation: conversation._id,
+                    message,
+                    type: 'message'
+                }).save((err, newMessage) => {
+                    if(err){
+                        console.log('Error in ctl/api-service/chat.js -> createAccountConversation 04 ' + err);
+                        return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                    }
+                    cb(null, {conversation, message: newMessage})
+                })
+            }
+        ], (err, result) => {
+            if(err) return reject(err);
+            resolve(result);
+        });
+    });
+}
+
+exports.checkBodyFirstTimeConversation = [
+    body('account_id', 'Account Id không hợp lệ').optional().isMongoId(),
+    body('user_id', 'User Id không hợp lệ').optional().isMongoId(),
+    body('message', 'Message không hợp lệ').notEmpty().isString(),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if(!errors.isEmpty())
+            return res.status(400).send(errors.array()[0].msg);
+        next();
+    }
+]
+
+exports.createFirstTimeConversation = (req, res) => {
+    if(req.body.account_id){
+        createAccountConversation(req.body.account_id, req.body.message, req.user._id)
+        .then(result => {
+            res.send(result);
+        })
+        .catch(err => {
+            res.status(400).send(err);
+        })
+    }
+}
 
 exports.checkBodyCreateTextMessage = [
     body('id_conversation', 'Id không hợp lệ').isMongoId(),
@@ -29,7 +129,7 @@ exports.createTextMessage = async (req, res) => {
     session.startTransaction();
 
     waterfall([
-        cb => { // Check if is in conversation
+        cb => { // Check if have conversation
             conversationModel
             .findOne({
                 _id: req.body.id_conversation,
@@ -43,7 +143,7 @@ exports.createTextMessage = async (req, res) => {
                 cb(null, conversation)
             });
         },
-        (conversation, cb) => {
+        (conversation, cb) => { // Update time conversation
             conversationModel.findByIdAndUpdate(conversation._id, {updatedAt: new Date()}, {session: session}, err => {
                 if(err){
                     console.log('Error in ctl/api-service/chat.js -> createTextMessage 02  ' + err);
@@ -194,8 +294,6 @@ exports.trackingConversation = (req, res) => {
 
               // Push 'Đã xem' to another people in conversation
               const idUserLeft = conversation.peoples.find(userId => userId.toString() !== req.user._id.toString());
-              console.log('userId');
-              console.log(idUserLeft);
               if(idUserLeft){
                   console.log('found');
                 helper.pushNotification(idUserLeft, {

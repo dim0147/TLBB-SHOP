@@ -111,7 +111,16 @@ $(document).ready(function(){
             }
         });
     })
-   
+    $('.copyIdIcon').click(function(){
+        const userId = $(this).attr('user-id');
+        const el = document.createElement('textarea');
+        el.value = userId;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        iziToast.success({message: 'Copy thành công'})
+    })
 
 });
 

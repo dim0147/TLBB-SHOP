@@ -19,6 +19,9 @@ function isNormalUserAjax(req, res, next){
     return res.status(401).send("Tài khoản không hợp lệ, xin vui lòng logout")
 }
 
+/* Create first time account conversation . */
+router.post('/create-first-time-conversation', isLogin, isNormalUserAjax, chatC.checkBodyFirstTimeConversation, chatC.createFirstTimeConversation);
+
 /* Create normal message . */
 router.post('/create-message', isLogin, isNormalUserAjax, chatC.checkBodyCreateTextMessage, chatC.createTextMessage);
 

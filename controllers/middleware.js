@@ -15,6 +15,7 @@ dateFormat.i18n = {
 
 const cache = require('../cache/cache');
 const helper = require('../help/helper');
+const config = require('../config/config');
 
 // Set user session and convert image, user created day
 exports.setUserSession = async function(req, res, next) {
@@ -23,6 +24,7 @@ exports.setUserSession = async function(req, res, next) {
         req.user.unReadNotifications = await helper.getUnreadNotifications(req.user._id).catch(err => console.log(err));
     }
       res.locals.userSS = req.user;
+      res.locals.urlImagePrefix = config.client.urlImagePrefix;
       next()
 }
 

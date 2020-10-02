@@ -3,7 +3,11 @@
 <head>
   <% include ../partials/head %>
 </head>
-
+<style>
+  .copyIdIcon{
+    cursor: pointer;
+  }
+</style>
 <body class="body-wrapper">
 
   <% include ../partials/menu %>
@@ -31,6 +35,7 @@
                             <h5 class="text-center"><%= user.name %></h5>
                             <div class="text-center">
                                 <p>Tham gia vào ngày <%= user.created_at %></p>
+                                <p class="userId">ID: <%= user._id %>    <i title="Copy" user-id="<%= user._id %>" style="color: rgb(99, 99, 219)" class="copyIdIcon fas fa-copy"></i></p>
                                 <% if(user.type == "google"){ %>
                                         <i title="Xác thực với Google" style="color:red!important"  class="fab fa-google"></i>
                                 <% }else if(user.type == "facebook"){ %>

@@ -1,3 +1,5 @@
+
+
 $('document').ready(function(){
 
     let priceChange = false;
@@ -317,7 +319,7 @@ $('document').ready(function(){
                                 account.transaction_type = 'Giao lưu ' + account.phaigiaoluu.name;
                             var myvar = '<a href="/account/view-account/' + account._id+'" class="divItemSearch">'+
                         '                                    <div class="itemInSearch" >'+
-                        '                                        <img style="display:inline" width="120px" height="100px" src="/images/data/'+ account.image[0].url+'" alt="">'+
+                        '                                        <img style="display:inline" width="120px" height="100px" src="'+configClient.urlImagePrefix+ account.image[0].url+'" alt="">'+
                         '                                        <div style="display: inline-block;">'+
                         '                                            <span style="display: inline;color:rgb(0, 240, 240);font-size:15px;">'+
                         '                                                Tên: '+account.c_name+'<br>'+

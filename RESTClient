@@ -50,3 +50,11 @@ Cookie: tlbb-shop=s%3ALeM8dl5TfkXaWIyb4leJNU5UHN7a1A5B.zY%2Fyeqk4frAqzhk1RcTl7jd
     "price": 300000,
     "_csrf": "EQ4wLNCc-4p2GPnDYcXb6NQ8F9-vzF5LW3KI"
 }
+
+###
+POST https://api.imgbb.com/1/upload HTTP/1.1
+content-type: application/json
+
+{
+    "key": "b2a71892722508409f68f4c3688401f9"
+}

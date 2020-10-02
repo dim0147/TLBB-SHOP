@@ -264,7 +264,7 @@
                         <div class="currentImage">
                             <% account.images.forEach(image => { %>
                                 <div class="divCurrentImage">
-                                    <img style="margin: 10px;" src="/images/data/<%= image.url %>" alt="" width="150" height="120">
+                                    <img style="margin: 10px;" src="<%= urlImagePrefix + image.url %>" alt="" width="150" height="120">
                                     <button type="button" data-image="<%= image.url %>" class="btn btnRemoveImage"><i class="fas fa-minus-square"></i></button>
                                 </div>
                             <% }) %>

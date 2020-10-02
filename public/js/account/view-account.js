@@ -773,9 +773,9 @@ $("document").ready(function() {
                 setAllowPointer(button, true);
                 $(button).prop('disabled', false);
                 $(button).html('<i class="fas fa-check"></i>   Thành công');
+                $('#exampleModal').modal('hide');
                 iziToast.success({
                     message: res.message,
-                    position: 'center',
                 })
             },
             error: function(err){
@@ -785,7 +785,44 @@ $("document").ready(function() {
                 iziToast.error({
                     title: 'Có lỗi xảy ra',
                     message: err.responseText,
-                    position: 'center',
+                })
+            }
+        })
+    })
+
+    $('.btnSendContactMessage').click(function(){
+        const button = this;
+    
+        const message = $('#ipContactMessage').val();
+        if(message.length === 0)
+            return iziToast.error({ title: 'Xin nhập tin nhắn' })
+        let data = {};
+        data.account_id =  $('#idAccount').val();
+        data.message = message;
+        data._csrf = $('#_csrf').val();
+        setAllowPointer(button, false);
+        $(button).prop('disabled', true);
+        $(button).html('<i class="fas fa-spinner fa-spin"></i>   Đang xử lý');
+        $.ajax({
+            url: '/api-service/chat/create-first-time-conversation',
+            method: 'POST',
+            data,
+            success: function(res){
+                setAllowPointer(button, true);
+                $(button).prop('disabled', false);
+                $(button).html('<i class="fas fa-check"></i>   Thành công');
+                $('#contactModal').modal('hide');
+                iziToast.success({
+                    message: 'Nhắn tin thành công',
+                })
+            },
+            error: function(err){
+                setAllowPointer(button, true);
+                $(button).prop('disabled', false);
+                $(button).html('<i class="fas fa-paper-plane" aria-hidden="true"></i>   Gửi tin nhắn');
+                iziToast.error({
+                    title: 'Có lỗi xảy ra',
+                    message: err.responseText,
                 })
             }
         })
