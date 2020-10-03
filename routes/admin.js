@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 
+const dashboardC = require('../controllers/admin/dashboard');
+
 const addPropertyC = require('../controllers/admin/property/add-property');
 const editPropertyC = require('../controllers/admin/property/edit-property')
 const addSubPropertyC = require('../controllers/admin/property/add-sub-property');
@@ -13,6 +15,9 @@ const addAddFieldC = require('../controllers/admin/addfield/add-addfield');
 
 const addLockReasonAccount = require('../controllers/admin/account/add-lock-readson');
 
+/* Dashboard  Page. */
+router.get('/dashboard', dashboardC.renderDashboard);
+router.get('/dashboard/get-account-sell-last-three-month', dashboardC.getAccountPostedPastThreeMonths);
 
 /* Property  Page. */
 router.get('/property/add-property', addPropertyC.renderPage);
