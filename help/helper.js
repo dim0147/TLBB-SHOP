@@ -156,6 +156,22 @@ exports.getItemPopACField = function(menuView = cache.getKey('menuView')){
     return arraySlugItem;
 }
 
+exports.getMonthAgo = totalMonth => {
+
+    var x = new Date();
+    // x.setDate(0); // 0 will result in the last day of the previous month
+    x.setDate(1); // 1 will result in the first day of the month
+    x.setMonth(new Date().getMonth() - totalMonth)
+    return x;
+}
+
+exports.getMondayOfLastNumbWeek = function(numbWeek = 1){
+    const beforeOneWeek = new Date(new Date().getTime() - (60 * 60 * 24 * 7 * 1000 * numbWeek))
+  , day = beforeOneWeek.getDay()
+  , diffToMonday = beforeOneWeek.getDate() - day + (day === 0 ? -6 : 1)
+  , lastMonday = new Date(beforeOneWeek.setDate(diffToMonday))
+  return lastMonday;
+}
 
 //----------------------- PUSH NOTIFICATION TO USER SCREEN------------------------
 const pushNotification = (userId, data) => {

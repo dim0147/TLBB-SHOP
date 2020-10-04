@@ -1,10 +1,8 @@
 const { query, validationResult } = require('express-validator');
 
-const accountModel = require('../../models/account');
+const helper = require('../../../help/helper');
 
-exports.renderDashboard = (req, res) => {
-    res.render('admin/dashboard', {title: 'Dashboard'})
-}
+const accountModel = require('../../../models/account');
 
 exports.checkQueryGetAccountPastNumbMonths = [
     query('total_months', 'Tháng không hợp hợp lệ').isNumeric(),
@@ -16,15 +14,6 @@ exports.checkQueryGetAccountPastNumbMonths = [
         next();
     }
 ]
-
-function getMonthAgo(totalMonth){
-
-    var x = new Date();
-    // x.setDate(0); // 0 will result in the last day of the previous month
-    x.setDate(1); // 1 will result in the first day of the month
-    x.setMonth(new Date().getMonth() - totalMonth)
-    return x;
-}
 
 function getPhai(result){
     const array = [];
@@ -84,7 +73,7 @@ exports.getAccountPostedPastThreeMonths = (req, res) => {
 
     const totalMonth = Number(req.query.total_months);
     const totalPhai = Number(req.query.total_phais);
-    const lastThreeMonths = getMonthAgo(totalMonth);
+    const lastThreeMonths = helper.getMonthAgo(totalMonth);
 
     accountModel.aggregate([
         { // Get account
@@ -178,5 +167,96 @@ exports.getAccountPostedPastThreeMonths = (req, res) => {
         const array = initializeArray(totalMonth, phaiUnique);
         queryArray(result, array);
         res.send({data: array, phai: phaiUnique});
+    })
+}
+
+exports.checkQueryGetAccountLastNumbMonth = [
+    query('total_months', 'Tháng không hợp lệ').isNumeric(),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if(!errors.isEmpty())
+            return res.status(400).send(errors.array()[0].msg)
+        next()
+    }
+]
+
+exports.getAccountLastNumbMonth = (req, res) => {
+    const monthAgo = helper.getMonthAgo(Number(req.query.total_months));
+    accountModel.countDocuments({ createdAt: {$gte: monthAgo} }, (err, count) => {
+        if(err){
+            console.log('Error in ctl/api-service/admin/account.js -> getAccountLastNumbMonth ' + err);
+            return res.status(400).send('Có lỗi xảy ra vui lòng thử lại sau')
+        }
+        res.send({count});
+    })
+}
+
+exports.getTotalAccounts = (req, res) => {
+    accountModel.estimatedDocumentCount((err, count) => {
+        if(err){
+            console.log('Error in ctl/api-service/admin/account.js -> getTotalAccounts ' + err);
+            return res.status(400).send('Có lỗi xảy ra vui lòng thử lại sau')
+        }
+        res.send({count});
+    })
+}
+
+exports.getTotalPendingAccount = (req, res) => {
+    accountModel.aggregate([
+        {
+            $match: {status: 'pending'}
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'userId',
+                foreignField: '_id',
+                as: 'user'
+            }
+        },
+        {
+            $addFields: {
+                user: {$cond: [
+                    { $anyElementTrue: ['$user'] },
+                    { $arrayElemAt: ['$user', 0] },
+                    null
+                ]}
+            }
+        },
+        {
+            $match: {'user.status': 'normal'}
+        },
+        {
+            $count: 'totalCount'
+        }
+    ], function(err, result){
+        if(err){
+            console.log('Error in ctl/api-service/admin/account.js -> getTotalPendingAccount ' + err);
+            return res.status(400).send('Có lỗi xảy ra vui lòng thử lại sau')
+        }
+        if(result.length === 0){
+            return res.send({count: 0})
+        }
+        res.send({count: result[0].totalCount});
+    })
+}
+
+exports.getTotalDoneAccount = (req, res) => {
+    accountModel.countDocuments({status: 'done'}, (err, count) => {
+        if(err){
+            console.log('Error in ctl/api-service/admin/account.js -> getTotalDoneAccount ' + err);
+            return res.status(500).send('Có lỗi xảy ra vui lòng thử lại sau')
+        }
+        res.send({count});
+    })
+}
+
+exports.getTotalLockAccount = (req, res) => {
+    accountModel.countDocuments({status: 'lock'}, (err, count) => {
+        if(err){
+            console.log('Error in ctl/api-service/admin/account.js -> getTotalLockAccount ' + err);
+            return res.status(500).send('Có lỗi xảy ra vui lòng thử lại sau')
+        }
+        res.send({count});
     })
 }

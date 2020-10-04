@@ -17,7 +17,6 @@ const addLockReasonAccount = require('../controllers/admin/account/add-lock-read
 
 /* Dashboard  Page. */
 router.get('/dashboard', dashboardC.renderDashboard);
-router.get('/dashboard/get-account-sell-last-three-month', dashboardC.getAccountPostedPastThreeMonths);
 
 /* Property  Page. */
 router.get('/property/add-property', addPropertyC.renderPage);
