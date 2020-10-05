@@ -15,8 +15,14 @@ const addAddFieldC = require('../controllers/admin/addfield/add-addfield');
 
 const addLockReasonAccount = require('../controllers/admin/account/add-lock-readson');
 
+const managerMemberUserC = require('../controllers/admin/manager_member/user');
+
 /* Dashboard  Page. */
 router.get('/dashboard', dashboardC.renderDashboard);
+
+/* Manager User Page. */
+router.get('/manager_member/user', managerMemberUserC.renderUserPage);
+router.get('/manager_member/get-users', managerMemberUserC.checkQueryGetUserData, managerMemberUserC.getUserData);
 
 /* Property  Page. */
 router.get('/property/add-property', addPropertyC.renderPage);

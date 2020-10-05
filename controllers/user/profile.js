@@ -573,7 +573,10 @@ exports.getAccount = function(req, res){
             }
         } 
         else{
-                const totalAccounts = await accountModel.estimatedDocumentCount();
+                const totalAccounts = await accountModel.countDocuments({userId: req.user._id}).catch(err => false);
+                if(totalAccounts === false)
+                    return res.status(500).send('Có lỗi xảy ra vui lòng thử lại sau');
+
                 payload.accounts = result[0].accounts;
                 payload.totalAccount = result[0].totalAccount[0].total;
                 payload.accounts.forEach(function(account){

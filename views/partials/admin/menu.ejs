@@ -60,6 +60,7 @@
                     </li>
                 </ul>
             </div>
+            <% if(userSS){ %>
             <div class="app-header-right">
                 <div class="header-btn-lg pr-0">
                     <div class="widget-content p-0">
@@ -67,7 +68,7 @@
                             <div class="widget-content-left">
                                 <div class="btn-group">
                                     <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="p-0 btn">
-                                        <img width="42" class="rounded-circle" src="/css/admin/assets/images/avatars/1.jpg" alt="" />
+                                        <img width="42" class="rounded-circle" src="<%= userSS.urlImage %>" alt="" />
                                         <i class="fa fa-angle-down ml-2 opacity-8"></i>
                                     </a>
                                     <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
@@ -82,10 +83,16 @@
                             </div>
                             <div class="widget-content-left ml-3 header-user-info">
                                 <div class="widget-heading">
-                                    Alina Mclourd
+                                    <% if(userSS.role === 'moderator' || userSS.role === 'admin'){ %>
+                                        <%= userSS.name %>
+                                    <% } %>
                                 </div>
                                 <div class="widget-subheading">
-                                    VP People Manager
+                                    <% if(userSS.role === 'moderator'){ %>
+                                        <i class="fas fa-star"></i>   Quản trị viên
+                                    <% }else if(userSS.role === 'admin'){ %>
+                                        <i class="fas fa-user-shield"></i>   Admin
+                                    <% } %>
                                 </div>
                             </div>
                             <div class="widget-content-right header-user-info ml-3">
@@ -97,6 +104,7 @@
                     </div>
                 </div>
             </div>
+            <% } %>
         </div>
     </div>
     <div class="ui-theme-settings">
@@ -330,45 +338,24 @@
                     <ul class="vertical-nav-menu">
                         <li class="app-sidebar__heading">Dashboards</li>
                         <li>
-                            <a href="index.html" class="mm-active">
+                            <a href="/admin/dashboard" class="mm-active">
                                 <i class="metismenu-icon pe-7s-rocket"></i>
                                 Trang Tổng Quan
                             </a>
                         </li>
-                        <li class="app-sidebar__heading">UI Components</li>
+                        <li class="app-sidebar__heading">Quản lí</li>
                         <li>
                             <a href="#">
-                                <i class="metismenu-icon pe-7s-diamond"></i>
-                                Elements
+                                <i class="metismenu-icon pe-7s-helm"></i>
+                                Quản trị thành viên
                                 <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
                             </a>
                             <ul>
                                 <li>
-                                    <a href="elements-buttons-standard.html">
-                                        <i class="metismenu-icon"></i>
-                                        Buttons
-                                    </a>
+                                    <a href="/admin/manager_member/user"><i class="pe-7s-users"></i>   Người Dùng </a>
                                 </li>
                                 <li>
-                                    <a href="elements-dropdowns.html"> <i class="metismenu-icon"> </i>Dropdowns </a>
-                                </li>
-                                <li>
-                                    <a href="elements-icons.html"> <i class="metismenu-icon"> </i>Icons </a>
-                                </li>
-                                <li>
-                                    <a href="elements-badges-labels.html"> <i class="metismenu-icon"> </i>Badges </a>
-                                </li>
-                                <li>
-                                    <a href="elements-cards.html"> <i class="metismenu-icon"> </i>Cards </a>
-                                </li>
-                                <li>
-                                    <a href="elements-list-group.html"> <i class="metismenu-icon"> </i>List Groups </a>
-                                </li>
-                                <li>
-                                    <a href="elements-navigation.html"> <i class="metismenu-icon"> </i>Navigation Menus </a>
-                                </li>
-                                <li>
-                                    <a href="elements-utilities.html"> <i class="metismenu-icon"> </i>Utilities </a>
+                                    <a href="/admin/manager_member/moderator"> <i class="pe-7s-star"> </i> Quản trị viên</a>
                                 </li>
                             </ul>
                         </li>
