@@ -1,6 +1,8 @@
-const { sortString, getDateDiff } = helper;
 $(document).ready(function(){
-    helper.admin.setActiveSideMenu(['link-manager_member', 'link-manager_member-user']);
+
+    const { sortString, getDateDiff } = helper;
+
+    helper.admin.setActiveSideMenu(['link-manager_member', 'link-manager_member-moderator']);
     function setAllowPointer(element, value, type = 'pointer'){
         if(value)
             $(element).css('cursor', type);
@@ -115,17 +117,18 @@ $(document).ready(function(){
                 render: function(data, t, row){
                     if(row[6] === 'normal'){
                         let button = '<button data-name-user="'+row[2]+'" data-id-user="'+ row[0]+'" title="Khoá tài khoản này" data-toggle="modal" data-target="#lockModal" class="mb-2 mr-2 btn btn-warning btnLock"><i class="fas fa-key"></i>   </button>';
-                        if(helper.admin.isAdmin())
-                            button += '<button data-name-user="'+row[2]+'" data-id-user="'+ row[0]+'" title="Duyệt làm quản trị viên" class="mb-2 mr-2 btn btn-alternate btnMakeModerator"><i class="fas fa-star"></i>   </button>';
+                        button += '<button data-name-user="'+row[2]+'" data-id-user="'+ row[0]+'" title="Huỷ quản trị viên" class="mb-2 mr-2 btn btn-danger btnDemote"><i class="fas fa-user-slash"></i>   </button>';
                         return button
                     }
                     else if(row[6] === 'lock'){
                         return '<button data-name-user="'+row[2]+'" data-id-user="'+ row[0]+'" title="Mở khoá tài khoản" class="btn btn-info btn-sm btnUnLock"><i class="fas fa-lock-open"></i></button>' +
-                               '<button data-name-user="'+row[2]+'" data-id-user="'+ row[0]+'" title="Thêm lí do khoá" data-toggle="modal" data-target="#lockModal" style="margin-top: 5px;" class="btn btn-success btn-sm  btnLock"><i class="fa fa-plus-circle" aria-hidden="true"></i></button>' +
-                               '<button data-name-user="'+row[2]+'" data-id-user="'+ row[0]+'" title="Xem lí do khoá" style="margin-top: 5px;" class="btn btn-secondary btn-sm btnSeeReason"><i class="fas fa-eye"></i></button>'
+                               '<button data-name-user="'+row[2]+'" data-id-user="'+ row[0]+'" title="Thêm lí do khoá" data-toggle="modal" data-target="#lockModal" style="margin-left: 10px;" class="btn btn-success btn-sm  btnLock"><i class="fas fa-plus"></i></button>' +
+                               '<button data-name-user="'+row[2]+'" data-id-user="'+ row[0]+'" title="Xem lí do khoá" style="margin-top: 5px;" class="btn btn-secondary btn-sm btnSeeReason"><i class="fas fa-eye"></i></button>' + 
+                               '<button data-name-user="'+row[2]+'" data-id-user="'+ row[0]+'" title="Huỷ quản trị viên" style="margin-left: 10px;" class="btn btn-danger btn-sm btnDemote"><i class="fas fa-user-slash"></i>   </button>';
                     }
                     else
-                        return '<button title="Trạng thái không hợp lệ" class="btn btn-danger btn-sm"><i class="fas fa-exclamation-circle"></i></button>'
+                        return '<button title="Trạng thái không hợp lệ" class="btn btn-danger btn-sm"><i class="fas fa-exclamation-circle"></i></button>' +
+                                '<button data-name-user="'+row[2]+'" data-id-user="'+ row[0]+'" title="Huỷ quản trị viên" class="mb-2 mr-2 btn btn-danger btnDemote"><i class="fas fa-user-slash"></i>   </button>';
                 }
             }
         ],
@@ -133,7 +136,7 @@ $(document).ready(function(){
         "processing": true,
         serverSide: true,
         ajax: {
-            url: '/admin/manager_member/get-users',
+            url: '/admin/manager_member/get-moderators',
             type: 'GET',
             error: function (error) {
                 iziToast.error({title: 'Có lỗi khi tải dữ liệu', message: error.responseText, timeout: false})
@@ -145,128 +148,128 @@ $(document).ready(function(){
     $(document).on('click', '.btnLock', function (e) {
         const nameUser = $(this).attr('data-name-user');
         const idUser = $(this).attr('data-id-user');
-        $('#lockModalLabel').html(`<i class="fas fa-lock"></i>   Khoá người dùng "${nameUser}"`)
+        $('#lockModalLabel').html(`<i class="fas fa-lock"></i>   Khoá Quản Trị Viên "${nameUser}"`)
         $('#lockModalLabel').attr('data-id-user', idUser);
     })
 
     // Click on button unlock in table
     $(document).on('click', '.btnUnLock', function(e) {
-        const nameUser = $(this).attr('data-name-user');
-        const idUser = $(this).attr('data-id-user');
-        const data = {
-            'user_id': idUser,
-            '_csrf': $('#_csrf').val()
-        }
-        function unlockAccount(toast){
-            $.ajax({
-                url: '/api-service/admin/user/unlock',
-                method: 'PATCH',
-                data,
-                success: function(res){
-                    toast.instance.hide({
-                        transitionOut: 'fadeOutUp',
-                    }, toast.toast, '');
-                    table.draw(false);
-                    iziToast.success({message: res});
-                },
-                error: function(err){
-                    toast.instance.hide({
-                        transitionOut: 'fadeOutUp',
-                    }, toast.toast, '');
-
-                    iziToast.error({message: err.responseText})
-                }
-            })
-        }
-
-        iziToast.show({
-            theme: 'dark',
-            timeout: false,
-            overlay: true,
-            progressBar: false,
-            icon: 'fas fa-question',
-            title: 'Xác nhận',
-            message: `Bạn muốn mở khoá tài khoản "${nameUser}"?`,
-            position: 'center', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
-            progressBarColor: 'rgb(0, 255, 184)',
-            buttons: [
-                ['<button><i class="fas fa-lock-open"></i>   Mở khoá</button>', function (instance, toast) {
-                    unlockAccount({instance, toast})
-                }, true], // true to focus
-                ['<button>Đóng</button>', function (instance, toast) {
-                    instance.hide({
-                        transitionOut: 'fadeOutUp',
-                    }, toast, 'buttonName');
-                }]
-            ],
-        });
-    })
-
+            const nameUser = $(this).attr('data-name-user');
+            const idUser = $(this).attr('data-id-user');
+            const data = {
+                'user_id': idUser,
+                '_csrf': $('#_csrf').val()
+            }
+            function unlockAccount(toast){
+                $.ajax({
+                    url: '/api-service/admin/user/unlock',
+                    method: 'PATCH',
+                    data,
+                    success: function(res){
+                        toast.instance.hide({
+                            transitionOut: 'fadeOutUp',
+                        }, toast.toast, '');
+                        table.draw(false);
+                        iziToast.success({message: res});
+                    },
+                    error: function(err){
+                        toast.instance.hide({
+                            transitionOut: 'fadeOutUp',
+                        }, toast.toast, '');
+    
+                        iziToast.error({message: err.responseText})
+                    }
+                })
+            }
+    
+            iziToast.show({
+                theme: 'dark',
+                timeout: false,
+                overlay: true,
+                progressBar: false,
+                icon: 'fas fa-question',
+                title: 'Xác nhận',
+                message: `Bạn muốn mở khoá tài khoản "${nameUser}"?`,
+                position: 'center', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
+                progressBarColor: 'rgb(0, 255, 184)',
+                buttons: [
+                    ['<button><i class="fas fa-lock-open"></i>   Mở khoá</button>', function (instance, toast) {
+                        unlockAccount({instance, toast})
+                    }, true], // true to focus
+                    ['<button>Đóng</button>', function (instance, toast) {
+                        instance.hide({
+                            transitionOut: 'fadeOutUp',
+                        }, toast, 'buttonName');
+                    }]
+                ],
+            });
+        })
+    
     // Click on see reason 
     $(document).on('click', '.btnSeeReason', function(){
-        const button = this;
-        const nameUser = $(this).attr('data-name-user');
-        const idUser = $(this).attr('data-id-user');
-        const data = {
-            'user_id': idUser,
-        }
-
-        setAllowPointer(button, false);
-        $(button).prop('disabled', true);
-        $(button).html('<i class="fas fa-spinner fa-pulse"></i>');
-
-        $.ajax({
-            url: '/api-service/admin/user/get-lock-reason',
-            type: 'GET',
-            data,
-            success: function(res){
-                let divReason = '';
-                let title = '';
-                if(typeof res === 'object' && res.length > 0){
-                    title = 'Khoá vào ngày: ' + dateFormat(new Date(res[Number(res.length) - 1].createdAt), "d mmmm, yyyy");
-                    res.forEach(function(reason){ // Convert date and create div
-                        const lockAt = reason.createdAt;
-                        reason.createdAt = dateFormat(new Date(reason.createdAt), "d mmmm, yyyy");
-                        divReason += '- ' + reason.reason + ' ('+getDateDiff(lockAt)+')<br>';
-                    })
-                }
-                else{
-                    divReason = 'Không tìm thấy, vui lòng thử lại sau';
-                    title = 'Có lỗi xảy ra';
-                }
-                iziToast.show({
-                    theme: 'dark',
-                    icon: 'fas fa-lock',
-                    iconColor: 'yellow',
-                    progressBar: false,
-                    title: title,
-                    message: divReason,
-                    position: 'center', 
-                    overlay: true,
-                    timeout: false,
-                    layout: 2,
-                    onClosing: function(instance, toast, closedBy){
-                        setAllowPointer(button, true);
-                        $(button).prop('disabled', false);
-                        $(button).html('<i class="fas fa-eye"></i>')
-                    }
-                });
-            },
-            error: function(err){
-                iziToast.error({
-                    title: 'Có lỗi',
-                    message: err.responseText
-                });
-                setAllowPointer(button, true);
-                $(button).prop('disabled', false);
-                $(button).html('<i class="fas fa-eye"></i>')
+            const button = this;
+            const nameUser = $(this).attr('data-name-user');
+            const idUser = $(this).attr('data-id-user');
+            const data = {
+                'user_id': idUser,
             }
-        })
-
-    });
-
-    // Click make moderator
-    $(document).on('click', '.btnMakeModerator', function(){
+    
+            setAllowPointer(button, false);
+            $(button).prop('disabled', true);
+            $(button).html('<i class="fas fa-spinner fa-pulse"></i>');
+    
+            $.ajax({
+                url: '/api-service/admin/user/get-lock-reason',
+                type: 'GET',
+                data,
+                success: function(res){
+                    let divReason = '';
+                    let title = '';
+                    if(typeof res === 'object' && res.length > 0){
+                        title = 'Khoá vào ngày: ' + dateFormat(new Date(res[Number(res.length) - 1].createdAt), "d mmmm, yyyy");
+                        res.forEach(function(reason){ // Convert date and create div
+                            const lockAt = reason.createdAt;
+                            reason.createdAt = dateFormat(new Date(reason.createdAt), "d mmmm, yyyy");
+                            divReason += '- ' + reason.reason + ' ('+getDateDiff(lockAt)+')<br>';
+                        })
+                    }
+                    else{
+                        divReason = 'Không tìm thấy, vui lòng thử lại sau';
+                        title = 'Có lỗi xảy ra';
+                    }
+                    iziToast.show({
+                        theme: 'dark',
+                        icon: 'fas fa-lock',
+                        iconColor: 'yellow',
+                        progressBar: false,
+                        title: title,
+                        message: divReason,
+                        position: 'center', 
+                        overlay: true,
+                        timeout: false,
+                        layout: 2,
+                        onClosing: function(instance, toast, closedBy){
+                            setAllowPointer(button, true);
+                            $(button).prop('disabled', false);
+                            $(button).html('<i class="fas fa-eye"></i>')
+                        }
+                    });
+                },
+                error: function(err){
+                    iziToast.error({
+                        title: 'Có lỗi',
+                        message: err.responseText
+                    });
+                    setAllowPointer(button, true);
+                    $(button).prop('disabled', false);
+                    $(button).html('<i class="fas fa-eye"></i>')
+                }
+            })
+    
+        });
+    
+    // Click on denote
+    $(document).on('click', '.btnDemote', function(e){
         const nameUser = $(this).attr('data-name-user');
         const idUser = $(this).attr('data-id-user');
         const data = {
@@ -274,9 +277,9 @@ $(document).ready(function(){
             '_csrf': $('#_csrf').val()
         }
 
-        function makeModerator(toast){
+        function demoteModerator(toast){
             $.ajax({
-                url: '/api-service/admin/user/make-moderator',
+                url: '/api-service/admin/user/demote-moderator',
                 method: 'PATCH',
                 data,
                 success: function(res){
@@ -301,17 +304,17 @@ $(document).ready(function(){
             timeout: false,
             overlay: true,
             progressBar: false,
-            icon: 'fas fa-star',
+            icon: 'fas fa-user-slash',
             iconColor: 'yellow',
             title: 'Xác nhận',
             titleColor: 'yellow',
-            message: `Bạn muốn duyệt "${nameUser}" trở thành Moderator?`,
+            message: `Bạn muốn huỷ bỏ chức vụ Moderator của "${nameUser}" ?`,
             messageColor: 'yellow',
             position: 'center', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
             progressBarColor: 'rgb(0, 255, 184)',
             buttons: [
-                ['<button><i class="fas fa-star"></i>   Duyệt</button>', function (instance, toast) {
-                    makeModerator({instance, toast})
+                ['<button><i class="fas fa-check"></i>   Duyệt</button>', function (instance, toast) {
+                    demoteModerator({instance, toast})
                 }, true], // true to focus
                 ['<button>Đóng</button>', function (instance, toast) {
                     instance.hide({
@@ -321,7 +324,7 @@ $(document).ready(function(){
             ],
         });
     })
-
+    
     // Click on button lock in modals
     $('.btnLockSubmit').click(function(){
         const idUser =  $('#lockModalLabel').attr('data-id-user');
@@ -382,4 +385,5 @@ $(document).ready(function(){
         el.addEventListener("click", handleSelectDropdown)
         );
         });
+
 })

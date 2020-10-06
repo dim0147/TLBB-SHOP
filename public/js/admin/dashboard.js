@@ -1,4 +1,5 @@
 $(document).ready(function(){
+    helper.admin.setActiveSideMenu(['link-dashboard']);
 
     function getMonthAgo(totalMonth){
 

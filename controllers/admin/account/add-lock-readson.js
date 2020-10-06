@@ -54,6 +54,10 @@ exports.checkBody = [
 ]
 
 exports.addLockReason = async function (req, res){
+    // Check is valid moderator and admin
+    if(req.user.role !== 'moderator' && req.user.role !== 'admin')
+        return res.status(403).send('Bạn không có quyền khoá tài khoản này')
+
     const session = await mongoose.startSession().catch(err => console.log(err));
     if(typeof session === 'undefined')
         return res.status(400).send("Có lỗi xảy ra, vui lòng thử lại sau");
@@ -86,7 +90,7 @@ exports.addLockReason = async function (req, res){
         (result, cb) => { // Create reason
             const payload = new lockReasonModel({
                 account: result.account._id,
-                user: req.user._id,
+                lock_by: req.user._id,
                 reason: req.body.reason
             });
             payload.save({session: session}, function(err) {

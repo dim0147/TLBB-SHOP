@@ -3,7 +3,7 @@
   <head>
     <% include ../../partials/admin/head %>
     <link rel="stylesheet" type="text/css" href="/plugins/DataTables/datatables.min.css"/>
-    <link rel="stylesheet" type="text/css" href="/css/admin/manager_user/user.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/admin/manager_user/moderator.css"/>
   </head>
   <body>
     <% if(typeof csrfToken !== "undefined"){ %>
@@ -14,7 +14,7 @@
 			<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header text-center">
-				<h5 class="modal-title" id="lockModalLabel">Khoá người dùng</h5>
+				<h5 class="modal-title" id="lockModalLabel">Khoá Quản Trị Viên</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
@@ -22,16 +22,16 @@
 				<div class="modal-body">
           <p>Chọn lí do</p>
           <div class="dropdownD" id="lightdropdown">
-            <div data-choose="Không phải tên thật" class="dropdown-select">
-              <span class="dropdown-selected">Không phải tên thật</span>
+            <div data-choose="Làm Ẩu" class="dropdown-select">
+              <span class="dropdown-selected">Làm Ẩu</span>
               <i class="fa fa-angle-down dropdown-caret"></i>
             </div>
             <ul class="dropdown-list">
-              <li class="dropdown-item" data-value="Không phải tên thật">
-                Không phải tên thật
+              <li class="dropdown-item" data-value="Làm Ẩu">
+                Làm ẩu
               </li>
-              <li class="dropdown-item" data-value="Giả mạo">
-                Giả mạo
+              <li class="dropdown-item" data-value="Lạm dụng">
+                Lạm dụng
               </li>
               <li class="dropdown-item" data-value="Chửi bậy">
                 Chửi bậy
@@ -64,12 +64,12 @@
       <div class="page-title-wrapper">
         <div class="page-title-heading">
           <div class="page-title-icon">
-            <i class="pe-7s-users text-success"> </i>
+            <i class="pe-7s-star text-success"> </i>
           </div>
           <div>
-            Người dùng
+            Quản trị viên
             <div class="page-title-subheading">
-              Quản trị người dùng, những người dùng đăng kí được hiện ở đây
+              Tất cả những quản trị viên được hiện ở đây
             </div>
           </div>
         </div>
@@ -173,6 +173,6 @@
                 
     <% include ../../partials/admin/footer %>
     <script src="/plugins/DataTables/datatables.min.js"></script>
-    <script src="/js/admin/manager_member/user.js"></script>
+    <script src="/js/admin/manager_member/moderator.js"></script>
   </body>
 </html>

@@ -4,12 +4,11 @@ const mongoose = require('mongoose');
 
 const userModel = require('../../../models/user');
 
-
-exports.renderUserPage = (req, res) => {
-    res.render('admin/manager_member/user', {title: 'Quản trị thành viên', csrfToken: req.csrfToken()})
+exports.renderModeratorPage = (req, res) => {
+    res.render('admin/manager_member/moderator', {title: 'Quản trị viên', csrfToken: req.csrfToken()})
 }
 
-exports.checkQueryGetUserData = [
+exports.checkQueryGetModeratorData = [
     query('order', 'Order không hợp lệ').isArray().custom(order => {
         if(!order[0] || typeof order[0] !== 'object')
             throw new Error('Value không hợp lệ');
@@ -31,7 +30,7 @@ exports.checkQueryGetUserData = [
     }
 ]
 
-exports.getUserData = (req, res) => {
+exports.getModeratorData = (req, res) => {
     const drawNumber = Number(req.query.draw);
     const skip = Number(req.query.start);
     const limit = Number(req.query.length);
@@ -63,7 +62,7 @@ exports.getUserData = (req, res) => {
 
     // Analyze query
     let query = {
-        role: 'user',
+        role: 'moderator',
     };
     const textSearch = req.query.search.value;
     if(textSearch !== ''){
@@ -109,7 +108,7 @@ exports.getUserData = (req, res) => {
         }
     ], async function(err, result){
         if(err){
-            console.log('Error in ctl/manager_member/user.js -> getUserData 01 ' + err);
+            console.log('Error in ctl/manager_member/moderator.js -> getModeratorData 01 ' + err);
             return res.status(400).send('Có lỗi xảy ra vui lòng thử lại sau')
         }
         // Convert result
@@ -118,7 +117,7 @@ exports.getUserData = (req, res) => {
         result = result[0];
 
         // Get total documents 
-        const totalUser = await userModel.countDocuments({role: 'user'}).catch(err => false);
+        const totalUser = await userModel.countDocuments({role: 'moderator'}).catch(err => false);
         if(totalUser === false)
             return res.status(500).send('Có lỗi xảy ra vui lòng thử lại sau');
 

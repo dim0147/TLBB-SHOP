@@ -172,6 +172,21 @@ exports.getMondayOfLastNumbWeek = function(numbWeek = 1){
   , lastMonday = new Date(beforeOneWeek.setDate(diffToMonday))
   return lastMonday;
 }
+//----------------------- HANDLE TRANSACTION ERROR------------------------
+exports.handleStartSessionError = function(err){
+    console.log('Error while starting session');
+    return false;
+}
+
+exports.handleCommitTransactionError = function(err){
+    console.log('Error while CommitTransaction');
+    return false;
+}
+
+exports.handleAbortTransactionError = function(err){
+    console.log('Error while AbortTransaction');
+    return false;
+}
 
 //----------------------- PUSH NOTIFICATION TO USER SCREEN------------------------
 const pushNotification = (userId, data) => {
@@ -971,3 +986,4 @@ exports.createNotification = function(data){
             break;
     }
 }
+

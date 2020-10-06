@@ -87,5 +87,19 @@ const helper = {
         } else {
             return dateFormat(date, "d mmmm, yyyy");
         }
+    },
+
+    admin: {
+        setActiveSideMenu: function(arrayElement){
+            arrayElement.forEach(function(element){
+                $(`.${element}`).addClass('mm-active');
+            })
+        },
+        isAdmin: function(){
+            if($('#isAdmin').length)
+                return true
+            else
+                return false
+        }
     }
 }
