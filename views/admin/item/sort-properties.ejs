@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <% include ../../partials/admin/head %>
+  </head>
+  <body>
+    <% if(typeof csrfToken !== "undefined"){ %>
+    <input type="hidden" id="_csrf" value="<%= csrfToken %>" />
+    <% } %> <% include ../../partials/admin/menu %>
+    <input type="hidden" id="itemId" value="<%= item._id %>">
+    <div class="app-page-title">
+      <div class="page-title-wrapper">
+        <div class="page-title-heading">
+          <div class="page-title-icon">
+            <i class="pe-7s-edit text-success"> </i>
+          </div>
+          <div>
+            Chỉnh sửa thứ tự property của Item <%= item.name %>
+            <div class="page-title-subheading">
+              Chỉnh sửa thứ tự xuất hiện của property, sắp xếp theo từ nhỏ đến lớn
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content">
+      <div
+        class="tab-pane tabs-animation fade active show"
+        id="tab-content-1"
+        role="tabpanel"
+      >
+        <div class="main-card mb-3 card">
+          <div class="card-body">
+            <h5 class="card-title">Chỉnh sửa thứ tự property của item <%= item.name %></h5>
+            <div id="alert" class="alert alert-primary d-none" role="alert">
+              A simple primary alert—check it out!
+            </div>
+            <% if(properties && properties.length > 0){ %>
+              <form id="submitForm">
+              <% properties.forEach(property => { %>
+                <div class="position-relative row form-group">
+                  <label for="exampleEmail" class="col-sm-2 col-form-label"
+                    ><% if(property.parent && property.parent.name){ %>
+                        <%= property.parent.name %> (+<%= property.name %>)
+                    <% }else{ %>
+                      <%= property.name %>
+                    <% } %></label
+                  >
+                  <div class="col-sm-2">
+                    <input
+                      name="title"
+                      value="<%= property.order ? property.order : '' %>"
+                      placeholder="Đặt số thứ tự"
+                      type="number"
+                      data-property-id="<%= property._id %>"
+                      class="form-control orderNumber"
+                      min="1"
+                      required
+                    />
+                  </div>
+                </div>
+              <% }) %>
+            <% } %>
+            <div class="position-relative row form-check">
+              <div class="col-sm-10 offset-sm-2">
+                <button id="submit" class="btn btn-secondary">Lưu</button>
+              </div>
+            </div>
+          </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <% include ../../partials/admin/footer %>
+    <script src="/js/admin/item/sort-properties.js"></script>
+  </body>
+</html>

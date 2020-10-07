@@ -8,6 +8,10 @@ const editPropertyC = require('../controllers/admin/property/edit-property')
 const addSubPropertyC = require('../controllers/admin/property/add-sub-property');
 
 const addItemC = require('../controllers/admin/item/add-item');
+const showItemC = require('../controllers/admin/item/show-item');
+const editItemC = require('../controllers/admin/item/edit-item');
+const delItemC = require('../controllers/admin/item/delete-item');
+const sortPropertyC = require('../controllers/admin/item/sort-properties');
 
 const addPhaiC = require('../controllers/admin/phai/add-phai');
 
@@ -78,6 +82,12 @@ router.post('/property/add-sub-property/:idItem',  isLogin, isNormalUserAjax, is
 /* Item  Page. */
 router.get('/item/add-item', isLogin, isNormalUser, isAdmin, addItemC.renderPage);
 router.post('/item/add-item', isLogin, isNormalUserAjax, isAdmin, addItemC.addNewItem);
+router.get('/item/show-items', isLogin, isNormalUser, isAdmin, showItemC.renderPage);
+router.get('/item/edit-item/:itemId', isLogin, isNormalUser, isAdmin, editItemC.renderPage);
+router.put('/item/edit-item', isLogin, isNormalUser, isAdmin, editItemC.updateItem);
+router.delete('/item/delete-item', isLogin, isNormalUser, isAdmin, delItemC.checkBodyDeleteItem, delItemC.deleteItem);
+router.get('/item/sort-properties/:itemId', isLogin, isNormalUser, isAdmin, sortPropertyC.checkParam, sortPropertyC.renderPage);
+router.patch('/item/sort-properties', isLogin, isNormalUser, isAdmin, sortPropertyC.checkBody, sortPropertyC.updateOrderProperties);
 
 /* Phai  Page. */
 router.get('/phai/add-phai', isLogin, isNormalUser, isAdmin, addPhaiC.renderPage);

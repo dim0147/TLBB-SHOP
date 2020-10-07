@@ -1,47 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <% include ../../partials/head %>
-</head>
-
-<body class="body-wrapper">
-  <% include ../../partials/menu %>
-<section class="ad-post bg-gray py-5">
-    <div class="container">
-            <!-- Post Your ad start -->
-            <fieldset class="border border-gary p-4 mb-5">
-                <% if(typeof csrfToken !== "undefined"){ %>
-                    <input type="hidden" id="_csrf" value="<%= csrfToken %>">
-                <% } %>
-                    <div class="row">
-                        <div id="alert" class="alert alert-primary d-none" role="alert">
-                            A simple primary alert—check it out!
-                        </div>
-                        <div class="col-lg-12">
-                            <h3>Thêm Item</h3>
-                        </div>
-                        <div class="col-lg-12">
-                            <h6 class="font-weight-bold pt-4 pb-1">Tên:</h6>
-                            <input id="title" type="text" name="title" class="border w-100 p-2 bg-white" placeholder="eg: Võ Hồn">
-                            
-                            <h6 class="font-weight-bold pt-4 pb-1">Slug:</h6>
-                            <input id="slug" type="text" name="slug" class="border w-100 p-2 bg-white" placeholder="eg: vohon">
-                        
-                            <button id="submit" type="submit" class="btn btn-info d-block mt-2"><i class="fas fa-plus"></i>  Thêm</button>
-                        </div>
-                            
-                    </div>
-                    </div>
-            </fieldset>
+  <head>
+    <% include ../../partials/admin/head %>
+  </head>
+  <body>
+    <% if(typeof csrfToken !== "undefined"){ %>
+    <input type="hidden" id="_csrf" value="<%= csrfToken %>" />
+    <% } %> <% include ../../partials/admin/menu %>
+    <div class="app-page-title">
+      <div class="page-title-wrapper">
+        <div class="page-title-heading">
+          <div class="page-title-icon">
+            <i class="pe-7s-plus text-success"> </i>
+          </div>
+          <div>
+            Thêm
+            <div class="page-title-subheading">
+              Thêm item cho account.
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    
-</section>
-<!--============================
-=            Footer            =
-=============================-->
 
-<% include ../../partials/footer %>
-<script src="/js/admin/item/add-item.js"></script>
-</body>
+    <div class="tab-content">
+      <div
+        class="tab-pane tabs-animation fade active show"
+        id="tab-content-1"
+        role="tabpanel"
+      >
+        <div class="main-card mb-3 card">
+          <div class="card-body">
+            <h5 class="card-title">Thêm</h5>
+            <div id="alert" class="alert alert-primary d-none" role="alert">
+              A simple primary alert—check it out!
+            </div>
+            <div class="position-relative row form-group">
+              <label for="exampleEmail" class="col-sm-2 col-form-label"
+                >Tên</label
+              >
+              <div class="col-sm-10">
+                <input
+                  name="title"
+                  id="title"
+                  placeholder="eg: Võ Hồn"
+                  class="form-control"
+                />
+              </div>
+            </div>
+            <div class="position-relative row form-group">
+              <label for="examplePassword" class="col-sm-2 col-form-label"
+                >Slug</label
+              >
+              <div class="col-sm-10">
+                <input
+                  id="slug"
+                  type="text"
+                  name="slug"
+                  placeholder="eg: vohon"
+                  class="form-control"
+                />
+              </div>
+            </div>
+            <div class="position-relative row form-check">
+              <div class="col-sm-10 offset-sm-2">
+                <button id="submit" class="btn btn-secondary">Thêm</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <% include ../../partials/admin/footer %>
+    <script src="/js/admin/item/add-item.js"></script>
+  </body>
 </html>

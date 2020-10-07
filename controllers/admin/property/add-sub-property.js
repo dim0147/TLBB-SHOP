@@ -88,11 +88,28 @@ exports.addNewSubProperty = (req, res) => {
                 cb(null, result);
             });
         },
+        function(result, cb){
+            itemPropertyModel
+            .findOne({itemId: result.property.itemId})
+            .sort({order: -1})
+            .exec((err, property) => {
+                if(err){
+                    console.error(err);
+                    cb("Có lỗi xảy ra xin vui lòng thử lại sau", null);
+                    return
+                }
+                // Check if order number of property is exist then + 1 that order number is 
+                const orderNumber = property && property.order ? property.order + 1 : 1;
+                result.orderNumber = orderNumber;
+                cb(null, result);
+            })
+        },
         (result, cb) => { // Create sub property
             const payload = new itemPropertyModel({
                 name: req.body.name,
                 itemId: result.property.itemId,
-                parent: result.property._id
+                parent: result.property._id,
+                order: result.orderNumber
             });
             payload.save(err => {
                 if(err){

@@ -33,7 +33,7 @@ exports.checkBodyEditProperty = [
 
 exports.editProperty = (req, res) => {
     waterfall([
-        (cb) => {
+        (cb) => {   // Check if exist
             itemPropertyModel.findById(req.body._id).exec(function (err, property){
                 if(err){
                     console.log('Có lỗi khi get property, source: CTL/admin/property/edit-property -> editProperty1' + err);
@@ -44,13 +44,32 @@ exports.editProperty = (req, res) => {
                 cb(null, {property: property})
             });
         },
-        (result, cb) => {
+        (result, cb) => { // Check name if exist
+            itemPropertyModel.countDocuments({name: {$regex: req.body.name, $options: 'i'}, itemId: result.property.itemId, _id: {$ne: req.body._id}}, (err, count) => {
+                if(err){
+                    console.log('Có lỗi khi update property, source: CTL/admin/property/edit-property -> editProperty3' + err);
+                    return cb("Có lỗi xảy ra , vui lòng thử lại sau");
+                }
+                if(count !== 0) return cb(`Property "${req.body.name}" đã tồn tại`)
+                cb(null, result);
+            })
+        },
+        (result, cb) => { // Check slug if exists
+            if(req.body.slug === '') return cb(null, result);
+            itemPropertyModel.countDocuments({slug: req.body.slug, itemId: result.property.itemId, _id: {$ne: req.body._id}}, (err, count) => {
+                if(err){
+                    console.log('Có lỗi khi update property, source: CTL/admin/property/edit-property -> editProperty4' + err);
+                    return cb("Có lỗi xảy ra , vui lòng thử lại sau");
+                }
+                if(count !== 0) return cb(`Slug "${req.body.slug}" đã tồn tại`)
+                cb(null, result);
+            })
+        },
+        (result, cb) => {   // Update property
             let payload = {
                 name: req.body.name
             }
-            if(req.body.slug != '' || req.body.slug.length != 0){
                 payload.slug = req.body.slug;
-            }
             itemPropertyModel.updateOne({_id: result.property._id}, payload, err => {
                 if(err){
                     console.log('Có lỗi khi update property, source: CTL/admin/property/edit-property -> editProperty2' + err);

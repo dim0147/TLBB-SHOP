@@ -48,6 +48,9 @@ exports.getMenuData = function(){
                                       foreignField: 'parent',
                                       as: 'sub_properties'
                                   }
+                              },
+                              {
+                                  $sort: {order: 1}
                               }
                           ],
                           as: 'properties'

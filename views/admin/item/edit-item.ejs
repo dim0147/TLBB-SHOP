@@ -3,7 +3,6 @@
   <head>
     <% include ../../partials/admin/head %>
   </head>
-  <link rel="stylesheet" href="/css/admin/property/add-property.css">
   <body>
     <% if(typeof csrfToken !== "undefined"){ %>
     <input type="hidden" id="_csrf" value="<%= csrfToken %>" />
@@ -12,18 +11,18 @@
       <div class="page-title-wrapper">
         <div class="page-title-heading">
           <div class="page-title-icon">
-            <i class="pe-7s-plus text-success"> </i>
+            <i class="pe-7s-pen text-success"> </i>
           </div>
           <div>
-            Thêm Property
+            Chỉnh sửa
             <div class="page-title-subheading">
-              Thêm Property cho item
+              Chỉnh sửa item "<%= item.name %>".
             </div>
           </div>
         </div>
       </div>
     </div>
-
+    <input type="hidden" id="itemId" value="<%= item._id %>">
     <div class="tab-content">
       <div
         class="tab-pane tabs-animation fade active show"
@@ -32,7 +31,7 @@
       >
         <div class="main-card mb-3 card">
           <div class="card-body">
-            <h5 class="card-title">Thêm</h5>
+            <h5 class="card-title">Chỉnh sửa</h5>
             <div id="alert" class="alert alert-primary d-none" role="alert">
               A simple primary alert—check it out!
             </div>
@@ -42,30 +41,32 @@
               >
               <div class="col-sm-10">
                 <input
-                  id="name" 
-                  type="text" 
-                  name="name"
+                  name="title"
+                  id="title"
+                  value="<%= item.name %>"
+                  placeholder="eg: Võ Hồn"
                   class="form-control"
                 />
               </div>
             </div>
             <div class="position-relative row form-group">
               <label for="examplePassword" class="col-sm-2 col-form-label"
-                >Item</label
+                >Slug</label
               >
               <div class="col-sm-10">
-                <select id="idItem" name="item" id="inputGroupSelect" class="w-100 select-css">
-                    <% if (typeof items !== "undefined"){ %>
-                        <% items.forEach((item) =>{ %>
-                        <option value="<%= item._id %>"><%= item.name %></option>
-                        <% }) %>
-                    <% } %>
-                </select>
+                <input
+                  id="slug"
+                  type="text"
+                  name="slug"
+                  value="<%= item.slug %>"
+                  placeholder="eg: vohon"
+                  class="form-control"
+                />
               </div>
             </div>
             <div class="position-relative row form-check">
               <div class="col-sm-10 offset-sm-2">
-                <button id="submit" class="btn btn-secondary">Thêm</button>
+                <button id="submit" class="btn btn-secondary">Lưu</button>
               </div>
             </div>
           </div>
@@ -74,6 +75,6 @@
     </div>
 
     <% include ../../partials/admin/footer %>
-    <script src="/js/admin/property/add-property.js"></script>
+    <script src="/js/admin/item/edit-item.js"></script>
   </body>
 </html>

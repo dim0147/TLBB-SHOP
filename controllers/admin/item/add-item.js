@@ -75,8 +75,9 @@ exports.addNewItem = async (req, res) => {
                 cb(null, items[0]);
             })
         },
-        function(item, cb){
-            itemPropertyModel.create([{name: 'Chưa có', itemId: item._id}], {session: session}, function(err){
+        // Create "Chưa có" sub properties
+        function(item, cb){ 
+            itemPropertyModel.create([{name: 'Chưa có', itemId: item._id, order: 1}], {session: session}, function(err){
                 if(err){
                     console.log('Error in ctl/admin/item/add-item.js -> addNewItem 05 ' + err);
                     return cb('Có lỗi xảy ra vui lòng thử lại sau')

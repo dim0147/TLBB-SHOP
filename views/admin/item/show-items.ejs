@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <% include ../../partials/admin/head %>
+    <link rel="stylesheet" type="text/css" href="/plugins/DataTables/datatables.min.css"/>
+  </head>
+  <body>
+    <% if(typeof csrfToken !== "undefined"){ %>
+      <input type="hidden" id="_csrf" value="<%= csrfToken %>">
+    <% } %>
+
+        <% include ../../partials/admin/menu %>
+    <div class="app-page-title">
+      <div class="page-title-wrapper">
+        <div class="page-title-heading">
+          <div class="page-title-icon">
+            <i class="pe-7s-star text-success"> </i>
+          </div>
+          <div>
+            Items
+            <div class="page-title-subheading">
+              Hiển thị toàn bộ Item của tài khoản
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-12">
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <div class="table-responsive">
+                <table class="mb-0 table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Tên</th>
+                        <th>Slug</th>
+                        <th>Properties</th>
+                        <th>Ngày thêm</th>
+                        <th>Lần cuối chỉnh sửa</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                      <% if(items && items.length > 0){ %>
+                        <% items.forEach(item => { %>
+                          <tr>
+                            <th><%= item._id %></th>
+                            <td><%= item.name %></td>
+                            <td><%= item.slug %></td>
+                            <td>
+                              <% if(item.properties && item.properties.length > 0){ %>
+                              <% 
+                                const arrayA = item.properties.map(property => {
+                                  return `<a href="/admin/property/edit-property/${property._id}">${property.name}</a>`
+                                })
+                              %>
+                              <%- arrayA.join(', ') %>
+                              <%} else {%>
+                                <p>Chưa Có property</p>
+                              <% } %>
+                            </td>
+                            <td data-order="<%= item.createdAt %>"><%= dateFormat(item.createdAt, 'd mmmm, yyyy') %></td>
+                            <td data-order="<%= item.updatedAt %>"><%= dateFormat(item.updatedAt, 'd mmmm, yyyy') %></td>
+                            <td>
+                              <a href="/admin/item/edit-item/<%= item._id %>"><button data-item-id="<%= item._id %>" title="Chỉnh sửa" class="btn btn-info btn-sm"><i class="fas fa-edit"></i></button></a>
+                              <a href="/admin/property/add-property"><button title="Thêm property" class="btn btn-success btn-sm"><i class="fas fa-plus"></i></button></a>
+                              <a href="/admin/item/sort-properties/<%= item._id %>"><button data-item-id="<%= item._id %>" title="Sắp xếp properties" class="btn btn-warning btn-sm"><i class="fas fa-sort"></i></a>
+                              <button style="margin-top: 5px;" data-item-id="<%= item._id %>" data-item-name="<%= item.name %>" title="Xoá" class="btn btn-danger btn-sm btnRemove"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                      <% }) %>
+                    <% } %>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+                
+    <% include ../../partials/admin/footer %>
+    <script src="/plugins/DataTables/datatables.min.js"></script>
+    <script src="/js/admin/item/show-items.js"></script>
+  </body>
+</html>

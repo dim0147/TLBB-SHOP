@@ -62,6 +62,9 @@ exports.renderAddAccount = (req, res) => {
                                     foreignField: 'parent',
                                     as: 'sub_properties'
                                 }
+                            },
+                            {
+                                $sort: {order: 1}
                             }
                         ],
                         as: 'detail'

@@ -393,6 +393,9 @@ exports.indexPage = (req, res) =>{
                                 }
                             },
                             {
+                                $sort: {order: 1}
+                            },
+                            {
                                 $lookup:{
                                     from: 'accounts',
                                     let: {idProperty: '$_id'},
@@ -460,7 +463,7 @@ exports.indexPage = (req, res) =>{
                                     as: 'sub_properties'
 
                                 }
-                            }
+                            },
                         ],
                         as: 'properties'
                     }

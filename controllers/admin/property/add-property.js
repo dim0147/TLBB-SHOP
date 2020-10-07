@@ -43,7 +43,7 @@ exports.addNewProperty = (req, res) => {
         },
         //  Find property if exist 
         function(item, cb){
-            itemPropertyModel.findOne({itemId: item._id, name: nameProperty}, (err, property) => {
+            itemPropertyModel.findOne({itemId: item._id, name: {$regex: nameProperty, $options: 'i'}}, (err, property) => {
                 if(err){
                     console.error(err);
                     cb("Có lỗi xảy ra xin vui lòng thử lại sau", null);
@@ -56,11 +56,27 @@ exports.addNewProperty = (req, res) => {
                 cb(null, item);
             });
         },
-        // Create new Property
         function(item, cb){
+            itemPropertyModel
+            .findOne({itemId: item._id})
+            .sort({order: -1})
+            .exec((err, property) => {
+                if(err){
+                    console.error(err);
+                    cb("Có lỗi xảy ra xin vui lòng thử lại sau", null);
+                    return
+                }
+                // Check if order number of property is exist then + 1 that order number is 
+                const orderNumber = property && property.order ? property.order + 1 : 1;
+                cb(null, item, orderNumber);
+            })
+        },
+        // Create new Property
+        function(item, orderNumber, cb){
             itemPropertyModel.create({
                 name: nameProperty,
-                itemId: item._id
+                itemId: item._id,
+                order: orderNumber
             }, err => {
                 if(err){
                     console.error(err);
