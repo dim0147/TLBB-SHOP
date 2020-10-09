@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <% include ../../partials/admin/head %>
+    <link rel="stylesheet" type="text/css" href="/plugins/DataTables/datatables.min.css"/>
+  </head>
+  <body>
+    <% if(typeof csrfToken !== "undefined"){ %>
+      <input type="hidden" id="_csrf" value="<%= csrfToken %>">
+    <% } %>
+
+        <% include ../../partials/admin/menu %>
+    <div class="app-page-title">
+      <div class="page-title-wrapper">
+        <div class="page-title-heading">
+          <div class="page-title-icon">
+            <i class="pe-7s-star text-success"> </i>
+          </div>
+          <div>
+            Properties
+            <div class="page-title-subheading">
+              Hiển thị toàn bộ Properties
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-12">
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <div class="table-responsive">
+                <table class="mb-0 table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Item</th>
+                        <th>Property</th>
+                        <th>Order</th>
+                        <th>Slug</th>
+                        <th>Parent</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                      <% if(properties && properties.length > 0){ %>
+                        <% properties.forEach(property => { %>
+                          <tr>
+                            <th><%= property._id %></th>
+                            <td>
+                                <% if(property.itemId && property.itemId.name){ %>
+                                <a href="/admin/item/edit-item/<%= property.itemId._id %>"><%= property.itemId.name %></a>
+                                <% }else{ %>
+                                    Không có
+                                <% } %>
+                            </td>
+                            <td><%= property.name %></td>
+                            <td><%= property.order %></td>
+                            <td><%= property.slug %></td>
+                            <td>
+                                <% if(property.parent && property.parent.name){ %>
+                                    <%= property.parent.name %>
+                                <% }else{ %>
+                                    Không có
+                                <% } %>
+                            </td>
+                            <td>
+                                <a href="/admin/property/edit-property/<%= property._id %>"><button data-property-id="<%= property._id %>" title="Chỉnh sửa" class="btn btn-info btn-sm"><i class="fas fa-edit"></i></button></a>
+                                <% if(property.itemId && property.itemId._id){ %>
+                                    <a href="/admin/item/sort-properties/<%= property.itemId._id %>"><button data-item-id="<%= property.itemId._id %>" title="Sắp xếp properties" class="btn btn-warning btn-sm"><i class="fas fa-sort"></i></button></a>
+                                    <a href="/admin/property/add-sub-property/<%= property.itemId._id %>"><button data-item-id="<%= property.itemId._id %>" title="Thêm sub property" class="btn btn-success btn-sm"><i class="fas fa-plus"></i></button></a>
+                                <% } %>
+                                <button data-property-id="<%= property._id %>" data-property-name="<%= property.name %>" title="Xoá" class="btn btn-danger btn-sm btnRemove"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                      <% }) %>
+                    <% } %>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+                
+    <% include ../../partials/admin/footer %>
+    <script src="/plugins/DataTables/datatables.min.js"></script>
+    <script src="/js/admin/property/show-properties.js"></script>
+  </body>
+</html>

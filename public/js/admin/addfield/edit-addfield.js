@@ -1,5 +1,4 @@
 $(document).ready(function(){
-    helper.admin.setActiveSideMenu(['link-bosung', 'link-bosung-add'])
 
     function setAllowPointer(element, value){
         if(value)
@@ -26,20 +25,21 @@ $(document).ready(function(){
     }
 
     $("#submit").click(function(){
-        let nameItem = $("#title").val();
-        if(nameItem == ""){
+        let nameBosung = $("#title").val();
+        if(nameBosung == ""){
             showAlert("Hãy nhập tên!", 2);
             return;
         }
+
         $(this).prop("disabled",true);
         setAllowPointer(this, false);
-        showAlert("Đang tạo mới bổ sung...", 3);
+        showAlert("Đang chỉnh sửa bổ sung...", 3);
         $.ajax({
-            method: "POST",
-            url: '/admin/addfield/add-addfield',
-            data: {name: nameItem, _csrf: $('#_csrf').val()},
+            method: "PUT",
+            url: '/admin/addfield/edit-addfield',
+            data: {name: nameBosung, addField_id: $('#bosungId').val(), _csrf: $('#_csrf').val()},
             success: res => {
-                showAlert("Tạo bổ sung '" + nameItem + "' thành công!", 1);
+                showAlert("Chỉnh sửa bổ sung '" + nameBosung + "' thành công!", 1);
                 $(this).prop("disabled",false);
                 setAllowPointer(this, true);
             },

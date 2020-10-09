@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <% include ../../partials/admin/head %>
+    <link rel="stylesheet" type="text/css" href="/plugins/DataTables/datatables.min.css"/>
+  </head>
+  <body>
+    <% if(typeof csrfToken !== "undefined"){ %>
+      <input type="hidden" id="_csrf" value="<%= csrfToken %>">
+    <% } %>
+
+        <% include ../../partials/admin/menu %>
+    <div class="app-page-title">
+      <div class="page-title-wrapper">
+        <div class="page-title-heading">
+          <div class="page-title-icon">
+            <i class="pe-7s-star text-success"> </i>
+          </div>
+          <div>
+            Bổ sung
+            <div class="page-title-subheading">
+              Hiển thị toàn bộ bổ sung
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-12">
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <div class="table-responsive">
+                <table class="mb-0 table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Tên</th>
+                        <th>Số tài khoản</th>
+                        <th>Tạo lúc</th>
+                        <th>Cập nhật lúc</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                      <% if(addFields && addFields.length > 0){ %>
+                        <% addFields.forEach(addField => { %>
+                          <tr>
+                            <th><%= addField._id %></th>
+                            <td><%= addField.name %></td>
+                            <td><%= addField.totalAccount %></td>
+                            <td data-order="<%= new Date(addField.createdAt).toISOString() %>"><%= dateFormat(addField.createdAt, 'dd mmmm,yyyy') %></td>
+                            <td data-order="<%= new Date(addField.updatedAt).toISOString() %>"><%= dateFormat(addField.updatedAt, 'dd mmmm,yyyy') %></td>
+                            <td>
+                                <a href="/admin/addfield/edit-addfield/<%= addField._id %>"><button data-addField-id="<%= addField._id %>" title="Chỉnh sửa" class="btn btn-info btn-sm"><i class="fas fa-edit"></i></button></a>
+                                <button data-addField-id="<%= addField._id %>" data-addField-name="<%= addField.name %>" title="Xoá" class="btn btn-danger btn-sm btnRemove"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                      <% }) %>
+                    <% } %>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+                
+    <% include ../../partials/admin/footer %>
+    <script src="/plugins/DataTables/datatables.min.js"></script>
+    <script src="/js/admin/addfield/show-addfield.js"></script>
+  </body>
+</html>

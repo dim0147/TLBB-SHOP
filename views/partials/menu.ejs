@@ -89,6 +89,9 @@
 								<% } %>
 								Thông Báo
 							</a>
+							<% if(userSS && (userSS.role === 'admin' || userSS.role === 'moderator')){ %>
+							<a class="dropdown-item" href="/admin/dashboard"><i class="fas fa-tachometer-alt"></i>  Dashboard</a>
+							<% } %>
 							<a class="dropdown-item" href="/user/logout"><i class="fas fa-sign-out-alt"></i>  Đăng Xuất</a>
 						</div>
 					</li>

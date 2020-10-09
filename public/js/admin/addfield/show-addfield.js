@@ -1,16 +1,16 @@
 $(document).ready(function(){
-    helper.admin.setActiveSideMenu(['link-item', 'link-item-show-item']);
+    helper.admin.setActiveSideMenu(['link-bosung', 'link-bosung-show']);
 
     const table = $('.table').DataTable({
         language: {
             "decimal":        "",
-            "emptyTable":     "Không có Item",
-            "info":           "Hiện _START_ tới _END_ Item trong tổng cộng _TOTAL_ Item",
+            "emptyTable":     "Không có Bổ sung",
+            "info":           "Hiện _START_ tới _END_ Bổ sung trong tổng cộng _TOTAL_ Bổ sung",
             "infoEmpty":      "Hiện 0 tới 0 của 0 mục",
-            "infoFiltered":   "(Lọc từ _MAX_ toàn bộ Item)",
+            "infoFiltered":   "(Lọc từ _MAX_ toàn bộ Bổ sung)",
             "infoPostFix":    "",
             "thousands":      ",",
-            "lengthMenu":     "Hiện _MENU_ Item",
+            "lengthMenu":     "Hiện _MENU_ Bổ sung",
             "loadingRecords": "Đang tải...",
             "processing":     "Đang xử lí...",
             "search":         "Tìm kiếm:",
@@ -25,21 +25,21 @@ $(document).ready(function(){
         rowId: 'Id',
         columnDefs: [
             { targets: 0, visible: false},
-            { targets: 6, sortable: false, searchable: false},
+            { targets: 5, sortable: false, searchable: false},
         ]
     });
 
     $(document).on('click', '.btnRemove', function(){
         const self = this;
-        const nameItem = $(self).attr('data-item-name');
+        const nameBosung = $(self).attr('data-addfield-name');
         const data = {
-            'item_id': $(self).attr('data-item-id'),
+            'addField_id': $(self).attr('data-addfield-id'),
             _csrf: $('#_csrf').val()
         };
 
-        function deleteItem(toast){
+        function deleteAddField(toast){
             $.ajax({
-                url: '/admin/item/delete-item',
+                url: '/admin/addfield/delete-addfield',
                 method: 'DELETE',
                 data,
                 success: function(res){
@@ -69,12 +69,12 @@ $(document).ready(function(){
             progressBar: false,
             icon: 'fas fa-trash',
             title: 'Xác nhận',
-            message: `Bạn muốn xoá item "${nameItem}"?`,
+            message: `Bạn muốn xoá bổ sung "${nameBosung}"?`,
             position: 'center', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
             progressBarColor: 'rgb(0, 255, 184)',
             buttons: [
                 ['<button><i class="fas fa-check"></i>   Xoá</button>', function (instance, toast) {
-                    deleteItem({instance, toast})
+                    deleteAddField({instance, toast})
                 }, true], // true to focus
                 ['<button>Đóng</button>', function (instance, toast) {
                     instance.hide({
@@ -85,5 +85,4 @@ $(document).ready(function(){
         });
     })
 
-    
 })

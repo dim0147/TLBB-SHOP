@@ -3,8 +3,10 @@ var router = express.Router();
 
 const dashboardC = require('../controllers/admin/dashboard');
 
+const showPropertyC = require('../controllers/admin/property/show-properties');
 const addPropertyC = require('../controllers/admin/property/add-property');
 const editPropertyC = require('../controllers/admin/property/edit-property')
+const deletePropertyC = require('../controllers/admin/property/delete-property')
 const addSubPropertyC = require('../controllers/admin/property/add-sub-property');
 
 const addItemC = require('../controllers/admin/item/add-item');
@@ -15,7 +17,10 @@ const sortPropertyC = require('../controllers/admin/item/sort-properties');
 
 const addPhaiC = require('../controllers/admin/phai/add-phai');
 
+const showAddFieldC = require('../controllers/admin/addfield/show-addfield');
 const addAddFieldC = require('../controllers/admin/addfield/add-addfield');
+const editAddFieldC = require('../controllers/admin/addfield/edit-addfield');
+const deleteAddFieldC = require('../controllers/admin/addfield/delete-addfield');
 
 const addLockReasonAccount = require('../controllers/admin/account/add-lock-readson');
 
@@ -70,11 +75,13 @@ router.get('/manager_member/moderator', isLogin, isNormalUser, isAdmin, managerM
 router.get('/manager_member/get-moderators', isLogin, isNormalUser, isAdmin, managerMemberModeratorC.checkQueryGetModeratorData, managerMemberModeratorC.getModeratorData);
 
 /* Property  Page. */
+router.get('/property/show-properties', isLogin, isNormalUser, isAdmin, showPropertyC.renderPage);
 router.get('/property/add-property', isLogin, isNormalUser, isAdmin, addPropertyC.renderPage);
 router.post('/property/add-property', isLogin, isNormalUserAjax, isAdmin, addPropertyC.addNewProperty);
 
 router.get('/property/edit-property/:id', isLogin, isNormalUser, isAdmin, editPropertyC.renderPage);
 router.patch('/property/edit-property/:id', isLogin, isNormalUserAjax, isAdmin, editPropertyC.checkBodyEditProperty, editPropertyC.editProperty);
+router.delete('/property/delete-property', isLogin, isNormalUserAjax, isAdmin, deletePropertyC.checkBody, deletePropertyC.deleteProperty);
 
 router.get('/property/add-sub-property/:idItem', isLogin, isNormalUser, isAdmin, addSubPropertyC.renderPage);
 router.post('/property/add-sub-property/:idItem',  isLogin, isNormalUserAjax, isAdmin, addSubPropertyC.checkBodyAddNewSubP, addSubPropertyC.addNewSubProperty);
@@ -94,8 +101,12 @@ router.get('/phai/add-phai', isLogin, isNormalUser, isAdmin, addPhaiC.renderPage
 router.post('/phai/add-phai', isLogin, isNormalUserAjax, isAdmin, addPhaiC.addNewPhai);
 
 /* Addition field  Page. */
+router.get('/addfield/show-addfield', isLogin, isNormalUser, isAdmin, showAddFieldC.renderPage);
 router.get('/addfield/add-addfield', isLogin, isNormalUser, isAdmin, addAddFieldC.renderPage);
 router.post('/addfield/add-addfield', isLogin, isNormalUserAjax, isAdmin, addAddFieldC.addNewAdditionField);
+router.get('/addfield/edit-addfield/:id', isLogin, isNormalUser, isAdmin, editAddFieldC.checkParams, editAddFieldC.renderPage);
+router.put('/addfield/edit-addfield/', isLogin, isNormalUser, isAdmin, editAddFieldC.checkBody, editAddFieldC.editAddField);
+router.delete('/addfield/delete-addfield/', isLogin, isNormalUser, isAdmin, deleteAddFieldC.checkBody, deleteAddFieldC.deleteAddField);
 
 /* Lock account. */
 router.get('/account/add-lock-reason/:id', isLogin, isNormalUser, isAdmin, addLockReasonAccount.checkParam, addLockReasonAccount.renderPage);

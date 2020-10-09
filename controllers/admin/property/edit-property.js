@@ -45,7 +45,7 @@ exports.editProperty = (req, res) => {
             });
         },
         (result, cb) => { // Check name if exist
-            itemPropertyModel.countDocuments({name: {$regex: req.body.name, $options: 'i'}, itemId: result.property.itemId, _id: {$ne: req.body._id}}, (err, count) => {
+            itemPropertyModel.countDocuments({name: req.body.name, itemId: result.property.itemId, _id: {$ne: req.body._id}}, (err, count) => {
                 if(err){
                     console.log('Có lỗi khi update property, source: CTL/admin/property/edit-property -> editProperty3' + err);
                     return cb("Có lỗi xảy ra , vui lòng thử lại sau");

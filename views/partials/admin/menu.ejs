@@ -364,6 +364,39 @@
                                     <% } %>
                                 </ul>
                             </li>
+
+                            <li class="link-account">
+                                <a href="#">
+                                    <i class="metismenu-icon pe-7s-news-paper"></i>
+                                    Quản lí tài khoản
+                                    <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                                </a>
+                                <ul>
+                                    <li>
+                                        <a href="/admin/account/show-accpunts" class="link-account-show"><i class="fas fa-border-all"></i>   Xem tất cả </a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <% if(userSS && userSS.role === 'admin'){ %>
+                            <li class="link-bosung">
+                                <a href="#">
+                                    <i class="metismenu-icon pe-7s-graph3"></i>
+                                    Quản lí bổ sung
+                                    <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                                </a>
+                                <ul>
+                                    <li>
+                                        <a href="/admin/addfield/add-addfield" class="link-bosung-add"><i class="fas fa-plus"></i>   Thêm bổ sung </a>
+                                    </li>
+                                    <li>
+                                        <a href="/admin/addfield/show-addfield" class="link-bosung-show"><i class="fas fa-border-all"></i>   Xem tất cả </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <% } %>
+
+                        <% if(userSS && userSS.role === 'admin'){ %>
                         <li class="app-sidebar__heading">Item và Property</li>
                             <li class="link-item">
                                 <a href="#">
@@ -376,7 +409,7 @@
                                         <a href="/admin/item/add-item" class="link-item-add-item"><i class="fas fa-plus"></i>   Thêm item </a>
                                     </li>
                                     <li>
-                                        <a href="/admin/item/show-items"><i class="fas fa-border-all"></i>   Xem tất cả </a>
+                                        <a href="/admin/item/show-items" class="link-item-show-item"><i class="fas fa-border-all"></i>   Xem tất cả </a>
                                     </li>
 
                                 </ul>
@@ -389,11 +422,12 @@
                                 </a>
                                 <ul>
                                     <li>
-                                        <a href="/admin/item/show-items"><i class="fas fa-border-all"></i>   Xem tất cả </a>
+                                        <a href="/admin/property/show-properties" class="link-property-show-property"><i class="fas fa-border-all"></i>   Xem tất cả </a>
                                     </li>
 
                                 </ul>
                             </li>
+                        <% } %>
                         <li class="app-sidebar__heading">Forms</li>
                             <li>
                                 <a href="forms-controls.html"> <i class="metismenu-icon pe-7s-mouse"> </i>Forms Controls </a>

@@ -1,4 +1,5 @@
 $(document).ready(function(){
+    helper.admin.setActiveSideMenu(['link-item', 'link-item-add-item'])
     function setAllowPointer(element, value){
         if(value)
             $(element).css('cursor', 'default');
