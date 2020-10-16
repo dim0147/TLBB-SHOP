@@ -15,6 +15,7 @@ const editItemC = require('../controllers/admin/item/edit-item');
 const delItemC = require('../controllers/admin/item/delete-item');
 const sortPropertyC = require('../controllers/admin/item/sort-properties');
 
+const showPhaiC = require('../controllers/admin/phai/show-phai');
 const addPhaiC = require('../controllers/admin/phai/add-phai');
 
 const showAddFieldC = require('../controllers/admin/addfield/show-addfield');
@@ -22,7 +23,9 @@ const addAddFieldC = require('../controllers/admin/addfield/add-addfield');
 const editAddFieldC = require('../controllers/admin/addfield/edit-addfield');
 const deleteAddFieldC = require('../controllers/admin/addfield/delete-addfield');
 
+const showAccountC = require('../controllers/admin/account/show-account');
 const addLockReasonAccount = require('../controllers/admin/account/add-lock-readson');
+const unlockAccount = require('../controllers/admin/account/unlock-account');
 
 const managerMemberUserC = require('../controllers/admin/manager_member/user');
 const managerMemberModeratorC = require('../controllers/admin/manager_member/moderator');
@@ -97,8 +100,11 @@ router.get('/item/sort-properties/:itemId', isLogin, isNormalUser, isAdmin, sort
 router.patch('/item/sort-properties', isLogin, isNormalUser, isAdmin, sortPropertyC.checkBody, sortPropertyC.updateOrderProperties);
 
 /* Phai  Page. */
+router.get('/phai/show-phai', isLogin, isNormalUser, isAdmin, showPhaiC.renderShowPhai);
 router.get('/phai/add-phai', isLogin, isNormalUser, isAdmin, addPhaiC.renderPage);
 router.post('/phai/add-phai', isLogin, isNormalUserAjax, isAdmin, addPhaiC.addNewPhai);
+router.put('/phai/edit', isLogin, isNormalUserAjax, isAdmin, showPhaiC.checkBodyEditPhai, showPhaiC.editPhai);
+router.delete('/phai/delete', isLogin, isNormalUserAjax, isAdmin, showPhaiC.checkBodyDeletePhai, showPhaiC.deletePhai);
 
 /* Addition field  Page. */
 router.get('/addfield/show-addfield', isLogin, isNormalUser, isAdmin, showAddFieldC.renderPage);
@@ -108,9 +114,12 @@ router.get('/addfield/edit-addfield/:id', isLogin, isNormalUser, isAdmin, editAd
 router.put('/addfield/edit-addfield/', isLogin, isNormalUser, isAdmin, editAddFieldC.checkBody, editAddFieldC.editAddField);
 router.delete('/addfield/delete-addfield/', isLogin, isNormalUser, isAdmin, deleteAddFieldC.checkBody, deleteAddFieldC.deleteAddField);
 
-/* Lock account. */
-router.get('/account/add-lock-reason/:id', isLogin, isNormalUser, isAdmin, addLockReasonAccount.checkParam, addLockReasonAccount.renderPage);
-router.post('/account/add-lock-reason/:id', isLogin, isNormalUserAjax, isAdmin, addLockReasonAccount.checkBody, addLockReasonAccount.addLockReason);
+/* Account. */
+router.get('/account/show-account', isLogin, isNormalUser, isAdminOrModerator, showAccountC.renderPage);
+router.get('/account/show-account/get-accounts', isLogin, isNormalUser, isAdminOrModerator, showAccountC.getAccount);
+router.get('/account/add-lock-reason/:id', isLogin, isNormalUser, isAdminOrModerator, addLockReasonAccount.checkParam, addLockReasonAccount.renderPage);
+router.post('/account/add-lock-reason/:id', isLogin, isNormalUserAjax, isAdminOrModerator, addLockReasonAccount.checkBody, addLockReasonAccount.addLockReason);
+router.patch('/account/unlock-account', isLogin, isNormalUserAjax, isAdminOrModerator, unlockAccount.checkBodyUnLock, unlockAccount.unlockAccount);
 
 
 module.exports = router;

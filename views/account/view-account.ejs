@@ -101,6 +101,37 @@
 			</div>
 		</div>
 
+		 <!-- Report Modal -->
+		 <div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="reportModalTitle" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+			  <div class="modal-content">
+				<div class="modal-header">
+				  <h5 class="modal-title-report" id="reportModalTitle"><i style="font-size: 15px;" class="fas fa-flag" aria-hidden="true"></i>   Báo cáo bài đăng này</h5>
+				  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				  </button>
+				</div>
+				<div class="modal-body">
+				  <div class="text-center">
+					<h5>Hãy cho chúng tôi biết chuyện gì đang xảy ra</h5>
+					<select id="reportReasonSelect" class="w-100" style="display: none;">
+					  <option value="Tài khoản giả mạo">Tài khoản giả mạo</option>
+					  <option value="Tài khoản game không được xác minh">Tài khoản không được xác minh</option>
+					  <option value="Sử dụng ảnh khác">Sử dụng ảnh khác</option>
+					  <option value="other">Khác</option>
+				  </select>
+				  
+				  <input style="margin: 10px;" id="reportOtherReason" type="text" class="d-none border w-100 p-2 bg-white" placeholder="Nhập lí do">
+				  </div>
+				</div>
+				<div class="modal-footer">
+				  <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+				  <button type="button" class="btn btn-dark btnSendReport">Gửi báo cáo</button>
+				</div>
+			  </div>
+			</div>
+		  </div>
+
 	<% } %>
 
 
@@ -147,7 +178,7 @@
 					<div class="product-meta">
 						<ul class="list-inline">
 							<% if(typeof account !== 'undefined'){ %>
-							<li class="list-inline-item"><i class="fa fa-user-o"></i> Đăng bởi <a href=""><%= account.userId.name %></a></li>
+							<li class="list-inline-item"><i class="fa fa-user-o"></i> Đăng bởi <a href="/user/<%= account.userId._id %>/accounts"><%= account.userId.name %></a></li>
 							<li class="list-inline-item"><i class="fa fa-folder-open-o"></i> Phái<a href="/account/search?phai=<%= account.phai._id %> "><%= account.phai.name %></a></li>
 							<li class="list-inline-item"><i class="fa fa-location-arrow"></i> Ngọc<a href="/account/search?ngoc=<%= account.ngoc._id %>"><%= account.ngoc.name %></a></li>
 							<li class="list-inline-item"><i class="fas fa-eye"></i> <%= account.totalView %></li>
@@ -423,6 +454,7 @@
 						<a href="/user/<%= account.userId._id %>/accounts" style="color: green"><i class="fas fa-cart-plus"></i>  Xem tất cả các tài khoản được đăng bởi <%= account.userId.name %></a>
 						<ul class="list-inline mt-20">
 							<% if(userSS && !account.isOwner){ %>
+								<li class="list-inline-item"><a href="" class="ml-n1 my-1 px-lg-4 px-md-3"  data-toggle="modal" data-target="#reportModal" ><i style="font-size: 15px;" class="fas fa-flag" aria-hidden="true"></i>    Báo cáo</a></li>
 								<% if(conversation){ %>
 									<li class="list-inline-item"><a href="/user/chat?account_id=<%= account._id %>" target="_blank"><i class="fas fa-sms"></i>  Xem cuộc trò chuyện này</a></li>
 								<% }else{ %>

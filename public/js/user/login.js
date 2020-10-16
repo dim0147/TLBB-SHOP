@@ -27,6 +27,11 @@ $(document).ready(function(){
         alertElement.html(text);
     }
 
+    $("#username,#password").keypress(e => {
+        if(e.which === 13)
+            $('#submit').click();
+    })
+
     $("#submit").click(function(){
         let username = $("#username").val();
         if(username == ""){

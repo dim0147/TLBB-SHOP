@@ -1,5 +1,5 @@
 const waterfall = require('async-waterfall');
-const { param, validationResult } = require('express-validator');
+const { param, body, validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 const dateFormat = require('dateformat');
 dateFormat.i18n = {
@@ -22,6 +22,7 @@ const helper = require('../../help/helper');
 
 const userModel = require('../../models/user');
 const accountModel = require('../../models/account');
+const reportModel = require('../../models/report');
 
 exports.checkParams = [
     param('id', 'id không hợp lệ').isMongoId(),
@@ -287,4 +288,57 @@ exports.getUserAccounts = async function(req, res){
         res.send(returnData);
         
     });
+}
+
+exports.checkBodyCreateReportUser = [
+    body('reason', 'Lí do phải hơn 5 kí tự và không quá 50 kí tự').isString().isLength({min: 5, max: 50}),
+    body('user_id', 'Id không hợp lệ').isMongoId(),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty())
+            return res.status(400).send(errors.array()[0].msg);
+        next();
+    }
+]
+
+exports.createUserReport = (req, res) => {
+    const { reason, 'user_id': userId } = req.body;
+    waterfall([
+        (cb) => { // Check if report is exist already
+            reportModel
+            .countDocuments(
+                {
+                    user: userId,
+                    reason,
+                    owner: req.user._id,
+                    type: 'user'
+                },
+                (err, count) => {
+                    if(err){
+                        console.log('Error in ctl/account/view-account.js -> createUserReport 01 ' + err);
+                        return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                    }
+                    if(count !== 0) return cb(`Bạn đã báo cáo với lí do "${reason}" rồi`)
+                    cb(null);
+                }
+            )
+        },
+        (cb) => { // Create report
+            new reportModel({
+                user: userId,
+                reason,
+                owner: req.user._id,
+                type: 'user'
+            }).save(err => {
+                if(err){
+                    console.log('Error in ctl/account/view-account.js -> createUserReport 02 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                cb(null, 'Báo cáo thành công');
+            })
+        }
+    ], function(err, result){
+        if(err) return res.status(400).send(err);
+        res.send(result);
+    })
 }

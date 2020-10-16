@@ -90,6 +90,7 @@ router.patch('/mark-done', isLogin, isNormalUserAjax, setStatusAC.checkBody, set
 
 /* VIEW detail account. */
 router.get('/view-account/:id', viewAC.checkBody ,viewAC.renderPage);
+router.post('/view-account/create-report', isLogin, isNormalUserAjax, viewAC.checkBodyCreateReportAccount ,viewAC.createAccountReport);
 
 /* VIEW comment of account. */
 router.get('/view-comment/:id', viewCommentAC.checkParam, viewCommentAC.render);

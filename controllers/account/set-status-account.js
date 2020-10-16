@@ -24,8 +24,13 @@ exports.markDoneAccount = function (req, res){
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau")
                 // If account not found
                 if(account === null) return cb("Không tìm thấy tài khoản")
-                // If not correct user
-                if(account.userId.toString() != req.user._id.toString()) return cb("Bạn không có quyền đánh dấu tài khoản này");
+                // If not correct user or not admin and moderator
+                if(req.user.role === 'user'){
+                    if(account.userId.toString() != req.user._id.toString()) return cb("Bạn không có quyền đánh dấu tài khoản này");
+                }
+                else if(req.user.role !== 'admin' && req.user.role !== 'moderator'){
+                    return cb('Vai trò không hợp lệ')
+                }
                 // If account is not pending
                 if(account.status != 'pending') return cb("Tài khoản này không thể đánh dấu")
                 cb(null, {account: account});

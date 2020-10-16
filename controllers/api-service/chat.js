@@ -263,10 +263,7 @@ exports.trackingConversation = (req, res) => {
                 }
                     // Push 'Đã xem' to another people in conversation
                 const idUserLeft = conversation.peoples.find(userId => userId.toString() !== req.user._id.toString());
-                console.log('userId in update');
-                console.log(idUserLeft);
                 if(idUserLeft){
-                    console.log('found');
                     helper.pushNotification(idUserLeft, {
                         event: 'send-tracker-message',
                         value: {

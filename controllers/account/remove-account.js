@@ -32,15 +32,19 @@ exports.removeAccount = async (req, res) => {
         const account = await new Promise((resolve, reject) => {
             accountModel.findById(req.body.id, (err, account) => {
                 if(err) return reject(new Error("Có lỗi xảy ra, vui lòng thử lại sau"))
-                if(account === null) reject(new Error("Không tìm thấy account"))
-                if(account != 'pending' && account != 'done') reject(new Error("Tài khoản không thể xoá"))
+                if(account === null) return reject(new Error("Không tìm thấy account"))
+                if(account.status !== 'pending' && account.status !== 'done') return reject(new Error("Tài khoản không thể xoá"))
                 resolve(account);
             });
         });
 
-        // Check if account is equal user session
-        if(account.userId.toString() != req.user._id.toString())
-            throw new Error("Bạn không có quyền chỉnh sửa tài khoản này");
+        // Check if account is owner or moderator or admin
+        if(req.user.role === 'user'){
+            if(account.userId.toString() != req.user._id.toString())
+                throw new Error("Bạn không có quyền chỉnh sửa tài khoản này");
+        }
+        else if(req.user.role !== 'admin' && req.user.role !== 'moderator')
+            throw new Error("Role không hợp lệ");
         
         // Create session 
         session = await mongoose.startSession();
@@ -53,25 +57,25 @@ exports.removeAccount = async (req, res) => {
                     cb(null);
                 });
             },
-            (cb) => { // dell rate
+            (cb) => { // del rate
                 rateModel.deleteMany({account: account._id}, {session: session}, err => {
                     if(err) return cb(err);
                     cb(null);
                 });
             },
-            (cb) => { // dell bosung
+            (cb) => { // del bosung
                 accountLinkAddfieldsModel.deleteMany({accountId: account._id}, {session: session}, err => {
                     if(err) return cb(err);
                     cb(null);
                 });
             },
-            (cb) => { // dell reason
+            (cb) => { // del reason
                 lockReasonModel.deleteMany({account: account._id}, {session: session}, err => {
                     if(err) return cb(err);
                     cb(null);
                 });
             },
-            (cb) => { // dell collection
+            (cb) => { // del collection
                 collectionModel.deleteMany({account: account._id}, {session: session}, err => {
                     if(err) return cb(err);
                     cb(null);
@@ -112,30 +116,32 @@ exports.removeAccount = async (req, res) => {
                     cb(null, {listUrlImage: listUrlImage});
                 });
             },
-            (result, cb) => {
+            (result, cb) => { // dell account
                 accountModel.findByIdAndDelete(account._id, {session: session}, (err) => {
                     if(err) return cb(err);
                     cb(null, result);
                 })
             }
-        ], function(err, result){
+        ], async function(err, result){
             if(err){
                 console.log('có lỗi xảy ra khi remove account ' + err);
-                session.abortTransaction();
+                await session.abortTransaction();
                 session.endSession();
                 return res.status(400).send("Có lỗi xảy ra, vui lòng thử lại sau")
-                
             }
-            session.commitTransaction();
+            await session.commitTransaction();
+            session.endSession();
             if(result.listUrlImage.length > 0)
                 helper.deleteManyFiles(result.listUrlImage);
 
-            // Save activity
-            helper.createActivity({
-                type: 'remove-account',
-                account: account._id,
-                owner: req.user._id
-            });
+            // Save activity if is user
+            if(req.user.role === 'user'){
+                helper.createActivity({
+                    type: 'remove-account',
+                    account: account._id,
+                    owner: req.user._id
+                });
+            }
             res.send('Xoá tài khoản '+account.c_name+' thành công!');
         })
     

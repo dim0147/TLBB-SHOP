@@ -1,72 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <% include ../../partials/head %>
-</head>
-
-<body class="body-wrapper">
-  <% include ../../partials/menu %>
-<section class="ad-post bg-gray py-5">
-    <div class="container">
-        <% if(typeof csrfToken !== "undefined"){ %>
-            <input type="hidden" id="_csrf" value="<%= csrfToken %>">
-        <% } %>
-        <% if(typeof error !== 'undefined'){ %>
-            <h1><%= error %></h1>
-        <% }else{ %>
-            <!-- Post Your ad start -->
-            <fieldset class="border border-gary p-4 mb-5">
-                    <div class="row">
-                        <div id="alert" class="alert alert-primary d-none" role="alert">
-                            A simple primary alert—check it out!
-                        </div>
-                        <% if(typeof account !== 'undefined'){ %>
-                            <input type="hidden" id="idAccount" value="<%= account._id %>">
-                            <div class="col-lg-12">
-                                <h3>Khoá tài khoản <%= account.c_name %></h3>
-                            </div>
-                            
-                            <% if(typeof reasons !== 'undefined' && reasons.length > 0){ %>
-                                <% reasons.forEach(function(reason){ %>
-                                    <p><%= reason.text %></p>
-                                <% }) %>
-                            <% } %>
-
-                            <div class="col-lg-12">
-                                <h6 class="font-weight-bold pt-4 pb-1">Lí do:</h6>
-                                <select name="reason" id="selectReason" class="w-100" style="display: none;">
-                                    <option value="Tài khoản giả mạo">Tài khoản giả mạo</option>
-                                    <option value="Facebook liên hệ không đáng tin cậy">Facebook liên hệ không đáng tin cậy</option>
-                                    <option value="Trùng lập tài khoản">Trùng lập tài khoản</option>
-                                    <option value="Tài khoản không có thật">Tài khoản không có thật</option>
-                                    <option value="Sử dụng ảnh giả mạo">Sử dụng ảnh giả mạo</option>
-                                    <option value="Xúc phạm admin">Xúc phạm admin</option>
-                                    <option value="Khác">Khác</option>                 
-                                </select>
-                            </div>
-
-                            <div class="col-lg-12 d-none" id="divIpReason">
-                                <h6 class="font-weight-bold pt-4 pb-1">Nhập lí do:</h6>
-                                <input type="text" id="ipReason" class="border w-100 p-2 bg-white" >
-                            </div>
-
-                            <div class="col-lg-12 text-center" style="margin: 10px;">
-                                <button id="submit" class="btn btn-warning"><i class="fas fa-lock"></i>  Khoá</button>
-                            </div> 
-                            <% } %>
-                    </div>
-                    </div>
-            </fieldset>
-        <% } %>
+  <head>
+    <% include ../../partials/admin/head %>
+  </head>
+  <link rel="stylesheet" href="/css/admin/property/add-property.css">
+  <body>
+    <% if(typeof csrfToken !== "undefined"){ %>
+    <input type="hidden" id="_csrf" value="<%= csrfToken %>" />
+    <% } %> <% include ../../partials/admin/menu %>
+    <div class="app-page-title">
+      <div class="page-title-wrapper">
+        <div class="page-title-heading">
+          <div class="page-title-icon">
+            <i class="pe-7s-lock text-success"> </i>
+          </div>
+          <div>
+            Khoá tài khoản
+            <div class="page-title-subheading">
+              Khoá tài khoản với lí do
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    
-</section>
-<!--============================
-=            Footer            =
-=============================-->
+    <% if(typeof error !== 'undefined'){ %>
+        <h1><%= error %></h1>
+    <% }else{ %>
+    <div class="tab-content">
+      <div
+        class="tab-pane tabs-animation fade active show"
+        id="tab-content-1"
+        role="tabpanel"
+      >
+        <div class="main-card mb-3 card">
+          <div class="card-body">
+            <h5 class="card-title">Khoá tài khoản</h5>
+            <div id="alert" class="alert alert-primary d-none" role="alert">
+              A simple primary alert—check it out!
+            </div>
+            <% if(typeof account !== 'undefined'){ %>
+              <% if(typeof reasons !== 'undefined' && reasons.length > 0){ %>
+                <h5>Những lí do đã tồn tại:</h5>
+                <% reasons.forEach(function(reason){ %>
+                    <p>- <%= reason.reason %></p>
+                <% }) %>
+              <% } %>
+            <input type="hidden" id="idAccount" value="<%= account._id %>">
 
-<% include ../../partials/footer %>
-<script src="/js/admin/account/add-lock-reason.js"></script>
-</body>
+            <div class="position-relative row form-group">
+              <label for="examplePassword" class="col-sm-2 col-form-label"
+                >Lí do</label
+              >
+              <div class="col-sm-10">
+                <select name="item" id="selectReason" class="w-100 select-css">
+                  <option value="Tài khoản giả mạo">Tài khoản giả mạo</option>
+                  <option value="Facebook liên hệ không đáng tin cậy">Facebook liên hệ không đáng tin cậy</option>
+                  <option value="Trùng lập tài khoản">Trùng lập tài khoản</option>
+                  <option value="Tài khoản không có thật">Tài khoản không có thật</option>
+                  <option value="Sử dụng ảnh giả mạo">Sử dụng ảnh giả mạo</option>
+                  <option value="Xúc phạm admin">Xúc phạm admin</option>
+                  <option value="Khác">Khác</option>      
+                </select>
+              </div>
+            </div>
 
+            <div class="position-relative row form-group d-none" id="divIpReason">
+
+              <label for="exampleEmail" class="col-sm-2 col-form-label"
+                >Nhập lí do</label
+              >
+              <div class="col-sm-10">
+                <input
+                  id="ipReason" 
+                  type="text" 
+                  name="name"
+                  class="form-control"
+                />
+              </div>
+            </div>
+
+
+            <div class="position-relative row form-check">
+              <div class="col-sm-10 offset-sm-2">
+                <button id="submit" class="btn btn-secondary">Thêm</button>
+              </div>
+            </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+    <% } %>
+    <% include ../../partials/admin/footer %>
+    <script src="/js/admin/account/add-lock-reason.js"></script>
+  </body>
 </html>

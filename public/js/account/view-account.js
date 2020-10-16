@@ -828,5 +828,50 @@ $("document").ready(function() {
         })
     })
 
+    $('#reportReasonSelect').on('change', function(){
+        if(this.value === 'other')
+            $('#reportOtherReason').removeClass('d-none');
+        else
+            $('#reportOtherReason').addClass('d-none');
+    })
+
+    $('.btnSendReport').click(function(){
+        const button = this;
+        const accountId = $("#idAccount").val();
+        if(!accountId)
+            return iziToast.error({message: 'Tài khoản không hợp lệ'})
+        const reason = $('#reportReasonSelect').val() === 'other' ? $('#reportOtherReason').val() :  $('#reportReasonSelect').val();
+        setAllowPointer(button, false);
+        $(button).prop('disable', true);
+        $(button).html('<i class="fas fa-spinner fa-pulse"></i>   Đang gửi báo cáo')
+        $.ajax({
+            url: '/account/view-account/create-report',
+            method: 'POST',
+            data: {
+                'account_id': accountId,
+                reason,
+                _csrf: $('#_csrf').val()
+            },
+            success: function(res){
+                setAllowPointer(button, true);
+                $(button).prop('disable', false);
+                $(button).html('Gửi báo cáo');
+                $('#exampleModalCenter').modal('hide');
+                iziToast.success({
+                    title: res,
+                })
+            },
+            error: function(err){
+                setAllowPointer(button, true);
+                $(button).prop('disable', false);
+                $(button).html('Gửi báo cáo');
+                iziToast.error({
+                    title: err.responseText,
+                })
+            }
+        })
+    })
+
+
 })
 

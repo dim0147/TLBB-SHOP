@@ -606,10 +606,10 @@ exports.createReportConversation = (req, res) => {
     waterfall([
         (cb) => {
             reportModel
-            .findOne({
+            .findOne({ // Check if exist already
                 conversation: req.body.conversation_id,
                 reason: req.body.reason, 
-                user: req.user._id, 
+                owner: req.user._id, 
                 type: 'conversation'
             })
             .select('_id')
@@ -623,11 +623,11 @@ exports.createReportConversation = (req, res) => {
                 cb(null);
             })
         },
-        (cb) => {
+        (cb) => { // Create new report
             new reportModel({
                 conversation: req.body.conversation_id,
                 reason: req.body.reason,
-                user: req.user._id,
+                owner: req.user._id,
                 type: 'conversation'
             }).save(err => {
                 if(err){

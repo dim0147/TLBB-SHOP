@@ -117,6 +117,7 @@ router.patch('/profile/update-notification', isLogin, isNormalUserAjax, profileA
 
 /* Account From User Profile  . */
 router.get('/:id/accounts', viewUserAC.checkParams, viewUserAC.renderPage);
+router.post('/create-report', viewUserAC.checkBodyCreateReportUser, viewUserAC.createUserReport);
 
 /* API Get Account From User Profile . */
 router.get('/:id/get-accounts', viewUserAC.checkParamGetUserAccounts, viewUserAC.getUserAccounts);

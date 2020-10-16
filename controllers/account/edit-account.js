@@ -23,8 +23,6 @@ exports.checkParamRenderPage = [
 ]
 
 exports.renderPage = (req, res) => {
-    if(!req.isAuthenticated())
-        return res.render('account/edit-account', {title: 'Chỉnh sửa tài khoản', error: 'Bạn chưa đăng nhập'});
 
     waterfall([
         function(cb){   // Query account and check if correct user to edit
@@ -61,8 +59,14 @@ exports.renderPage = (req, res) => {
             ], function(err, accounts){
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
                 if(accounts.length === 0) return cb("Không tìm thấy tài khoản")
-                if(accounts[0].user[0].length === 0) return cb("Không tìm thấy user")
-                if(accounts[0].user[0]._id.toString() != req.user._id) return cb('Bạn không có quyền chỉnh sửa tài khoản này');
+                if(accounts[0].user.length === 0) return cb("Không tìm thấy user")
+
+                if(req.user.role === 'user'){
+                    if(accounts[0].user[0]._id.toString() !== req.user._id.toString()) return cb('Bạn không có quyền chỉnh sửa tài khoản này');
+                }
+                else if(req.user.role !== 'admin' && req.user.role !== 'moderator')
+                    return cb('Role không hợp lệ')
+
                 if(accounts[0].status.toString() != 'pending') return cb('Tài khoản này không thể chỉnh sửa');
                 cb(null, {account: accounts[0]})
             })
@@ -164,7 +168,7 @@ function checkEmptyField(bodyRequest){
     return false;
 }
 
-function checkUserAccount(idAccount, userId){
+function checkUserAccount(idAccount, userId, userRole){
     return new Promise((resolve, reject) => {
         // Check if is mongo id
         if(!mongoose.Types.ObjectId.isValid(idAccount))
@@ -174,7 +178,11 @@ function checkUserAccount(idAccount, userId){
         accountModel.findById(idAccount).exec((err, account) => {
             if(err) return reject(new Error('Có lỗi xảy ra vui lòng thử lại sau'));
             if(account === null) return reject(new Error("Tài khoản không tìm thấy"));
-            if(account.userId.toString() != userId) return reject(new Error("Bạn không thể chỉnh sửa tài khoản ày!"));
+            if(userRole === 'user'){
+                if(account.userId.toString() != userId.toString()) return reject(new Error("Bạn không thể chỉnh sửa tài khoản này!"));
+            }
+            else if(userRole !== 'admin' && userRole !== 'moderator')
+                return reject(new Error("Role không hợp lệ"));
             if(account.status.toString() != 'pending') return reject(new Error("Tài khoản này không thể chỉnh sửa"));
             resolve();
         });
@@ -363,7 +371,7 @@ exports.updateAccount =  async (req, res) => {
 
         try{
             // Check if account and user is correct, jump to catch if not valid
-            await checkUserAccount(req.body.idAccount, req.user._id);
+            await checkUserAccount(req.body.idAccount, req.user._id, req.user.role);
 
             // Elevate add bosung
             if(typeof req.body.listBosungAdd !== 'undefined'){

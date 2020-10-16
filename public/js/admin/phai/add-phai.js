@@ -1,4 +1,6 @@
 $(document).ready(function(){
+    helper.admin.setActiveSideMenu(['link-phai', 'link-phai-add']);
+
     function setAllowPointer(element, value){
         if(value)
             $(element).css('cursor', 'default');

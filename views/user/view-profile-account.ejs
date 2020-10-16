@@ -22,6 +22,37 @@
             <% } %>
 
             <% if(typeof accounts !== 'undefined' && typeof user !== 'undefined'){ %>
+               <!-- Report Modal -->
+              <div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="reportModalTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                  <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title-report" id="reportModalTitle"><i style="font-size: 15px;" class="fas fa-flag" aria-hidden="true"></i>   Báo cáo người dùng này</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="text-center">
+                    <h5>Hãy cho chúng tôi biết chuyện gì đang xảy ra</h5>
+                    <select id="reportReasonSelect" class="w-100" style="display: none;">
+                      <option value="Người dùng giả mạo">Người dùng giả mạo</option>
+                      <option value="Có ý đồ lừa đảo">Có ý đồ lừa đảo</option>
+                      <option value="Đăng tài khoản khônng thuộc về mình">Đăng tài khoản khônng thuộc về mình</option>
+                      <option value="other">Khác</option>
+                    </select>
+                    
+                    <input style="margin: 10px;" id="reportOtherReason" type="text" class="d-none border w-100 p-2 bg-white" placeholder="Nhập lí do">
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-dark btnSendReport">Gửi báo cáo</button>
+                  </div>
+                  </div>
+                </div>
+                </div>
+      
               <input type="hidden" id="userId" value="<%= user._id %>">
                 <div class="col-md-10 offset-md-1 col-lg-3 offset-lg-0">
                     <div class="sidebar">
@@ -35,6 +66,7 @@
                             <h5 class="text-center"><%= user.name %></h5>
                             <div class="text-center">
                                 <p>Tham gia vào ngày <%= user.created_at %></p>
+                                <a href="" class="ml-n1 my-1 px-lg-4 px-md-3"  data-toggle="modal" data-target="#reportModal" ><i style="font-size: 15px;" class="fas fa-flag" aria-hidden="true"></i>    Báo cáo</a>
                                 <p class="userId">ID: <%= user._id %>    <i title="Copy" user-id="<%= user._id %>" style="color: rgb(99, 99, 219)" class="copyIdIcon fas fa-copy"></i></p>
                                 <% if(user.type == "google"){ %>
                                         <i title="Xác thực với Google" style="color:red!important"  class="fab fa-google"></i>

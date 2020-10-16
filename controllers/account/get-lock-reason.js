@@ -38,7 +38,11 @@ exports.getLockReasonAccount = (req, res) => {
             });
         },
         (result, cb) => {
-            if(result.account.userId.toString() != req.user._id) return cb("Bạn không có quyền thực hiện truy cập này!");
+            if(req.user.role === 'user'){
+                if(result.account.userId.toString() != req.user._id) return cb("Bạn không có quyền thực hiện truy cập này!");
+            }
+            else if(req.user.role !== 'admin' && req.user.role !== 'moderator')
+                return cb("Role không hợp lệ!");
             lockReasonModel.find({account: result.account._id}, null, {sort: {createdAt: 1}}, (err, reasons) => {
                 if(err) return cb("Có lỗi xảy ra, vui lòng thử lại sau");
                 result.reasons = reasons;

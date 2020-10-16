@@ -1,5 +1,12 @@
 $(document).ready(function(){
 
+    function setAllowPointer(element, value){
+        if(value)
+            $(element).css('cursor', 'default');
+        else
+            $(element).css('cursor', 'not-allowed');
+    }
+
     function getParameterByName(name, url) {
         if (!url) url = window.location.href;
         name = name.replace(/[\[\]]/g, '\\$&');
@@ -197,6 +204,50 @@ $(document).ready(function(){
         document.execCommand('copy');
         document.body.removeChild(el);
         iziToast.success({message: 'Copy thành công'})
+    })
+
+    $('#reportReasonSelect').on('change', function(){
+        if(this.value === 'other')
+            $('#reportOtherReason').removeClass('d-none');
+        else
+            $('#reportOtherReason').addClass('d-none');
+    })
+
+    $('.btnSendReport').click(function(){
+        const button = this;
+        const userId = $('#userId').val();
+        if(!userId)
+            return iziToast.error({message: 'User không hợp lệ'})
+        const reason = $('#reportReasonSelect').val() === 'other' ? $('#reportOtherReason').val() :  $('#reportReasonSelect').val();
+        setAllowPointer(button, false);
+        $(button).prop('disable', true);
+        $(button).html('<i class="fas fa-spinner fa-pulse"></i>   Đang gửi báo cáo')
+        $.ajax({
+            url: '/user/create-report',
+            method: 'POST',
+            data: {
+                'user_id': userId,
+                reason,
+                _csrf: $('#_csrf').val()
+            },
+            success: function(res){
+                setAllowPointer(button, true);
+                $(button).prop('disable', false);
+                $(button).html('Gửi báo cáo');
+                $('#exampleModalCenter').modal('hide');
+                iziToast.success({
+                    title: res,
+                })
+            },
+            error: function(err){
+                setAllowPointer(button, true);
+                $(button).prop('disable', false);
+                $(button).html('Gửi báo cáo');
+                iziToast.error({
+                    title: err.responseText,
+                })
+            }
+        })
     })
 
 })

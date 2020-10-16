@@ -36,6 +36,7 @@ exports.renderPage = function(req, res){
             })
         }
     ], (err, result) => {
+        console.log(result.reasons);
         if(err) return res.render('admin/account/add-lock-reason', {title: 'Khoá tài khoản', error: err})
         res.render('admin/account/add-lock-reason', {title: 'Khoá tài khoản', account: result.account, reasons: result.reasons, csrfToken: req.csrfToken()})
     });

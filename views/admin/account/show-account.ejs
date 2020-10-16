@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <% include ../../partials/admin/head %>
+    <link rel="stylesheet" type="text/css" href="/plugins/DataTables/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/admin/manager_user/user.css"/>
+  </head>
+  <body>
+    <% if(typeof csrfToken !== "undefined"){ %>
+      <input type="hidden" id="_csrf" value="<%= csrfToken %>">
+    <% } %>
+    		<!-- Lock account Model-->
+		<div class="modal fade" id="lockModal" tabindex="-1" role="dialog" aria-labelledby="lockModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header text-center">
+				<h5 class="modal-title" id="lockModalLabel">Khoá người dùng</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				</div>
+				<div class="modal-body">
+          <p>Chọn lí do</p>
+          <div class="dropdownD" id="lightdropdown">
+            <div data-choose="Không phải tên thật" class="dropdown-select">
+              <span class="dropdown-selected">Không phải tên thật</span>
+              <i class="fa fa-angle-down dropdown-caret"></i>
+            </div>
+            <ul class="dropdown-list">
+              <li class="dropdown-item" data-value="Không phải tên thật">
+                Không phải tên thật
+              </li>
+              <li class="dropdown-item" data-value="Giả mạo">
+                Giả mạo
+              </li>
+              <li class="dropdown-item" data-value="Chửi bậy">
+                Chửi bậy
+              </li>
+              <li class="dropdown-item" data-value="Phá hoại">
+                Phá hoại
+              </li>
+              <li class="dropdown-item" data-value="Spam">
+                Spam
+              </li>
+              <li class="dropdown-item" data-value="Khác">
+                Khác
+              </li>
+            </ul>
+          </div>
+            <input type="text" class="input-focus ipReason d-none" placeholder="Nhập lí do" />
+
+				</div>
+				<div class="modal-footer">
+				<button type="button" class="btn btn-secondary btnCloseModal" data-dismiss="modal">Đóng</button>
+				<button type="button" class="btn btn-success btnLockSubmit">Xác nhận</button>
+				</div>
+			</div>
+			</div>
+    </div>
+    
+
+    <% include ../../partials/admin/menu %>
+    <div class="app-page-title">
+      <div class="page-title-wrapper">
+        <div class="page-title-heading">
+          <div class="page-title-icon">
+            <i class="pe-7s-users text-success"> </i>
+          </div>
+          <div>
+            Tài khoản
+            <div class="page-title-subheading">
+              Quản trị tài khoản, những bài đăng về tài khoản ở đây
+            </div>
+          </div>
+        </div>
+        <div class="page-title-actions">
+          <button
+            type="button"
+            data-toggle="tooltip"
+            title=""
+            data-placement="bottom"
+            class="btn-shadow mr-3 btn btn-dark"
+            data-original-title="Example Tooltip"
+          >
+            <i class="fa fa-star"></i>
+          </button>
+          <div class="d-inline-block dropdown">
+            <button
+              type="button"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+              class="btn-shadow dropdown-toggle btn btn-info"
+            >
+              <span class="btn-icon-wrapper pr-2 opacity-7">
+                <i class="fa fa-business-time fa-w-20"></i>
+              </span>
+              Buttons
+            </button>
+            <div
+              tabindex="-1"
+              role="menu"
+              aria-hidden="true"
+              class="dropdown-menu dropdown-menu-right"
+            >
+              <ul class="nav flex-column">
+                <li class="nav-item">
+                  <a href="javascript:void(0);" class="nav-link">
+                    <i class="nav-link-icon lnr-inbox"></i>
+                    <span> Inbox </span>
+                    <div class="ml-auto badge badge-pill badge-secondary">
+                      86
+                    </div>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="javascript:void(0);" class="nav-link">
+                    <i class="nav-link-icon lnr-book"></i>
+                    <span> Book </span>
+                    <div class="ml-auto badge badge-pill badge-danger">5</div>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="javascript:void(0);" class="nav-link">
+                    <i class="nav-link-icon lnr-picture"></i>
+                    <span> Picture </span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a
+                    disabled=""
+                    href="javascript:void(0);"
+                    class="nav-link disabled"
+                  >
+                    <i class="nav-link-icon lnr-file-empty"></i>
+                    <span> File Disabled </span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-12">
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <div class="table-responsive">
+                <table class="mb-0 table table-hover tableUser">
+                    <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Hình ảnh</th>
+                        <th>Tiêu đề</th>
+                        <th>Tên nhân vật</th>
+                        <th>Trạng thái</th>
+                        <th>Phái</th>
+                        <th>Server</th>
+                        <th>Hình thức</th>
+                        <th>Giá</th>
+                        <th>Phái Giao lưu</th>
+                        <th>Ngọc</th>
+                        <th>Ngày Đăng</th>
+                        <th>Đánh Giá</th>
+                        <th>Lượt Xem</th>
+                        <th>Đăng bởi</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+                
+    <% include ../../partials/admin/footer %>
+    <script src="/plugins/DataTables/datatables.min.js"></script>
+    <script src="/js/admin/account/show-account.js"></script>
+  </body>
+</html>
