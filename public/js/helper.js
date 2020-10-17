@@ -42,7 +42,7 @@ function getDateDiffHelper(date){
 }
 
 const helper = {
-    sortString: function(str, length){
+    sortString: function(str, length = 10){
         if(str.length <= length) return str;
         return str.substring(0, length) + '...';
     },

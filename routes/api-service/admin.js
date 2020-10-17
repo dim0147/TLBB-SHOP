@@ -4,6 +4,7 @@ var router = express.Router();
 const accountC = require('../../controllers/api-service/admin/account');
 const userC = require('../../controllers/api-service/admin/user');
 const reportC = require('../../controllers/api-service/admin/report');
+const response = require('../../controllers/api-service/admin/response');
 
 function isLogin(req, res, next){ // if not login save current url to session then redirect to login page
     if(!req.isAuthenticated()){
@@ -89,6 +90,8 @@ router.get('/user/get-top-user-at-time', isLogin, isNormalUserAjax, isAdminOrMod
 // --------------------------------REPORT----------------------------------------
 /* Get Report Last Numb Months. */
 router.get('/report/get-report-last-number-months', isLogin, isNormalUserAjax, isAdminOrModerator, reportC.checkQueryGetReportLastNumbMonth, reportC.getReportLastNumbMonth);
+/* Create response for  Report . */
+router.post('/report/create-response', isLogin, isNormalUserAjax, isAdminOrModerator, response.checkBodyCreateResponse, response.createResponse);
 
 
 

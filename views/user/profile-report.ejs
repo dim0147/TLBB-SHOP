@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <% include ../partials/head %>
+ <link rel="stylesheet" href="/css/user/profile-report.css">
+</head>
+
+<body class="body-wrapper">
+  <% include ../partials/menu %>
+  <% if(typeof csrfToken !== "undefined"){ %>
+    <input type="hidden" id="_csrf" value="<%= csrfToken %>">
+  <% } %>
+  <section class="user-profile section">
+	<div class="container">
+		<div class="row">
+            <% if(typeof error !== 'undefined'){ %>
+                <h1><%= error %></h1>
+            <% } %>
+
+            <% if(typeof user !== 'undefined'){ %>
+                <div class="col-md-10 offset-md-1 col-lg-3 offset-lg-0">
+                    <div class="sidebar">
+                        <!-- User Widget -->
+                        <div class="widget user">
+                            <!-- User Image -->
+                            <div class="image d-flex justify-content-center">
+                                <img src="<%= user.urlImage %>" alt="" class="">
+                            </div>
+                            <!-- User Name -->
+                            <h5 class="text-center"><%= user.name %></h5>
+                            <div class="text-center">
+                                <p>Tham gia vào ngày <%= user.created_at %></p>
+                                <% if(user.type == "google"){ %>
+                                        <i title="Xác thực với Google" style="color:red!important"  class="fab fa-google"></i>
+                                <% }else if(user.type == "facebook"){ %>
+                                        <i title="Xác thực với Facebook" style="color: blue" class="fab fa-facebook-f"></i>
+                                <% } %>
+                            </div>
+                        </div>
+                        <!-- Dashboard Links -->
+                        <div class="widget dashboard-links">
+                            <ul>
+                                <li><a class="my-1 d-inline-block" href="/user/profile"><i class="fas fa-user-circle"></i>  Thông tin cá nhân</a></li>
+                                <li><a class="my-1 d-inline-block" href="/user/profile/accounts"><i class="fas fa-cart-plus"></i>   Tài khoản đã đăng</a></li>
+                                <li><a class="my-1 d-inline-block" href="/user/profile/notifications"><i class="fas fa-bell" aria-hidden="true"></i>   Thông báo của bạn</a></li>
+                                <li><a class="my-1 d-inline-block" href="/user/profile/collections"><i class="fas fa-bookmark"></i>   Bộ sưu tập</a></li>
+                                <li><a class="my-1 d-inline-block" href="/user/profile/activities"><i class="far fa-clock"></i>   Hoạt động gần đây</a></li>
+                                <li><a  style="color: green"  class="my-1 d-inline-block" href="/user/profile/reports"><i class="fas fa-flag"></i>   Báo cáo</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-10 offset-md-1 col-lg-9 offset-lg-0">
+                    <!-- Edit Profile Welcome Text -->
+                    <div class="widget welcome-message notificationsDiv">
+                        <h2><i class="fas fa-flag"></i>   Báo cáo của bạn</h2>
+                    </div>
+
+                    <div class="widget welcome-message divReport">
+                        <div class="text-center loadingFirst">
+                            <h4>Đang tải...</h4>
+                            <div class="circle-loading2">
+                                <div></div>
+                                <div></div>
+                            </div>
+                        </div>
+
+                        <!-- <div class="main-card mb-3 card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-flag" aria-hidden="true"></i>   Báo cáo cuộc trò chuyện với quỳnh như   <div class="mb-2 mr-2 badge badge-pill badge-warning">Đang chờ</div></h5>
+                                <span class="card-subtitle">Bạn đã báo cáo với lí do: Người dùng giả mạo</span>
+                                <p>17 tháng 9, 2020</p>
+                                <hr>
+                                <h5 class="card-title">RE: Báo cáo cuộc trò chuyện với quỳnh như</h5>
+                                <span class="card-subtitle">- Cám ơn bạn đã báo cáo, tài khoản này đã được xem xét và quyết định sẽ khoá</span>
+                                <p>17 tháng 9, 2020</p>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-large btn-block btn-primary btnLoadMore" type="button">Tải thêm</button> -->
+
+                    </div>
+
+                </div>                    
+
+
+
+                </div>
+            <% } %>
+		</div>
+	</div>
+</section>
+
+
+
+<!--============================
+=            Footer            =
+=============================-->
+
+<% include ../partials/footer %>
+<script src="/js/user/profile-report.js"></script>
+
+</body>
+
+</html>

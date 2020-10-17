@@ -30,6 +30,8 @@ const unlockAccount = require('../controllers/admin/account/unlock-account');
 const managerMemberUserC = require('../controllers/admin/manager_member/user');
 const managerMemberModeratorC = require('../controllers/admin/manager_member/moderator');
 
+const showReport = require('../controllers/admin/report/show');
+
 function isLogin(req, res, next){ // if not login save current url to session then redirect to login page
     if(!req.isAuthenticated()){
         req.session.oldUrl = '/admin' + req.url;
@@ -121,5 +123,9 @@ router.get('/account/add-lock-reason/:id', isLogin, isNormalUser, isAdminOrModer
 router.post('/account/add-lock-reason/:id', isLogin, isNormalUserAjax, isAdminOrModerator, addLockReasonAccount.checkBody, addLockReasonAccount.addLockReason);
 router.patch('/account/unlock-account', isLogin, isNormalUserAjax, isAdminOrModerator, unlockAccount.checkBodyUnLock, unlockAccount.unlockAccount);
 
+/* Report. */
+router.get('/report/show', isLogin, isNormalUser, isAdminOrModerator, showReport.renderPage);
+router.get('/report/show/get-reports', isLogin, isNormalUser, isAdminOrModerator, showReport.getReport);
+router.get('/report/add-response/:reportId', isLogin, isNormalUser, isAdminOrModerator, showReport.checkParamsAddResponse, showReport.renderAddResponse);
 
 module.exports = router;

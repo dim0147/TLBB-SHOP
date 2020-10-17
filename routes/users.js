@@ -110,6 +110,10 @@ router.get('/profile/notifications', isLogin, isNormalUser, profileAC.renderNoti
 router.get('/profile/get-notifications', isLogin, isNormalUserAjax, profileAC.getNotifications);
 router.patch('/profile/update-notification', isLogin, isNormalUserAjax, profileAC.checkBodyUpdateNotification, profileAC.updateStatusNotifications);
 
+/* Report profile. */
+router.get('/profile/reports', isLogin, isNormalUser, profileAC.renderProfileReport);
+router.get('/profile/reports/get-reports', isLogin, isNormalUser, profileAC.checkQueryGetUserReport, profileAC.getUserReport);
+
 // ---------------------------------------- END PROFILE -----------------------------------------
 
 

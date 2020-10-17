@@ -1,4 +1,6 @@
 $(document).ready(function(){
+    helper.admin.setActiveSideMenu(['link-account', 'link-account-show']);
+
     function setAllowPointer(element, value, type = 'pointer'){
         if(value)
             $(element).css('cursor', type);
@@ -193,7 +195,7 @@ $(document).ready(function(){
             },
         ],
         rowId: 'Id',
-        "processing": true,
+        processing: true,
         serverSide: true,
         ajax: {
             url: '/admin/account/show-account/get-accounts',
