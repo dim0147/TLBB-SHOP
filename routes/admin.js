@@ -31,6 +31,7 @@ const managerMemberUserC = require('../controllers/admin/manager_member/user');
 const managerMemberModeratorC = require('../controllers/admin/manager_member/moderator');
 
 const showReport = require('../controllers/admin/report/show');
+const showConversation = require('../controllers/admin/report/conversation');
 
 function isLogin(req, res, next){ // if not login save current url to session then redirect to login page
     if(!req.isAuthenticated()){
@@ -127,5 +128,7 @@ router.patch('/account/unlock-account', isLogin, isNormalUserAjax, isAdminOrMode
 router.get('/report/show', isLogin, isNormalUser, isAdminOrModerator, showReport.renderPage);
 router.get('/report/show/get-reports', isLogin, isNormalUser, isAdminOrModerator, showReport.getReport);
 router.get('/report/add-response/:reportId', isLogin, isNormalUser, isAdminOrModerator, showReport.checkParamsAddResponse, showReport.renderAddResponse);
+router.get('/report/conversation/get-messages', isLogin, isNormalUser, isAdminOrModerator, showConversation.checkQueryGetMessages, showConversation.getMessage);
+router.get('/report/conversation/:conversationId', isLogin, isNormalUser, isAdminOrModerator, showConversation.checkParamRenderPage, showConversation.renderPage);
 
 module.exports = router;

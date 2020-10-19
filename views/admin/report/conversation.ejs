@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <% include ../../partials/admin/head %>
+    <link rel="stylesheet" type="text/css" href="/plugins/DataTables/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/admin/report/conversation.css"/>
+  </head>
+  <body>
+    <% if(typeof csrfToken !== "undefined"){ %>
+      <input type="hidden" id="_csrf" value="<%= csrfToken %>">
+    <% } %>
+    <% if(conversation){ %>
+        <input type="hidden" id="conversationId" value="<%= conversation._id %>">
+        <input type="hidden" id="starterId" value="<%= conversation.starter %>">
+    <% } %>
+
+        <% include ../../partials/admin/menu %>
+    <div class="app-page-title">
+      <div class="page-title-wrapper">
+        <div class="page-title-heading">
+          <div class="page-title-icon">
+            <i class="pe-7s-star text-success"> </i>
+          </div>
+          <div>
+            Cuộc trò chuyện
+            <div class="page-title-subheading">
+              Hiển thị cuộc trò chuyện
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <% if(conversation && conversation.account){ 
+        const {account} = conversation;
+    %>
+    <div class="col-lg-12 divAccount">
+        <div style="margin: 10px;" class="text-center col-md-12">
+            <div style="margin:0 auto;" class="col-md-4">
+
+                <div class="product-item bg-light">
+                   
+                    <div class="card">
+
+                        <div class="thumb-content">
+                            <a href="/account/view-account/<%= account._id %>">
+                                <img class="card-img-top" src="<%= urlImagePrefix + account.image %>" alt="Card image cap" height="180px">
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <h4 class="card-title"><a style="color:rgb(189, 121, 38)" href="/account/view-account/<%= account._id %>">TD Hoả độc 2</a></h4>
+                            
+                            <p style="font-size: 12px; color: rgb(43, 177, 177);" class="card-text">
+                            - ID: <%= account._id %><br>
+                            <% if(account.user){ %>
+                            - Đăng bởi: <a style="color:#9999ff" href="/user/<%= account.user._id %>/accounts"><%= account.user.name %></a> <br>
+                            <% } %>
+                            - Server: <%= account.server %> (<%= account.sub_server %>)<br>
+                            - Tên nhân vật: <%= account.c_name %> <br>
+                            - Trạng thái: 
+                            <% if (account.status === 'pending'){ %>
+                                Đang đăng
+                            <% }else if (account.status === 'lock'){ %>
+                                Khoá
+                            <% }else{ %>
+                                <%= account.status %>
+                            <% } %>
+                            </p>
+                            <a href="/account/view-account/<%= account._id %>"><button class="btn btn-primary">Xem tài khoản này</button></a>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <% } %>
+
+    <% if(conversation){ %>
+        <div class="col-lg-12 divAccount">
+            <div style="margin: 10px;" class="text-center col-md-12">
+                <div style="margin:0 auto;" class="col-md-4">
+                    <p>Thông tin cuộc trò chuyện</p>
+                    <p style="font-size: 12px; color: rgb(164, 177, 43);" class="card-text">
+                            - ID: <%= conversation._id %><br>
+                            - Trạng thái: <% if(conversation.status === 'normal'){ %>
+                                                Bình thường
+                                          <% }else if(conversation.status === 'archived'){ %>
+                                                Đã hoàn thành
+                                          <% }else{ %>
+                                                <%= conversation.status %>
+                                          <% } %>
+                            <br>
+                            <% if(conversation.status === 'archived' && conversation.offer){ %>
+                                - Chấp nhận với giá: <%= conversation.offer.price_offer.toLocaleString('it-IT', {style : 'currency', currency : 'VND'}); %>
+                            <% } %>
+                    </p>
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+
+    <div class="col-lg-12" style="margin: 20px;">
+        <div class="row row-broken">
+            <div class="col-sm-12 col-xs-12 chat" style="outline: none;" tabindex="5001">
+              <div class="col-inside-lg decor-default">
+                <div class="chat-body">
+
+                    <div class="firstLoad">
+                        <div class="dots-loading">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        </div>
+                    </div>
+                  <div id="chat-messages"></div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+    </div>
+    
+
+                
+    <% include ../../partials/admin/footer %>
+    <script src="/plugins/DataTables/datatables.min.js"></script>
+    <script src="/js/admin/report/conversation.js"></script>
+  </body>
+</html>

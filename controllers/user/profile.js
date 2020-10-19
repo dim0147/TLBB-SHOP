@@ -1938,3 +1938,7 @@ exports.getUserReport = (req, res) => {
     })
 
 }
+
+exports.renderProfileTicket = (req, res) => {
+    res.render('user/profile-ticket', {title: 'Phiếu hỗ trợ', user: req.user, csrfToken: req.csrfToken()})
+}

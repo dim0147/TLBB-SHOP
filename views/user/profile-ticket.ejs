@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <% include ../partials/head %>
+    <link rel="stylesheet" href="/css/user/profile-ticket.css">
+</head>
+
+<body class="body-wrapper">
+
+  <% include ../partials/menu %>
+  <% if(typeof csrfToken !== "undefined"){ %>
+    <input type="hidden" id="_csrf" value="<%= csrfToken %>">
+  <% } %>
+  <section class="user-profile section">
+	<div class="container">
+		<div class="row">
+            <% if(typeof error !== 'undefined'){ %>
+                <h1><%= error %></h1>
+            <% } %>
+
+            <% if(typeof user !== 'undefined'){ %>
+                <div class="col-md-10 offset-md-1 col-lg-3 offset-lg-0">
+                    <div class="sidebar">
+                        <!-- User Widget -->
+                        <div class="widget user">
+                            <!-- User Image -->
+                            <div class="image d-flex justify-content-center">
+                                <img src="<%= user.urlImage %>" alt="" class="">
+                            </div>
+                            <!-- User Name -->
+                            <h5 class="text-center"><%= user.name %></h5>
+                            <div class="text-center">
+                                <p>Tham gia vào ngày <%= user.created_at %></p>
+                                <% if(user.type == "google"){ %>
+                                        <i title="Xác thực với Google" style="color:red!important"  class="fab fa-google"></i>
+                                <% }else if(user.type == "facebook"){ %>
+                                        <i title="Xác thực với Facebook" style="color: blue" class="fab fa-facebook-f"></i>
+                                <% } %>
+                            </div>
+                        </div>
+                        <!-- Dashboard Links -->
+                        <div class="widget dashboard-links">
+                            <ul>
+                                <li><a  class="my-1 d-inline-block" href="/user/profile"><i class="fas fa-user-circle"></i>  Thông tin cá nhân</a></li>
+                                <li><a class="my-1 d-inline-block" href="/user/profile/accounts"><i class="fas fa-cart-plus"></i>   Tài khoản đã đăng</a></li>
+                                <li><a class="my-1 d-inline-block" href="/user/profile/notifications"><i class="fas fa-bell" aria-hidden="true"></i>
+                                    <% if(userSS && userSS.unReadNotifications && !isNaN(userSS.unReadNotifications)){ %>
+                                        <% if(userSS.unReadNotifications > 9){ %>
+                                            <span class="badge badge-danger">9+</span>
+                                        <% }else{ %>
+                                            <span class="badge badge-danger"><%= userSS.unReadNotifications %></span>
+                                        <% } %>
+                                    <% } %>
+                                    Thông báo của bạn</a></li>
+                                <li><a class="my-1 d-inline-block" href="/user/profile/collections"><i class="fas fa-bookmark"></i>   Bộ sưu tập</a></li>
+                                <li><a class="my-1 d-inline-block" href="/user/profile/activities"><i class="far fa-clock"></i>   Hoạt động gần đây</a></li>
+                                <li><a class="my-1 d-inline-block" href="/user/profile/reports"><i class="fas fa-flag"></i>   Báo cáo</a></li>
+                                <li><a style="color: green" class="my-1 d-inline-block" href="/user/profile/tickets"><i class="fas fa-ticket-alt"></i>  Hỗ trợ</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>    
+
+            <% } %>
+               
+                <div class="col-md-10 offset-md-1 col-lg-9 offset-lg-0">
+                    <div class="row message-wrapper mb-20">
+                        <div class="col-lg-4 message-sideleft">
+                            <div class="panel">
+                                <div class="card-body no-padding">
+                                    <div class="list-group no-margin list-message"> <a href="#" class="list-group-item">
+                    
+                                            <h4 class="list-group-item-heading">Jeck Joko <small>Yesterday at 15:45</small></h4>
+                    
+                                            <p class="list-group-item-text">
+                    
+                                                Ticket #78: <strong>Problems with custom CSS3</strong>
+                    
+                                            </p>
+                    
+                                            <span class="badge badge-success float-right">SOLVED</span>
+                    
+                                            <div class="clearfix"></div>
+                    
+                                        </a>
+                     <a href="#" class="list-group-item active">
+                    
+                                            <h4 class="list-group-item-heading">Toni Miring <small>Sunday at 12:33</small></h4>
+                    
+                                            <p class="list-group-item-text">Ticket #43: <strong>How do i use something</strong></p>
+                    
+                                            <span class="badge badge-success float-right rounded">SOLVED</span>
+                    
+                                            <div class="clearfix"></div>
+                    
+                                        </a>
+                     <a href="#" class="list-group-item">
+                    
+                                            <h4 class="list-group-item-heading">Bella Negoro <small>Sunday at 12:33</small></h4>
+                    
+                                            <p class="list-group-item-text">Ticket #15: <strong>Why doesn&apos;t my cheese work properly? :(</strong></p>
+                    
+                                            <span class="badge badge-dark float-right circle">OPEN</span>
+                    
+                                            <div class="clearfix"></div>
+                    
+                                        </a>
+                     <a href="#" class="list-group-item">
+                    
+                                            <h4 class="list-group-item-heading">Bella Negoro <small>Sunday at 12:33</small></h4>
+                    
+                                            <p class="list-group-item-text">Ticket #15: <strong>Why doesn&apos;t my cheese work properly? :(</strong></p>
+                    
+                                            <span class="badge badge-dark float-right circle">OPEN</span>
+                    
+                                            <div class="clearfix"></div>
+                    
+                                        </a>
+                     <a href="#" class="list-group-item">
+                    
+                                            <h4 class="list-group-item-heading">Daddy Botak <small>Sunday at 12:33</small></h4>
+                    
+                                            <p class="list-group-item-text">Can i have longer on my free trial please?</p>
+                    
+                                        </a>
+                                    </div>
+                                    <!-- /.list-group -->
+                                </div>
+                                <!-- /.card-body -->
+                            </div>
+                            <!-- /.panel -->
+                        </div>
+                        <!-- /.message-sideleft -->
+                        <div class="col-lg-8 message-sideright">
+                            <div class="panel">
+                                <div class="card-header">
+                                    <div class="media">
+                                        <a
+                                        class="float-left" href="#">
+                                            <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="Rebecca Cabean"
+                                            class="rounded-circle avatar">
+                                            </a>
+                                            <div class="media-body">
+                                                 <h4 class="media-heading">Rebecca Cabean <small>(Sales Manager)</small></h4>
+                     <small>Thursday 5th July 2014-via Intercom</small>
+                                            </div>
+                                    </div>
+                                </div>
+                                <!-- /.card-header -->
+                                <div class="card-body">
+                                    <p class="lead">RE : Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque
+                                        ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at,
+                                        tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla.
+                                        Donec lacinia congue felis in faucibus.</p>
+                                    <hr>
+                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+                                        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+                                        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+                                        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+                                        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
+                                        non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                                    <br>
+                                    <p>Thanks!
+                                        <br>Rebecca.</p>
+                                </div>
+                                <!-- /.card-body -->
+                            </div>
+                            <!-- /.panel -->
+                            <div class="panel">
+                                <div class="card-header">
+                                    <div class="media"> <a class="float-left" href="#">
+                    
+                                            <img src="https://bootdey.com/img/Content/avatar/avatar6.png" alt="sarah tingting" class="rounded-circle avatar">
+                    
+                                        </a>
+                                        <div class="media-body">
+                                             <h4 class="media-heading">Sarah Tingting</h4>
+                     <small>Thursday 5th July 2014-via Intercom</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /.card-header -->
+                                <div class="card-body">
+                                    <p class="lead">Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque
+                                        ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at,
+                                        tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla.
+                                        Donec lacinia congue felis in faucibus.</p>
+                                    <hr> <strong>Hi Tol Lee</strong>
+                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+                                        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+                                        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+                                        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+                                        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
+                                        non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                                </div>
+                                <!-- /.card-body -->
+                            </div>
+                            <!-- /.panel -->
+                        </div>
+                        <!-- /.message-sideright -->
+                    </div>
+                </div>
+</section>
+
+
+
+<!--============================
+=            Footer            =
+=============================-->
+
+<% include ../partials/footer %>
+<script src="/js/user/profile-ticket.js"></script>
+
+</body>
+
+</html>

@@ -133,7 +133,7 @@ passport.use(new FacebookStrategy({
             else // System error
                 return done(err);
         }
-        user.urlImage = 'http://graph.facebook.com/' + profile.id +'/picture?type=square';
+        user.urlImage = 'https://graph.facebook.com/' + profile.id +'/picture?type=square';
         user.name = profile.displayName;
         done(null, user);
     });

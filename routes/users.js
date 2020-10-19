@@ -114,6 +114,9 @@ router.patch('/profile/update-notification', isLogin, isNormalUserAjax, profileA
 router.get('/profile/reports', isLogin, isNormalUser, profileAC.renderProfileReport);
 router.get('/profile/reports/get-reports', isLogin, isNormalUser, profileAC.checkQueryGetUserReport, profileAC.getUserReport);
 
+/* Ticket profile. */
+router.get('/profile/tickets', isLogin, isNormalUser, profileAC.renderProfileTicket);
+
 // ---------------------------------------- END PROFILE -----------------------------------------
 
 

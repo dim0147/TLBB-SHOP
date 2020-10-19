@@ -50,7 +50,7 @@ $(document).ready(function(){
                         const nameNavigation = data.peoples.map(user => {
                             return `<a href="/user/${user._id}/accounts">${user.name}</a>`
                         });
-                        return nameNavigation.join(',')
+                        return nameNavigation.join(',') + (`(<a href="/admin/report/conversation/${data._id}">Xem cuộc trò chuyện này</a>)`);
                     }
                     else return '';
                 }
