@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
   <% include ../partials/head %>
-    <link rel="stylesheet" href="/css/user/profile-ticket.css">
-    <link rel="stylesheet" href="/plugins/Trumbowyg/trumbowyg.min.css">
+  <link rel="stylesheet" href="/plugins/Trumbowyg/trumbowyg.min.css">
 </head>
 
 <body class="body-wrapper">
@@ -56,58 +55,40 @@
                                 <li><a class="my-1 d-inline-block" href="/user/profile/collections"><i class="fas fa-bookmark"></i>   Bộ sưu tập</a></li>
                                 <li><a class="my-1 d-inline-block" href="/user/profile/activities"><i class="far fa-clock"></i>   Hoạt động gần đây</a></li>
                                 <li><a class="my-1 d-inline-block" href="/user/profile/reports"><i class="fas fa-flag"></i>   Báo cáo</a></li>
-                                <li><a style="color: green" class="my-1 d-inline-block" href="/user/profile/tickets"><i class="fas fa-ticket-alt"></i>  Hỗ trợ</a></li>
+                                <li><a class="my-1 d-inline-block" href="/user/profile/tickets"><i class="fas fa-ticket-alt"></i>  Hỗ trợ</a></li>
                             </ul>
                         </div>
                     </div>
                 </div>    
 
             <% } %>
-               
                 <div class="col-md-10 offset-md-1 col-lg-9 offset-lg-0">
-                    <div class="row message-wrapper mb-20">
-                        <div class="col-lg-4 message-sideleft">
-                            <div class="panel">
-                                <div class="card-body no-padding">
-                                    <div class="list-group no-margin list-message">
-                    <% if(tickets && tickets.length > 0){ %>
-                        <% tickets.forEach(ticket => { %>
-                        <a href="" class="list-group-item divTicket" data-ticket-id="<%= ticket._id %>">
-                    
-                            <h4 class="list-group-item-heading">
-                                <% if(ticket.type === 'unlock_account'){ %>
-                                    Mở khoá bài đăng
-                                <% }else if(ticket.type === 'unlock_user'){ %>
-                                    Mở khoá tài khoản
-                                <% } %>
-                                <small><%= dateFormat(ticket.createdAt, 'd mmmm, yyyy HH:MM:ss') %></small></h4>
-    
-                            <p class="list-group-item-text">Ticket #<%= ticket._id %>: <strong><%= ticket.title %></strong></p>
-    
-                            <% if(ticket.status === 'pending'){ %>
-                                <span class="badge badge-warning float-right rounded">Đang chờ</span>
-                            <% }else if(ticket.status === 'response'){ %>
-                                <span class="badge badge-info float-right rounded">Đã trả lời</span>
-                            <% }else if(ticket.status === 'done'){ %>
-                                <span class="badge badge-success float-right rounded">Đã xử lí</span>
-                            <% } %>
-    
-                            <div class="clearfix"></div>
-                        </a>
-                    <% }) %>
-                    <% } %>
-                                    </div>
-                                    <!-- /.list-group -->
-                                </div>
-                                <!-- /.card-body -->
-                            </div>
-                            <!-- /.panel -->
-                        </div>
-                        <!-- /.message-sideleft -->
-                        <div class="col-lg-8 message-sideright">
+                    <h6 class="font-weight-bold pt-4 pb-1">Gửi phiếu hỗ trợ</h6>
 
-                        </div>
-                        <!-- /.message-sideright -->
+                    <h6 class="font-weight-bold pt-4 pb-1">Tiêu đề:</h6>
+                        <input id="titleTicket" class="border w-100 p-2 bg-white" required>
+
+                    <h6 class="font-weight-bold pt-4 pb-1">Chọn thể loại:</h6>
+                    <select id="inputGroupSelect" class="w-100">
+                        <option value="unlock_account">Mở khoá bài đăng</option>
+                        <option value="unlock_user">Mở khoá tài khoản</option>
+                    </select>
+
+                    <div class="inputAccount">
+                        <h6 class="font-weight-bold pt-4 pb-1">Nhập Id bài đăng:</h6>
+                        <input id="accountId" class="border w-100 p-2 bg-white" placeholder="Ví dụ: 5f695d4d1748b50709b31db2">
+                    </div>
+
+                    <div class="inputUser d-none">
+                        <h6 class="font-weight-bold pt-4 pb-1">Nhập email tài khoản:</h6>
+                        <input id="userEmail" class="border w-100 p-2 bg-white" placeholder="Ví dụ: email@gmail.com">
+                    </div>
+
+                    <h6 class="font-weight-bold pt-4 pb-1">Lí do:</h6>
+                    <textarea id="textTicketPost" class="border p-3 w-100" rows="7" placeholder="Miêu tả chi tiết nội dung bạn cần hỗ trợ"></textarea>
+
+                    <div class="text-center">
+                        <button class="btn btn-primary btnSubmit">Gửi phiếu hỗ trợ</button>
                     </div>
                 </div>
 </section>
@@ -129,7 +110,7 @@
 <script src="/plugins/Trumbowyg/plugins/fontsize/trumbowyg.fontsize.js"></script>
 <script src="/plugins/Trumbowyg/vi.min.js"></script>
 
-<script src="/js/user/profile-ticket.js"></script>
+<script src="/js/user/profile-ticket-create.js"></script>
 
 </body>
 

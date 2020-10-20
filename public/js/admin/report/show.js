@@ -64,6 +64,17 @@ $(document).ready(function(){
                     else return '';
                 }
             },
+            {
+                targets: 6,
+                render: data => {
+                    if(data === 'Đang chờ')
+                        return `<div class="mb-2 mr-2 badge badge-pill badge-warning">Đang chờ</div>`;
+                    else if(data === 'Đã xử lí')
+                        return `<div class="mb-2 mr-2 badge badge-pill badge-success">Đã xử lí</div>`;
+                    else
+                        return data;
+                }
+            },
             { 
                 targets: 7, // owner
                 render: (data) => {

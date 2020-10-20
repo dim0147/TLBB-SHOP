@@ -66,6 +66,8 @@ const collectionModel = require('../../models/collection');
 const activityModel = require('../../models/activity');
 const notificationModel = require('../../models/notification');
 const reportModel = require('../../models/report');
+const ticketModel = require('../../models/ticket');
+const ticketPostModel = require('../../models/ticket_post');
 
 // -------------------------------- Profile User ------------------------------------------------
 
@@ -1939,6 +1941,251 @@ exports.getUserReport = (req, res) => {
 
 }
 
+
+exports.renderCreateTicket = (req, res) => {
+    res.render('user/profile-ticket-create', {title: 'Tạo phiếu hỗ trợ', user: req.user, csrfToken: req.csrfToken()})
+}
+
+exports.checkBodyCreateTicker = [
+    body('type', 'Type không hợp lệ').isIn(['unlock_account', 'unlock_user']),
+    body('title', 'Title không hợp lệ').isString().notEmpty(),
+    body('text', 'Text không hợp lệ').isString().notEmpty(),
+    body('account_id', 'Id không hợp lệ').optional().isMongoId(),
+    body('user_email', 'email không hợp lệ').optional().isEmail(),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if(!errors.isEmpty())
+            return res.status(400).send(errors.array()[0].msg);
+        next();
+    }
+]
+
+exports.createTicket = async (req, res) => {
+    const { 
+        type, 
+        title, 
+        text, 
+        'account_id': accountId, 
+        'user_email': userEmail 
+    } = req.body;
+    if(type === 'unlock_account' && !accountId)
+        return res.status(400).send('Id account không hợp lệ')
+    if(type === 'unlock_user' && !userEmail)
+        return res.status(400).send('Email không hợp lệ')
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    waterfall([
+        (cb) => { // Create ticket
+            let payload = {
+                owner: req.user._id,
+                title,  // req.body
+                type    // req.body
+            };
+            // Check type
+            if(type === 'unlock_account')
+                payload['account'] = accountId;
+            else if(type === 'unlock_user')
+                payload['email'] = userEmail;
+
+            // Create ticket
+            ticketModel.create([payload], {session}, (err, tickets) => {
+                if(err){
+                    console.log('Error in ctl/user/profile.js ->  createTicket 01' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                if(tickets.length !== 1) return cb('Không thể tạo phiếu yêu cầu hỗ trợ!')
+                cb(null, tickets[0]);
+            })
+        },
+        (ticket, cb) => { // Create ticket post
+            ticketPostModel.create([
+                {
+                    ticket: ticket._id,
+                    owner: req.user._id,
+                    text    // req.body
+                }
+            ], 
+            {session},
+            (err, ticketPosts) => {
+                if(err){
+                    console.log('Error in ctl/user/profile.js -> createTicket 02 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                cb(null, 'Tạo phiếu thành công');
+            })
+        }
+    ], async function(err, result){
+        if(err){
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).send(err);
+        }
+        await session.commitTransaction();
+        session.endSession();
+        res.send(result);
+    })
+}
+
 exports.renderProfileTicket = (req, res) => {
-    res.render('user/profile-ticket', {title: 'Phiếu hỗ trợ', user: req.user, csrfToken: req.csrfToken()})
+    ticketModel.find({
+        owner: req.user._id
+    })
+    .select('title createdAt type status')
+    .sort({createdAt: -1})
+    .lean()
+    .exec((err, tickets) => {
+        if(err){
+            console.log('Error in ctl/user/profile.js -> renderProfileTicket 01 ' + err);
+            return res.status(500).send('Có lỗi xảy ra vui lòng thử lại sau')
+        }
+        res.render('user/profile-ticket', {title: 'Phiếu hỗ trợ', user: req.user, tickets, dateFormat, csrfToken: req.csrfToken()})
+    })
+}
+
+exports.checkQueryGetResponseTicket = [
+    query('ticket_id', 'Id không hợp lệ').isMongoId(),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if(!errors.isEmpty())
+            return res.status(400).send(errors.array()[0].msg);
+        next();
+    }
+]
+
+exports.getResponseTicket = (req, res) => {
+    const {'ticket_id': ticketId} = req.query;
+    waterfall([
+        (cb) => { // Get ticket and validate it
+            ticketModel
+            .findById(ticketId)
+            .select('title type status email account owner')
+            .lean()
+            .exec((err, ticket) => {
+                if(err){
+                    console.log('Error in ctl/user/profile.js -> getResponseTicket 01 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                if(!ticket) return cb('Không tìm thấy ticket');
+                if(ticket.owner.toString() !== req.user._id.toString()) return cb('Bạn không có quyền xem ticket này')
+                cb(null, ticket);
+            })
+        },
+        (ticket, cb) => { // Get ticket post
+            ticketPostModel
+            .find({ticket: ticketId})
+            .select('owner text createdAt')
+            .populate({
+                path: 'owner', 
+                select: '_id name role status urlImage'
+            })
+            .sort({createdAt: 1})
+            .lean()
+            .exec((err, ticketPosts) => {
+                if(err){
+                    console.log('Error in ctl/user/profile.js -> getResponseTicket 02 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                cb(null, {
+                    ticket,
+                    ticketPosts
+                });
+            })
+        }
+    ], function(err, result){
+        if(err) return res.status(400).send(err);
+        res.send(result);
+    })
+}
+
+exports.checkBodyCreateResponseTicket = [
+    body('ticket_id', 'id không hợp lệ').isMongoId(),
+    body('text', 'text không hợp lệ').isString().notEmpty(),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if(!errors.isEmpty())
+            return res.status(400).send(errors.array()[0].msg);
+        next();
+    }
+]
+
+exports.createResponseTicket = async (req, res) => {
+
+    const {'ticket_id': ticketId, text} = req.body;
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    waterfall([
+        (cb) => { // Get ticker id and validation it
+            ticketModel
+            .findById(ticketId)
+            .select('status owner')
+            .lean()
+            .session(session)
+            .exec((err, ticket) => {
+                if(err){
+                    console.log('Error in ctl/user/profile.js -> createResponseTicket 01 ' + err);
+                    return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                }
+                if(!ticket) return cb('Không tìm thấy ticket');
+                if(ticket.owner.toString() !== req.user._id.toString())  return cb('Bạn không có quyền phản hồi ticket này')
+                if(ticket.status !== 'response') return cb('Bạn không thể phản hồi ticket này')
+                cb(null);
+            })
+        },
+        (cb) => { // Create ticketPost
+            ticketPostModel.create(
+                [
+                    {
+                        ticket: ticketId,
+                        owner: req.user._id,
+                        text // req.body
+                    }
+                ],
+                {session},
+                err => {
+                    if(err){
+                        console.log('Error in ctl/user/profile.js -> createResponseTicket 02  ' + err);
+                        return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                    }
+                    cb(null);
+                }
+            )
+        },
+        (cb) => { // Update status ticket
+            ticketModel
+            .updateOne(
+                {
+                    _id: ticketId,
+                },
+                {
+                    status: 'pending'
+                },
+                {
+                    session,
+                    runValidators: true
+                },
+                (err, upResult) => {
+                    if(err){
+                        console.log('Error in ctl/user/profile.js -> createResponseTicket 03 ' + err);
+                        return cb('Có lỗi xảy ra vui lòng thử lại sau')
+                    }
+                    if(upResult.nModified !== 1) return cb('Update không thành công');
+                    cb(null, 'Phản hồi thành công');
+                }
+            )
+        }
+    ], async function(err, result){
+        if(err){
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).send(err)
+        }
+        await session.commitTransaction();
+        session.endSession();
+        res.send(result);
+    })
+
 }

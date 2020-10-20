@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <% include ../../partials/admin/head %>
+    <link rel="stylesheet" href="/plugins/Trumbowyg/trumbowyg.min.css">
+    <link rel="stylesheet" href="/css/admin/property/add-property.css">
+  </head>
+  <body>
+    <% if(typeof csrfToken !== "undefined"){ %>
+      <input type="hidden" id="_csrf" value="<%= csrfToken %>">
+    <% } %>
+    <% if(ticket){ %>
+      <input type="hidden" id="ticketId" value="<%= ticket._id %>">
+    <% } %>
+        <% include ../../partials/admin/menu %>
+    <div class="app-page-title">
+      <div class="page-title-wrapper">
+        <div class="page-title-heading">
+          <div class="page-title-icon">
+            <i class="pe-7s-star text-success"> </i>
+          </div>
+          <div>
+            Ticket
+            <div class="page-title-subheading">
+              Hiển thị chi tiết ticket
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-12">
+      <div class="main-card mb-3 card">
+        <div class="card-body">
+          <!-- Title -->
+          <div class="text-center">
+            <% if(ticket){ %>
+              <h5>Tiêu đề: <%= ticket.title %></h5>
+              <h5>Trạng thái: 
+                <% if(ticket.status === 'pending'){ %>
+                  <div class="mb-2 mr-2 badge badge-pill badge-warning">Đang chờ</div>
+                <% }else if(ticket.status === 'response'){ %>
+                  <div class="mb-2 mr-2 badge badge-pill badge-info">Đã trả lời</div>
+                <% }else if(ticket.status === 'done'){ %>
+                  <div class="mb-2 mr-2 badge badge-pill badge-success">Đã xử lí</div>
+                <% }else {%>
+                  <%= ticket.status %>
+                <% } %>
+              </h5>
+              <h5>Loại:
+                <% if(ticket.type === 'unlock_account'){ %>
+                  Mở khoá bài đăng
+                <% }else if(ticket.type === 'unlock_user'){ %>
+                  Mở khoá tài khoản
+                <% } %>
+              </h5>
+              <% if(ticket.email){ %>
+                <h5>Email tài khoản cần hỗ trợ: <%= ticket.email %></h5>
+              <% } %>
+              <% if(ticket.account){ %>
+                <h5>Id bài đăng: <%= ticket.account %></h5>
+              <% } %>
+            <% } %>
+          </div>
+
+          <% if(ticketPosts && ticketPosts.length > 0){ %>
+            <% ticketPosts.forEach(post => { %>
+              <!-- Ticket post -->
+              <div class="main-card mb-3 card">
+                <div class="card-body">
+                  <% if(post.owner){ %>
+                  <div class="clearfix">
+                    <img width="42" height="42" class="rounded-circle mr-2 float-left" src="<%= post.owner.urlImage %>" alt="">
+                    <a href="/user/<%= post.owner._id %>/accounts"><h6>
+                      <% if(post.owner.role === 'moderator'){ %>
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                      <% }else if(post.owner.role === 'admin'){ %>
+                        <i class="fas fa-user-shield" aria-hidden="true"></i>
+                      <% } %>
+                      <%= post.owner.name %>
+                      <% if(post.owner.status === 'lock'){ %>
+                        (khoá)
+                      <% } %>
+                    </h6></a>
+                  </div>
+                  <% } %>
+                    <%- post.text %>
+                    <small class="text-muted"><%= dateFormat(post.createdAt, 'd mmmm, yyyy HH:MM:ss') %></small>
+                  </div>
+              </div>
+              <hr>
+        <% }) %>
+        <% } %>
+
+        <% if(ticket && (ticket.status === 'pending' || ticket.status === 'response')){ %>
+          <h6 class="font-weight-bold pt-4 pb-1">Phản hồi:</h6>
+          <textarea id="textTicketPost" class="border p-3 w-100" rows="7" placeholder="Nhập nội dung phản hồi "></textarea>
+          <h6 class="font-weight-bold pt-4 pb-1">Xét trạng thái:</h6>
+          <select id="status" class="w-100 select-css">
+            <option value="response">Đã phản hồi</option>
+            <option value="done">Đã xử lí</option>
+        </select>
+
+          <div class="text-center">
+            <button class="btn btn-primary btnSubmit" style="margin: 10px;">Phản hồi</button>
+          </div>
+        <% }else{ %>
+          <p>Bạn không thể phản hồi lại phiếu trả lời này.</p>
+        <% } %>
+        </div>
+      </div>
+    </div>
+                
+    <% include ../../partials/admin/footer %>
+    <script src="/plugins/jquery-resizable/jquery-resizable.min.js"></script>
+    <script src="/plugins/Trumbowyg/trumbowyg.min.js"></script>
+    <script src="/plugins/Trumbowyg/plugins/emoji/trumbowyg.emoji.min.js"></script>
+    <script src="/plugins/Trumbowyg/plugins/noembed/trumbowyg.noembed.min.js"></script>
+    <script src="/plugins/Trumbowyg/plugins/pasteembed/trumbowyg.pasteembed.min.js"></script>
+    <script src="/plugins/Trumbowyg/plugins/upload/trumbowyg.upload.min.js"></script>
+    <script src="/plugins/Trumbowyg/plugins/resizimg/trumbowyg.resizimg.min.js"></script>
+    <script src="/plugins/Trumbowyg/plugins/fontsize/trumbowyg.fontsize.js"></script>
+    <script src="/plugins/Trumbowyg/vi.min.js"></script>
+    <script src="/js/admin/ticket/response_ticket.js"></script>
+  </body>
+</html>

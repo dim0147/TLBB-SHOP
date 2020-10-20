@@ -34,6 +34,16 @@ $('document').ready(function(){
             let itemSlug = pair[0];
             let idProperty = pair[1];
 
+            if(itemSlug === 'c_name'){
+                $('#c_nameIpFilter').val(idProperty);
+                continue;
+            }
+            else if(itemSlug === 'userId')
+            {
+                $('#ipUserId').val(idProperty)
+                continue;
+            }
+
             $('.itemProperty').each(function(){
                 let itemSlugCB = $(this).attr('item');
                 let propertyIdCB = $(this).attr('idProperty');

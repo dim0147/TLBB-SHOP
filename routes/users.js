@@ -115,7 +115,11 @@ router.get('/profile/reports', isLogin, isNormalUser, profileAC.renderProfileRep
 router.get('/profile/reports/get-reports', isLogin, isNormalUser, profileAC.checkQueryGetUserReport, profileAC.getUserReport);
 
 /* Ticket profile. */
+router.get('/profile/create-ticket', isLogin, isNormalUser, profileAC.renderCreateTicket);
+router.post('/profile/create-ticket', isLogin, isNormalUser, profileAC.checkBodyCreateTicker, profileAC.createTicket);
 router.get('/profile/tickets', isLogin, isNormalUser, profileAC.renderProfileTicket);
+router.get('/profile/tickets/get-ticket-response', isLogin, isNormalUser, profileAC.getResponseTicket);
+router.post('/profile/tickets/response-ticket', isLogin, isNormalUser, profileAC.checkBodyCreateResponseTicket, profileAC.createResponseTicket);
 
 // ---------------------------------------- END PROFILE -----------------------------------------
 

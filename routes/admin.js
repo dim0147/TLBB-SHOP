@@ -33,6 +33,9 @@ const managerMemberModeratorC = require('../controllers/admin/manager_member/mod
 const showReport = require('../controllers/admin/report/show');
 const showConversation = require('../controllers/admin/report/conversation');
 
+const showTicket = require('../controllers/admin/ticket/show');
+const responseTicket = require('../controllers/admin/ticket/response_ticket');
+
 function isLogin(req, res, next){ // if not login save current url to session then redirect to login page
     if(!req.isAuthenticated()){
         req.session.oldUrl = '/admin' + req.url;
@@ -130,5 +133,12 @@ router.get('/report/show/get-reports', isLogin, isNormalUser, isAdminOrModerator
 router.get('/report/add-response/:reportId', isLogin, isNormalUser, isAdminOrModerator, showReport.checkParamsAddResponse, showReport.renderAddResponse);
 router.get('/report/conversation/get-messages', isLogin, isNormalUser, isAdminOrModerator, showConversation.checkQueryGetMessages, showConversation.getMessage);
 router.get('/report/conversation/:conversationId', isLogin, isNormalUser, isAdminOrModerator, showConversation.checkParamRenderPage, showConversation.renderPage);
+
+/* Ticket. */
+router.get('/ticket/show', isLogin, isNormalUser, isAdminOrModerator, showTicket.renderPage);
+router.get('/ticket/show/get-tickets', isLogin, isNormalUser, isAdminOrModerator, showTicket.getTickets);
+router.get('/ticket/response-ticket/:ticketId', isLogin, isNormalUser, isAdminOrModerator, responseTicket.renderPage);
+router.post('/ticket/response-ticket/', isLogin, isNormalUser, isAdminOrModerator, responseTicket.checkBodyCreateResponseTicket, responseTicket.createResponseTicket);
+
 
 module.exports = router;
