@@ -47,7 +47,7 @@ $(document).ready(function(){
             { 
                 targets: 2, // Name
                 render: function(data, t, row){
-                    return '<a href="/admin/user/view-user/' + row[0] + '"><p class="titleP">'+ data +'</p></a>'
+                    return '<a href="/user/' + row[0] + '/accounts"><p class="titleP">'+ data +'</p></a>'
                 }
             },
             { 

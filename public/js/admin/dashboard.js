@@ -208,7 +208,7 @@ $(document).ready(function(){
                     '                                                                            <img width="42" class="rounded-circle" src="'+user.urlImage+'" alt="" />'+
                     '                                                                        </div>'+
                     '                                                                        <div class="widget-content-left">'+
-                    '                                                                            <div class="widget-heading"><a href="/admin/user/view-user/'+user._id+'">'+user.name+'</a></div>'+
+                    '                                                                            <div class="widget-heading"><a href="/user/'+user._id+'/accounts">'+user.name+'</a></div>'+
                     '                                                                            <div class="widget-subheading">'+user.email+'</div>'+
                     '                                                                            <div class="">'+user.badgeRole+'</div>'+
                     '                                                                        </div>'+
@@ -368,7 +368,7 @@ $(document).ready(function(){
                                                                     user.badgeRole +
             '                                                    </td>'+
             '                                                    <td class="text-center">'+
-            '                                                        <a href="/admin/user/view-user/'+user._id+'"><button type="button" id="PopoverCustomT-1" class="btn btn-primary btn-sm">Chi tiết</button></a>'+
+            '                                                        <a href="/user/'+user._id+'/accounts"><button type="button" id="PopoverCustomT-1" class="btn btn-primary btn-sm">Chi tiết</button></a>'+
             '                                                    </td>'+
             '                                                </tr>';
             $('.tableTopUser').append(myvar);

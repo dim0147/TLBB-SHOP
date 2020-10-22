@@ -186,7 +186,7 @@
 						</ul>
 					</div>
 
-					<% if(typeof account !== 'undefined' && account.isOwner) { %>
+					<% if(typeof account !== 'undefined' && (account.isOwner || (userSS && (userSS.role === 'admin' ||userSS.role === 'moderator')))) { %>
 						<% if(account.status == 'pending'){ %>
 							<a href="/account/edit-account/<%= account._id %>"><button type="button" class="btn btn-warning btn-sm btnOwner"><i class="fas fa-edit"></i>  Chỉnh sửa</button></a>
 							<button type="button" id="btnMark" class="btn btn-success btn-sm btnOwner"><i class="fas fa-check"></i>  Đánh dấu hoàn thành</button>
@@ -450,6 +450,17 @@
 							%>
 						<img class="rounded-circle img-fluid mb-5 px-5" src="<%= account.userId.urlImage %>" alt="">
 						<h4><a href=""><%= account.userId.name %></a></h4>
+						<% if(account.userId.role === 'admin'){ %>
+							<i style="color: red" title="Admin" class="fas fa-user-shield" aria-hidden="true"></i>
+						<% }else if(account.userId.role === 'moderator'){ %>
+							<i style="color: rgb(185, 185, 43)" class="fas fa-star" title="Quản trị viên" aria-hidden="true"></i>  
+						<% } %>
+
+						<% if(account.contactFB && !account.isOwner){ %>
+							<p>Liên hệ: <br>
+								<a href="<%= account.contactFB %>"><%= account.contactFB %></a>
+							</p>  
+						<% } %>
 						<p class="member-time">Thành viên kể từ <%= account.userId.created_at %></p>
 						<a href="/user/<%= account.userId._id %>/accounts" style="color: green"><i class="fas fa-cart-plus"></i>  Xem tất cả các tài khoản được đăng bởi <%= account.userId.name %></a>
 						<ul class="list-inline mt-20">

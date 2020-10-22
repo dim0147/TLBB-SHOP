@@ -188,6 +188,7 @@ exports.renderPage = (req, res) => {
             accountModel.aggregate([
                 {
                     $match: { // Query relevant account
+                        _id: {$ne: mongoose.Types.ObjectId(result.account._id)},
                         phai: mongoose.Types.ObjectId(result.account.phai._id),
                         status: 'pending',
                         $or: [

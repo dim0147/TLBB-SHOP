@@ -204,7 +204,8 @@ exports.getAccount = (req, res) => {
                 userId: {$first: '$userId'},
                 status: {$first: '$status'},
                 totalRates: {$first: '$totalRates'},
-                user: {$first: '$user'}
+                user: {$first: '$user'},
+                post_id: {$first: '$post_id'}
             }
         },
         {
@@ -266,7 +267,8 @@ exports.getAccount = (req, res) => {
                     { $anyElementTrue: ['$user'] },
                     { $arrayElemAt: ['$user', 0] },
                     null
-                ]}
+                ]},
+                post_id: 1
             }
         }
     ]
@@ -349,7 +351,9 @@ exports.getAccount = (req, res) => {
                     dateFormat(new Date(account.createdAt), "d mmmm, yyyy"),
                     [account.rates, account.totalRates],
                     account.views,
-                    account.user
+                    account.user,
+                    null,
+                    account.post_id
                 ];
                 data.push(payload);
             })

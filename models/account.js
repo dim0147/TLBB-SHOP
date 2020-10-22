@@ -12,7 +12,7 @@ const phaiModel = require('../models/phai');
 
 
 const accountSchema = mongoose.Schema({
-    title: {type: String, required: true, minlength: 5, maxlength: 80},
+    title: {type: String, required: true, minlength: 5},
     c_name: {type: String, required: true, minlength: 2, maxlength: 20},
     phai: {type: mongoose.Schema.Types.ObjectId, ref: 'phais', required: true},
     level: {type: Number, required: true, min: 1, max: 119},
@@ -34,10 +34,11 @@ const accountSchema = mongoose.Schema({
     price: {type: Number},
     phaigiaoluu: {type: mongoose.Schema.Types.ObjectId, ref: 'phais'},
     status: {type: String, required: true, enum: config.account.status, default: 'pending', required: true},
-    phone: Number,
+    phone: String,
     loinhan: String,
     contactFB: {type: String, required: true},
-    userId: {type: mongoose.Schema.Types.ObjectId, ref:'users', required: true}
+    userId: {type: mongoose.Schema.Types.ObjectId, ref:'users', required: true},
+    post_id: String
 },{ timestamps: { createdAt: 'createdAt' , updatedAt: 'updatedAt'} } );
 
 accountSchema.pre('save', function(next) {

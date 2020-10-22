@@ -73,6 +73,21 @@
                                 <% }else if(user.type == "facebook"){ %>
                                         <i title="Xác thực với Facebook" style="color: blue" class="fab fa-facebook-f"></i>
                                 <% } %>
+                                <% if(user.role === 'admin'){ %>
+                                    <i style="color: red" title="Admin" class="fas fa-user-shield" aria-hidden="true"></i>
+                                <% }else if(user.role === 'moderator'){ %>
+                                    <i style="color: rgb(185, 185, 43)" class="fas fa-star" title="Quản trị viên" aria-hidden="true"></i>  
+                                <% } %>
+
+                                <% if(user.linkFB){ %>
+                                  <p>Facebook liên lạc: <br>
+                                    <a href="<%= user.linkFB %>"><%= user.linkFB %></a>
+                                  </p>
+                                <% } %>
+
+                                <% if(user.phone){ %>
+                                  <a href="tel:<%= user.phone %>"><h6 style="font-size: 14px;letter-spacing: 0;color: #848484;"><i class="fa fa-phone" aria-hidden="true"></i> Gọi   <%= user.phone %></h6></a>
+                                <% } %>
                             </div>
                         </div>
                           <!-- Dashboard Links -->

@@ -6,6 +6,16 @@ $(document).ready(function(){
             $(element).css('cursor', 'not-allowed');
     }
 
+    function copyToClipboard(element) {
+        var $temp = $("<input>");
+        $("body").append($temp);
+        $temp.val(element).select();
+        document.execCommand("copy");
+        $temp.remove();
+    }
+      
+      
+
     function getParameterByName(name, url) {
         if (!url) url = window.location.href;
         name = name.replace(/[\[\]]/g, '\\$&');
@@ -40,7 +50,10 @@ $(document).ready(function(){
         columnDefs: [
             { 
                 targets: 0, 
-                visible: false
+                sortable: false,
+                render: data => {
+                    return `<button class="showId" data-id=${data}>Hiển thị Id</button>`
+                }
             },
             { 
                 targets: 1,
@@ -171,7 +184,6 @@ $(document).ready(function(){
                 }
             },
         ],
-        rowId: 'Id',
         "processing": true,
         serverSide: true,
         ajax: {
@@ -385,5 +397,15 @@ $(document).ready(function(){
         })
 
     });
+
+    $(document).on('click', '.showId', function(e){
+        $(this).after(`<p>${$(this).attr('data-id')}</p><button class="copyToClip" data-id="${$(this).attr('data-id')}">Copy</button>`);
+        $(this).remove();
+    })
+
+    $(document).on('click', '.copyToClip', function(e){
+        copyToClipboard($(this).attr('data-id'));
+        iziToast.success({message: 'Copy thành công'})
+    })
 
 })
