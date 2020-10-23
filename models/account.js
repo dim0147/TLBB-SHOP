@@ -29,6 +29,8 @@ const accountSchema = mongoose.Schema({
     longvan: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties',required: true},
     channguyen: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties', required: true},
     thanmocvuongdinh: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties', required: true},
+    tinhthong: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties', required: true},
+    bavuonglenh: {type: mongoose.Schema.Types.ObjectId, ref: 'item-properties', required: true},
 
     transaction_type: {type: String, required: true, enum: config.account.transaction_type},
     price: {type: Number},

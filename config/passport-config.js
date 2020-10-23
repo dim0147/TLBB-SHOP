@@ -51,7 +51,7 @@ passport.use('local.register', new LocalStrategy({passReqToCallback: true}, (req
                 password: passwordCrypt,
                 name: req.body.name,
                 email: req.body.email,
-                phone: isNaN(req.body.phone) ? null : req.body.phone,
+                phone: req.body.phone,
                 urlImage: '/images/member.png',
                 type: 'web'
             }, (err, user) => {

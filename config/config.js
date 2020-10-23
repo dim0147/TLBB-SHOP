@@ -1,7 +1,8 @@
 const config = {
     
     mongodb: {
-        uri: 'mongodb://mongo:27017/TLBB-SHOP'
+        // uri: 'mongodb://mongo:27017/TLBB-SHOP'
+        uri: 'mongodb+srv://user123:5371165@cluster0.l9dot.mongodb.net/TLBB-SHOP?retryWrites=true&w=majority'
     },
 
     pathStoreImageUpload: 'public/images/data',

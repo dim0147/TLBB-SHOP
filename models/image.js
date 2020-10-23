@@ -7,3 +7,4 @@ const imageSchema = mongoose.Schema({
 }, {timestamps: { createdAt: true }});
 
 module.exports = mongoose.model('images', imageSchema);
+

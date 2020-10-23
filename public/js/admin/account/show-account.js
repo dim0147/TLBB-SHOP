@@ -193,6 +193,12 @@ $(document).ready(function(){
                     return button;
                 }
             },
+            {
+                targets: 16, 
+                searchable: false,
+                sortable: false,
+                visible: false
+            }
         ],
         rowId: 'Id',
         processing: true,

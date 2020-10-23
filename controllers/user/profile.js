@@ -124,7 +124,7 @@ exports.updateProfile = function (req, res) {
             const payload = {
                 name: req.body.name,
                 email: req.body.email,
-                phone: isNaN(req.body.phone) ? null : req.body.phone,
+                phone: req.body.phone,
                 linkFB: req.body.linkFB ? req.body.linkFB : null
             }
 
