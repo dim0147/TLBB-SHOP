@@ -771,3 +771,7 @@ exports.indexPage = (req, res) =>{
                             });
     });
 }
+
+exports.termPage = (req, res) => {
+    res.render('terms', {title: 'Điều khoản và điều kiện'})
+}

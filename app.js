@@ -121,8 +121,8 @@ app.use(function(req, res, next) {
 // error handler
 app.use(function(err, req, res, next) {
   if(err.statusCode && err.statusCode === 404){
-    // return res.render('404', {title: 'Oops! Not Found'})
-    return res.status(400).send('Oops! Not Found');
+    return res.render('404', {title: 'Oops! Not Found'})
+    // return res.status(400).send('Oops! Not Found');
   }
 
   console.log('System error');
