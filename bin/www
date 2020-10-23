@@ -6,7 +6,7 @@
 
 var app = require('../app');
 var debug = require('debug')('tlbb-shop:server');
-var http = require('https');
+var http = require('http');
 const fs = require('fs');
 const path = require('path');
 
@@ -27,8 +27,8 @@ const httpsOptions = {
  * Create HTTP server.
  */
 
-// var server = http.createServer(app);
-var server = http.createServer(httpsOptions, app);
+var server = http.createServer(app);
+// var server = http.createServer(httpsOptions, app);
 
 /**
  *  Attack IO to Server
