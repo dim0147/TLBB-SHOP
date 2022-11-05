@@ -140,7 +140,7 @@
 											<div class="price allPGL">- Giao lưu <%= account.phaigiaoluu.name %> <br> hoặc <br>- Bán: <%= account.price.toLocaleString('en-US', {style : 'currency', currency : 'VND'}); %></div>
 											<% } %> %>
 										 <a href="/account/view-account/<%= account._id %>">
-										 <img width="315px" height="216px" class="card-img-top" src="images/data/<%= account.image.url %>" alt="Card image cap">
+										 <img width="315px" height="216px" class="card-img-top" src="<%= process.env.IMAGE_DATA_URL %>/images/data/<%= account.image.url %>" alt="Card image cap">
 										 </a>
 									  </div>
 									  <div class="card-body">
@@ -228,7 +228,7 @@
 											<div class="price allPGL">- Giao lưu <%= account.phaigiaoluu.name %> <br> hoặc <br>- Bán: <%= account.price.toLocaleString('en-US', {style : 'currency', currency : 'VND'}); %></div>
 											<% } %> %>
 										 <a href="/account/view-account/<%= account._id %>">
-										 <img width="340px" height="255px" class="card-img-top" src="images/data/<%= account.image.url %>" alt="Card image cap">
+										 <img width="340px" height="255px" class="card-img-top" src="<%= process.env.IMAGE_DATA_URL %>/images/data/<%= account.image.url %>" alt="Card image cap">
 										 </a>
 									  </div>
 									  <div class="card-body">
@@ -318,7 +318,7 @@
 													<div class="price allPGL">- Giao lưu <%= account.phaigiaoluu.name %> <br> hoặc <br>- Bán: <%= account.price.toLocaleString('en-US', {style : 'currency', currency : 'VND'}); %></div>
 													<% } %> %>
 												<a href="/account/view-account/<%= account._id %>">
-												<img width="340px" height="255px" class="card-img-top" src="images/data/<%= account.image.url %>" alt="Card image cap">
+												<img width="340px" height="255px" class="card-img-top" src="<%= process.env.IMAGE_DATA_URL %>/images/data/<%= account.image.url %>" alt="Card image cap">
 												</a>
 											</div>
 											<div class="card-body">

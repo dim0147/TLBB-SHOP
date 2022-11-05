@@ -92,7 +92,7 @@ const config = {
     },
 
     client: {
-        urlImagePrefix: '/images/data/'
+        urlImagePrefix: `${process.env.IMAGE_DATA_URL}/images/data/`
     }
 }
 
