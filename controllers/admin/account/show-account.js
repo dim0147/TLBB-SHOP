@@ -317,7 +317,7 @@ exports.getAccount = (req, res) => {
 
     accountModel.aggregate(pipelineAggregate, async function(err, result) {
         if(err){
-            return res.status(400).send('có lỗi vui lòng thủ lại sau');
+            return res.status(400).send(err);
         }
         let payload = {};
         const data = [];
