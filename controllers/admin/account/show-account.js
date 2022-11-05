@@ -298,10 +298,10 @@ exports.getAccount = (req, res) => {
                         $sort: sortCondition
                     },
                     {
-                        $skip: Number(req.query.start)
+                        $skip: Number(0)
                     },
                     {
-                        $limit: Number(req.query.length)
+                        $limit: Number(20)
                     }
                 ],
                 totalAccount: [
@@ -326,7 +326,7 @@ exports.getAccount = (req, res) => {
         // Check if empty
         if(result.length == 0 || result[0].accounts.length == 0 || result[0].totalAccount.length == 0){
             returnData = {
-                draw: Number(req.query.draw),
+                draw: Number(20),
                 recordsTotal: 0,
                 recordsFiltered: 0,
                 data: data
@@ -362,7 +362,7 @@ exports.getAccount = (req, res) => {
                 data.push(payload);
             })
             returnData = {
-                draw: Number(req.query.draw),
+                draw: Number(20),
                 recordsTotal: totalAccounts,
                 recordsFiltered: payload.totalAccount,
                 data: data
