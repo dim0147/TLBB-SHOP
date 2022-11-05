@@ -9,7 +9,11 @@ exports.renderPage = (req, res) => {
 
 exports.getAccount = (req, res) => {
     const textSearch = req.query.search ? req.query.search.value : '';
-    const sortColum = req.query.order[0];
+    // const sortColum = req.query.order[0];
+    const sortColum = {
+        column: 15,
+        dir: 'asc'
+    };
     let sortCondition = {};
     switch (Number(sortColum.column)){
         case 2:
