@@ -11,6 +11,7 @@ const flash = require('connect-flash');
 const cors = require('cors');
 const csurf = require('csurf'); 
 const passportSocketIo = require("passport.socketio");
+require('dotenv').config();
 
 
 const config = require('./config/config');

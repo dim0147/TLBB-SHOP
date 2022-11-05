@@ -8,4 +8,10 @@ router.get('/', indexController.indexPage);
 
 router.get('/terms', indexController.termPage);
 
+router.get('/privacy-policy', indexController.termPage);
+
+router.get('/remove-user-data', function(req, res) {
+    return res.send('Success')
+});
+
 module.exports = router;

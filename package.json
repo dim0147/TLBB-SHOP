@@ -17,6 +17,7 @@
     "csurf": "^1.11.0",
     "dateformat": "^3.0.3",
     "debug": "~2.6.9",
+    "dotenv": "^16.0.3",
     "ejs": "~2.6.1",
     "express": "~4.16.1",
     "express-session": "^1.17.1",
@@ -39,5 +40,8 @@
     "pm2": "^4.5.0",
     "rand-token": "^1.0.1",
     "socket.io": "^2.3.0"
+  },
+  "engines": {
+    "node": "14.x"
   }
 }

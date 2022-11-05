@@ -2,13 +2,13 @@ const config = {
     
     mongodb: {
         // uri: 'mongodb://mongo:27017/TLBB-SHOP'
-        uri: 'mongodb+srv://user123:5371165@cluster0.l9dot.mongodb.net/TLBB-SHOP?retryWrites=true&w=majority'
+        uri: process.env.MONGO_URI
     },
 
     pathStoreImageUpload: 'public/images/data',
     pathStoreImageUploadDescription: 'public/images/description',
 
-    urlWebsite: 'https://localhost:3000',
+    urlWebsite: process.env.WEBSITE_URL,
 
     // account for db
     account: {
@@ -64,9 +64,9 @@ const config = {
     },
 
     facebookDEV: {
-        clientID:'339252677259852', 
-        clientSecret:'e8cf170990869214504ea05f92d2d914',
-        urlCallBack: 'https://tlbb-shop.herokuapp.com/user/login/facebook/callback'
+        clientID: process.env.FB_APP_ID, 
+        clientSecret: process.env.FB_APP_ID,
+        urlCallBack: process.env.FB_CALLBACK_URL,
     },
 
     googleDEV: {
@@ -76,10 +76,10 @@ const config = {
     },
 
     imgurDEV: {
-        clientID: 'bba69b0109addd1',
+        clientID: process.env.IMGUR_CLIENT_ID,
         API_URL: 'https://api.imgur.com/3/',
-        username: 'provandam0369',
-        password: '5371165okA'
+        username: process.env.IMGUR_USERNAME,
+        password: process.env.IMGUR_PASSWORD
     },
 
     notifyText: {
