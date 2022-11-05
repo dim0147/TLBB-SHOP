@@ -8,7 +8,7 @@ exports.renderPage = (req, res) => {
 }
 
 exports.getAccount = (req, res) => {
-    const textSearch = req.query.search.value;
+    const textSearch = req.query.search ? req.query.search.value : '';
     const sortColum = req.query.order[0];
     let sortCondition = {};
     switch (Number(sortColum.column)){
